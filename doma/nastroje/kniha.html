@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kniha – Mytodeník</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0f0f0f;
+            color: #e8e0d0;
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .wrap { max-width: 1200px; margin: 0 auto; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 12px;
+            margin-bottom: 30px;
+        }
+        h1 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 1.8rem; }
+        .back-link { color: #a89880; text-decoration: none; font-size: 11px; }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        @media (max-width: 800px) { .grid-2 { grid-template-columns: 1fr; } }
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            font-weight: 300;
+            border-left: 2px solid #a89880;
+            padding-left: 10px;
+        }
+        .style-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .style-preview {
+            width: 150px;
+            background: #161616;
+            border: 1px solid #2a2a2a;
+            padding: 10px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .style-preview.selected { border-color: #a89880; background: #1f1f1f; }
+        .style-sample { font-size: 10px; line-height: 1.3; margin-top: 8px; color: #aaa; }
+        .entry-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #2a2a2a;
+            background: #161616;
+        }
+        .entry-item {
+            padding: 10px;
+            border-bottom: 1px solid #2a2a2a;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .entry-item input { width: auto; margin-top: 2px; }
+        .btn {
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            color: #e8e0d0;
+            padding: 8px 16px;
+            font-family: monospace;
+            font-size: 11px;
+            cursor: pointer;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        .btn:hover { background: #3a3a3a; border-color: #a89880; }
+        .book-list {
+            border-top: 1px solid #2a2a2a;
+            margin-top: 20px;
+            padding-top: 20px;
+        }
+        .book-item {
+            background: #161616;
+            border: 1px solid #2a2a2a;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .preview-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .preview-content {
+            background: #0f0f0f;
+            border: 1px solid #2a2a2a;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .hidden { display: none; }
+        .page {
+            margin-bottom: 2rem;
+            page-break-after: always;
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 20px;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 10px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <header>
+        <h1>📖 Knihy</h1>
+        <a href="zapisnik.html" class="back-link">← zpět do zápisníku</a>
+    </header>
+    <div class="grid-2">
+        <div class="card">
+            <h2>✎ Vytvořit novou knihu</h2>
+            <label>Název knihy</label>
+            <input type="text" id="newBookName" placeholder="např. Mytologie 2025">
+            <label>Styl (klikni pro náhled)</label>
+            <div class="style-selector" id="styleSelector"></div>
+            <input type="hidden" id="selectedStyle" value="style1">
+            <label>Vyber verze ze zápisníku</label>
+            <div id="entriesForBook" class="entry-list">Načítám...</div>
+            <button id="createBookBtn" class="btn">📗 Uložit knihu</button>
+        </div>
+        <div class="card">
+            <h2>📚 Uložené knihy</h2>
+            <div id="savedBooksList">Načítám...</div>
+        </div>
+    </div>
+    <footer>Každá kniha ukládá pouze ID verzí. Můžeš mít neomezeně knih. Klikni na knihu pro náhled a export.</footer>
+</div>
+
+<div id="previewModal" class="preview-modal hidden">
+    <div class="preview-content">
+        <h2 id="previewTitle"></h2>
+        <div id="previewPages"></div>
+        <div style="margin-top:20px; text-align:right;">
+            <button id="closePreviewBtn" class="btn">Zavřít</button>
+            <button id="exportHtmlBtn" class="btn">⬇ HTML</button>
+            <button id="printPdfBtn" class="btn">🖨 Tisk/PDF</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const STORAGE_ENTRIES = 'mytodenik_entries';
+    const STORAGE_BOOKS = 'mytodenik_books';
+
+    const STYLES = {
+        style1: { name: 'Klasická', css: 'body { font-family: Georgia, serif; line-height: 1.6; max-width: 700px; margin: 0 auto; padding: 2rem; background: #fff; color: #000; } h1 { font-size: 2rem; } .page { margin-bottom: 2rem; page-break-after: always; }' },
+        style2: { name: 'Strojopis', css: 'body { font-family: "Courier New", monospace; line-height: 1.5; max-width: 600px; margin: 0 auto; padding: 1.5rem; background: #fff; color: #000; } h1 { font-size: 1.5rem; text-transform: uppercase; }' },
+        style3: { name: 'Novinová', css: 'body { font-family: "Times New Roman", serif; line-height: 1.8; max-width: 800px; margin: 0 auto; padding: 2rem; text-align: justify; background: #fff; color: #000; } h1 { font-size: 2.2rem; font-variant: small-caps; }' },
+        style4: { name: 'Moderní', css: 'body { font-family: Verdana, sans-serif; line-height: 1.5; max-width: 650px; margin: 0 auto; padding: 1rem; background: #fff; color: #000; } h1 { font-size: 1.3rem; border-bottom: 1px solid #000; }' },
+        style5: { name: 'Esej', css: 'body { font-family: Georgia, serif; line-height: 1.9; max-width: 600px; margin: 0 auto; padding: 2rem; background: #fff; color: #000; } h1 { font-size: 1.7rem; font-weight: normal; }' },
+        style6: { name: 'Akademická', css: 'body { font-family: "Trebuchet MS", sans-serif; line-height: 1.4; max-width: 700px; margin: 0 auto; padding: 1rem; background: #fff; color: #000; } h1 { font-size: 1.5rem; border-left: 4px solid #000; padding-left: 10px; }' },
+        style7: { name: 'Poetická', css: 'body { font-family: Palatino, serif; line-height: 1.7; max-width: 600px; margin: 0 auto; padding: 2rem; background: #fff; color: #000; } h1 { font-size: 1.6rem; text-align: center; letter-spacing: 2px; }' },
+        style8: { name: 'Strohá', css: 'body { font-family: Monaco, monospace; line-height: 1.5; max-width: 700px; margin: 0 auto; padding: 1rem; background: #fff; color: #000; } h1 { font-size: 1.2rem; text-decoration: underline; }' }
+    };
+
+    function loadEntries() { return JSON.parse(localStorage.getItem(STORAGE_ENTRIES) || '[]'); }
+    function loadBooks() { return JSON.parse(localStorage.getItem(STORAGE_BOOKS) || '[]'); }
+    function saveBooks(b) { localStorage.setItem(STORAGE_BOOKS, JSON.stringify(b)); }
+
+    function renderStyleSelector() {
+        const container = document.getElementById('styleSelector');
+        container.innerHTML = '';
+        for (let [key, style] of Object.entries(STYLES)) {
+            const div = document.createElement('div');
+            div.className = 'style-preview';
+            div.setAttribute('data-style', key);
+            div.innerHTML = `<strong>${style.name}</strong><div class="style-sample" style="${style.css.replace(/}/g, '} ')}">Ukázka textu.<br>Druhý řádek.</div>`;
+            div.onclick = () => {
+                document.querySelectorAll('.style-preview').forEach(d => d.classList.remove('selected'));
+                div.classList.add('selected');
+                document.getElementById('selectedStyle').value = key;
+            };
+            container.appendChild(div);
+        }
+        document.querySelector('.style-preview').classList.add('selected');
+    }
+
+    function renderEntriesSelector() {
+        const entries = loadEntries();
+        const container = document.getElementById('entriesForBook');
+        if (!entries.length) { container.innerHTML = '<div style="padding:20px;">Zatím žádné verze.</div>'; return; }
+        let html = '';
+        entries.forEach(e => {
+            html += `<div class="entry-item"><input type="checkbox" class="entry-cb" data-id="${e.id}"><div><div>${escapeHtml(e.date)}</div><div style="font-size:11px;">📐 ${escapeHtml(e.angle)}</div><div>${escapeHtml(e.text.substring(0,80))}…</div></div></div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function getSelectedIds() { return Array.from(document.querySelectorAll('.entry-cb:checked')).map(cb => parseInt(cb.dataset.id)); }
+
+    function renderBooksList() {
+        const books = loadBooks();
+        const container = document.getElementById('savedBooksList');
+        if (!books.length) { container.innerHTML = '<div>Žádné knihy.</div>'; return; }
+        let html = '';
+        books.forEach((b, idx) => {
+            html += `<div class="book-item"><div><strong>${escapeHtml(b.name)}</strong><br><span style="font-size:11px;">${b.entryIds.length} verzí · styl: ${STYLES[b.style]?.name || b.style}</span></div>
+            <div><button class="btn openBook" data-idx="${idx}">📖 Otevřít</button>
+            <button class="btn editBook" data-idx="${idx}">✎ Upravit</button>
+            <button class="btn delBook" data-idx="${idx}">🗑 Smazat</button></div></div>`;
+        });
+        container.innerHTML = html;
+        document.querySelectorAll('.openBook').forEach(btn => btn.onclick = () => showBookPreview(books[parseInt(btn.dataset.idx)]));
+        document.querySelectorAll('.editBook').forEach(btn => btn.onclick = () => editBook(parseInt(btn.dataset.idx)));
+        document.querySelectorAll('.delBook').forEach(btn => btn.onclick = () => { if(confirm('Smazat knihu?')) { let b = loadBooks(); b.splice(parseInt(btn.dataset.idx),1); saveBooks(b); renderBooksList(); } });
+    }
+
+    function createBook() {
+        const name = document.getElementById('newBookName').value.trim();
+        if (!name) return alert('Zadej název');
+        const ids = getSelectedIds();
+        if (!ids.length) return alert('Vyber alespoň jednu verzi');
+        const style = document.getElementById('selectedStyle').value;
+        const books = loadBooks();
+        books.push({ id: Date.now(), name, style, entryIds: ids, created: new Date().toLocaleString() });
+        saveBooks(books);
+        renderBooksList();
+        alert('Kniha uložena');
+    }
+
+    function editBook(idx) {
+        let books = loadBooks();
+        const newName = prompt('Nový název', books[idx].name);
+        if (!newName) return;
+        books[idx].name = newName;
+        saveBooks(books);
+        renderBooksList();
+    }
+
+    function showBookPreview(book) {
+        const entries = loadEntries();
+        const map = new Map(entries.map(e => [e.id, e]));
+        const selected = book.entryIds.map(id => map.get(id)).filter(e => e);
+        if (!selected.length) return alert('Žádné verze (byly smazány)');
+        const styleCss = STYLES[book.style]?.css || STYLES.style1.css;
+        let pagesHtml = '';
+        for (let e of selected) {
+            pagesHtml += `<div class="page"><h3>${escapeHtml(e.date)}</h3><div>📐 ${escapeHtml(e.angle)}</div><div style="white-space:pre-wrap;">${escapeHtml(e.text)}</div></div>`;
+        }
+        const fullHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${escapeHtml(book.name)}</title><style>${styleCss} .page { margin-bottom: 2rem; page-break-after: always; }</style></head><body><h1>${escapeHtml(book.name)}</h1>${pagesHtml}</body></html>`;
+        const modal = document.getElementById('previewModal');
+        document.getElementById('previewTitle').innerText = book.name;
+        document.getElementById('previewPages').innerHTML = pagesHtml;
+        modal.classList.remove('hidden');
+        document.getElementById('exportHtmlBtn').onclick = () => { const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([fullHtml],{type:'text/html'})); a.download=`${book.name.replace(/[^a-z0-9]/gi,'_')}.html`; a.click(); };
+        document.getElementById('printPdfBtn').onclick = () => { const w=window.open(); w.document.write(fullHtml); w.document.close(); w.print(); };
+    }
+
+    function escapeHtml(s) { return s.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
+
+    document.getElementById('closePreviewBtn').onclick = () => document.getElementById('previewModal').classList.add('hidden');
+    document.getElementById('createBookBtn').onclick = createBook;
+
+    renderStyleSelector();
+    renderEntriesSelector();
+    renderBooksList();
+</script>
+</body>
+</html>
