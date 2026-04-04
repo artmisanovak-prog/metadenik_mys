@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zápisník – Mytodeník</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0f0f0f;
+            color: #e8e0d0;
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .wrap { max-width: 1200px; margin: 0 auto; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 12px;
+            margin-bottom: 24px;
+        }
+        h1 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 1.8rem; }
+        .back-link { color: #a89880; text-decoration: none; font-size: 11px; }
+        .cards {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            padding: 16px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+        }
+        .card {
+            flex: 1;
+            min-width: 180px;
+            background: #0f0f0f;
+            padding: 12px;
+            text-align: center;
+            position: relative;
+        }
+        .card img {
+            max-width: 100%;
+            height: auto;
+            background: #2a2a2a;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .card .name { font-weight: bold; font-size: 14px; margin-bottom: 4px; }
+        .card .snippet { font-size: 10px; color: #a89880; margin-bottom: 8px; }
+        .card .jevy-text { font-size: 11px; color: #ccc; margin-top: 8px; font-style: italic; border-top: 1px dashed #2a2a2a; padding-top: 6px; }
+        .perspective-panel {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            margin: 16px 0;
+            padding: 12px;
+            display: none;
+        }
+        .perspective-panel.visible { display: block; }
+        .angle-selector {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .angle-item {
+            flex: 1;
+            text-align: center;
+            background: #0f0f0f;
+            padding: 8px;
+        }
+        .angle-item select {
+            background: #2a2a2a;
+            color: #e8e0d0;
+            border: 1px solid #3a3a3a;
+            padding: 4px 8px;
+            font-family: monospace;
+            font-size: 11px;
+            margin-top: 6px;
+        }
+        textarea {
+            width: 100%;
+            background: #1c1c1c;
+            border: 1px solid #2a2a2a;
+            color: #e8e0d0;
+            padding: 14px;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            resize: vertical;
+            min-height: 250px;
+            margin: 16px 0;
+        }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        button {
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            color: #e8e0d0;
+            padding: 8px 14px;
+            font-family: monospace;
+            font-size: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover { background: #3a3a3a; border-color: #a89880; }
+        .analysis-result {
+            background: #1a1a1a;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 11px;
+            border-left: 3px solid #a89880;
+        }
+        .history {
+            margin-top: 30px;
+            border-top: 1px solid #2a2a2a;
+            padding-top: 20px;
+        }
+        .history-item {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            padding: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .history-info { flex: 1; }
+        .history-date { font-size: 10px; color: #a89880; }
+        .history-angle { font-size: 10px; margin-top: 4px; }
+        .timeline {
+            display: flex;
+            gap: 4px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .timeline-dot {
+            width: 20px;
+            height: 20px;
+            background: #2a2a2a;
+            border-radius: 2px;
+        }
+        .status {
+            background: #1a1a1a;
+            padding: 6px;
+            margin-top: 12px;
+            font-size: 10px;
+            text-align: center;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 10px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <header>
+        <h1>✎ Zápisník</h1>
+        <a href="index.html" class="back-link">← úvod</a>
+    </header>
+
+    <div id="cardsContainer" class="cards">Načítám karty...</div>
+
+    <div id="perspectivePanel" class="perspective-panel">
+        <div class="angle-selector" id="angleSelectors"></div>
+    </div>
+
+    <textarea id="entryText" placeholder="Napiš cokoliv – příběh, vzpomínku, absurditu. Karty tě můžou inspirovat."></textarea>
+
+    <div class="btn-group">
+        <button id="analyzeBtn">🔍 Analyzovat</button>
+        <button id="togglePerspectivesBtn">🎭 Perspektivy</button>
+        <button id="saveBtn">💾 Uložit zápis</button>
+        <button id="newEntryBtn">✨ Nový zápis</button>
+    </div>
+
+    <div id="analysisResult" class="analysis-result" style="display:none;"></div>
+
+    <div class="history">
+        <h3>📂 Historie</h3>
+        <div id="historyList">Zatím žádné zápisy.</div>
+        <div class="timeline" id="timeline"></div>
+    </div>
+    <div id="statusMsg" class="status"></div>
+    <footer>Klikni na "Perspektivy" – otočný úhloměr pro každou kartu. Po analýze se nastaví podle tvého textu.</footer>
+</div>
+
+<script>
+    // =============================================
+    // GLOBÁLNÍ PROMĚNNÉ
+    // =============================================
+    let cardsData = [];           // načtené karty z JSON
+    let currentCards = [];        // aktuálně vylosované 3 karty (objekty)
+    let currentAngles = {};       // pro každou kartu (podle indexu) vybraný úhel
+    let lastAnalysisAngle = null;  // naposledy detekovaný převažující úhel
+    let angleNames = {
+        "absurdni": "Absurdní",
+        "groteskni": "Groteskní",
+        "filozoficky": "Filozofický",
+        "ironicky": "Ironický",
+        "naivni": "Naivní",
+        "surrealisticky": "Surrealistický",
+        "kulturni": "Kulturní",
+        "introspektivni": "Introspektivní"
+    };
+    let angleKeys = Object.keys(angleNames);
+
+    // =============================================
+    // NAČTENÍ KARET Z JSON
+    // =============================================
+    async function loadCards() {
+        try {
+            const res = await fetch('../data/karty.json');
+            if (!res.ok) throw new Error('Chybí soubor doma/data/karty.json');
+            cardsData = await res.json();
+            initNewEntry();
+        } catch(e) {
+            document.getElementById('cardsContainer').innerHTML = `<div class="status" style="color:#c8722a;">Chyba: ${e.message}</div>`;
+        }
+    }
+
+    // =============================================
+    // NÁHODNÝ VÝBĚR 3 KARET
+    // =============================================
+    function getRandomCards() {
+        const shuffled = [...cardsData];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled.slice(0, 3);
+    }
+
+    function initNewEntry() {
+        currentCards = getRandomCards();
+        renderCards();
+        // reset úhlů na výchozí (první úhel)
+        currentAngles = {};
+        currentCards.forEach((_, idx) => { currentAngles[idx] = angleKeys[0]; });
+        if (document.getElementById('perspectivePanel').classList.contains('visible')) {
+            renderAngleSelectors();
+            updateJevyTexts();
+        }
+        document.getElementById('entryText').value = '';
+        document.getElementById('analysisResult').style.display = 'none';
+        lastAnalysisAngle = null;
+    }
+
+    function renderCards() {
+        const container = document.getElementById('cardsContainer');
+        let html = '';
+        currentCards.forEach((card, idx) => {
+            html += `
+                <div class="card">
+                    <img src="../illustrace/${card.id}.jpg" alt="${card.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23222\'/%3E%3Ctext x=\'50\' y=\'50\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23666\'%3E?%3C/text%3E%3C/svg%3E'">
+                    <div class="name">${escapeHtml(card.name)}</div>
+                    <div class="snippet">${escapeHtml(card.snippet)}</div>
+                    <div class="jevy-text" id="jevyText${idx}"></div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+        if (document.getElementById('perspectivePanel').classList.contains('visible')) updateJevyTexts();
+    }
+
+    function updateJevyTexts() {
+        currentCards.forEach((card, idx) => {
+            const angleKey = currentAngles[idx];
+            const jev = card.jevy?.[angleKey] || "";
+            const container = document.getElementById(`jevyText${idx}`);
+            if (container) container.innerText = jev;
+        });
+    }
+
+    function renderAngleSelectors() {
+        const container = document.getElementById('angleSelectors');
+        let html = '';
+        currentCards.forEach((card, idx) => {
+            html += `<div class="angle-item">
+                        <div><strong>${escapeHtml(card.name)}</strong></div>
+                        <select data-idx="${idx}" class="angle-select">
+                            ${angleKeys.map(key => `<option value="${key}" ${currentAngles[idx] === key ? 'selected' : ''}>${angleNames[key]}</option>`).join('')}
+                        </select>
+                    </div>`;
+        });
+        container.innerHTML = html;
+        document.querySelectorAll('.angle-select').forEach(sel => {
+            sel.addEventListener('change', (e) => {
+                const idx = parseInt(sel.getAttribute('data-idx'));
+                currentAngles[idx] = sel.value;
+                updateJevyTexts();
+            });
+        });
+    }
+
+    // =============================================
+    // ANALÝZA TEXTU (8 úhlů, každý 2 figury)
+    // =============================================
+    function analyzeText(text) {
+        if (!text.trim()) return null;
+        const sentences = text.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0);
+        const scores = {
+            absurdni: 0, groteskni: 0, filozoficky: 0, ironicky: 0,
+            naivni: 0, surrealisticky: 0, kulturni: 0, introspektivni: 0
+        };
+        // Mikro figury (na větu)
+        sentences.forEach(s => {
+            // Absurdní: fragment (věta bez slovesa)
+            if (!/\b(jsem|jsi|je|jsme|jsou|byl|byla|bylo|mám|jdu|stojí|leží|sedí|spí|píše|čte|dělá|chodí)\b/i.test(s) && s.split(/\s+/).length > 1) scores.absurdni++;
+            // Groteskní: hyperbola (slova jako naprosto, absolutně, tisíckrát)
+            if (/\b(naprosto|absolutně|totálně|nejvíc|stoprocentně|tisíckrát|milionkrát)\b/i.test(s)) scores.groteskni++;
+            // Filozofický: otázka (končí ?)
+            if (s.trim().endsWith('?')) scores.filozoficky++;
+            // Ironický: negace (2+ záporů)
+            const negs = (s.match(/\b(ne|ni|bez|nikdy|nic|není|nemá|nemohu|nechce)\b/gi) || []).length;
+            if (negs >= 2) scores.ironicky++;
+            // Naivní: elipsa (bez slovesa)
+            if (!/\b(jsem|jsi|je|jsme|jsou|byl|byla|bylo|mám|jdu|stojí|leží|sedí|spí|píše|čte|dělá|chodí)\b/i.test(s) && s.split(/\s+/).length > 1) scores.naivni++;
+            // Surrealistický: synestezie (smísení smyslů)
+            if (/\b(teplá\s+barva|studená\s+vůně|horká\s+tma|sladký\s+zvuk|hořké\s+světlo)\b/i.test(s)) scores.surrealisticky++;
+            // Kulturní: minulý čas (bez 1.os.)
+            if (/\b\w+(l|la|lo|li|ly)\b/i.test(s) && !/\b(jsem|jsem byl)\b/i.test(s)) scores.kulturni++;
+            // Introspektivní: 1. osoba j.č.
+            if (/\b(já|jsem|mě|mi|můj|moje|mám|říkám|vím|cítím)\b/i.test(s)) scores.introspektivni++;
+        });
+        // Makro figury (celý text)
+        const full = text.toLowerCase();
+        // Kontrast vět (ironický)
+        let contrast = 0;
+        for (let i = 1; i < sentences.length; i++) {
+            const pos = /\b(krásný|dobrý|šťastný|radost|úspěch|láska|naděje)\b/i.test(sentences[i-1]);
+            const neg = /\b(ošklivý|špatný|smutný|smutek|neúspěch|nenávist|beznaděj)\b/i.test(sentences[i]);
+            if (pos && neg) contrast++;
+        }
+        scores.ironicky += contrast;
+        // Gradace délek vět (groteskní)
+        const lens = sentences.map(s => s.split(/\s+/).length);
+        let grad = 0;
+        for (let i = 2; i < lens.length; i++) {
+            if (lens[i] > lens[i-1] && lens[i-1] > lens[i-2]) grad++;
+            if (lens[i] < lens[i-1] && lens[i-1] < lens[i-2]) grad++;
+        }
+        scores.groteskni += grad;
+        // Metatext (filozofický)
+        if (/\b(tento text|píšu|říkám to|jazyk sám)\b/i.test(full)) scores.filozoficky += 2;
+        // Smyslový detail (introspektivní)
+        if (/\b(červen|modr|zelen|žlut|teplý|studený|hladký|hrubý|sladký|hořký|tmavý|světlý)\b/i.test(full)) scores.introspektivni++;
+        // Najít nejvyšší skóre
+        let maxAngle = null;
+        let maxScore = -1;
+        for (let [key, val] of Object.entries(scores)) {
+            if (val > maxScore) {
+                maxScore = val;
+                maxAngle = key;
+            }
+        }
+        return maxAngle;
+    }
+
+    function setAnglesFromAnalysis(angleKey) {
+        if (!angleKey) return;
+        currentCards.forEach((_, idx) => { currentAngles[idx] = angleKey; });
+        if (document.getElementById('perspectivePanel').classList.contains('visible')) {
+            renderAngleSelectors();
+            updateJevyTexts();
+        } else {
+            updateJevyTexts();
+        }
+    }
+
+    // =============================================
+    // UKLÁDÁNÍ A HISTORIE
+    // =============================================
+    function saveEntry() {
+        const text = document.getElementById('entryText').value.trim();
+        if (!text) { showStatus('Napiš něco před uložením.', true); return; }
+        const angle = lastAnalysisAngle || "neurčeno";
+        const entries = loadEntries();
+        const newEntry = {
+            id: Date.now(),
+            date: new Date().toLocaleString(),
+            text: text,
+            cards: currentCards.map(c => ({ name: c.name, id: c.id })),
+            angle: angle
+        };
+        entries.unshift(newEntry);
+        saveEntries(entries);
+        renderHistory();
+        showStatus('Zápis uložen.', false);
+    }
+
+    function loadEntries() {
+        const stored = localStorage.getItem('mytodenik_entries');
+        return stored ? JSON.parse(stored) : [];
+    }
+    function saveEntries(entries) {
+        localStorage.setItem('mytodenik_entries', JSON.stringify(entries));
+    }
+
+    function renderHistory() {
+        const entries = loadEntries();
+        const container = document.getElementById('historyList');
+        if (!entries.length) { container.innerHTML = 'Zatím žádné zápisy.'; return; }
+        let html = '';
+        entries.forEach(entry => {
+            const cardsStr = entry.cards.map(c => c.name).join(', ');
+            html += `
+                <div class="history-item">
+                    <div class="history-info">
+                        <div class="history-date">${escapeHtml(entry.date)}</div>
+                        <div>🎴 ${escapeHtml(cardsStr)}</div>
+                        <div class="history-angle">📐 ${escapeHtml(entry.angle)}</div>
+                        <div>${escapeHtml(entry.text.substring(0, 80))}…</div>
+                    </div>
+                    <div>
+                        <button class="loadBtn" data-id="${entry.id}">📂 Načíst</button>
+                        <button class="deleteBtn" data-id="${entry.id}">🗑 Smazat</button>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+        document.querySelectorAll('.loadBtn').forEach(btn => {
+            btn.onclick = () => {
+                const id = parseInt(btn.getAttribute('data-id'));
+                const entry = loadEntries().find(e => e.id === id);
+                if (entry) {
+                    document.getElementById('entryText').value = entry.text;
+                    showStatus(`Načteno: ${entry.date}`, false);
+                }
+            };
+        });
+        document.querySelectorAll('.deleteBtn').forEach(btn => {
+            btn.onclick = () => {
+                if (confirm('Smazat zápis?')) {
+                    let entries = loadEntries();
+                    entries = entries.filter(e => e.id !== parseInt(btn.getAttribute('data-id')));
+                    saveEntries(entries);
+                    renderHistory();
+                    renderTimeline();
+                    showStatus('Smazáno.', false);
+                }
+            };
+        });
+        renderTimeline();
+    }
+
+    function renderTimeline() {
+        const entries = loadEntries();
+        const timeline = document.getElementById('timeline');
+        timeline.innerHTML = '';
+        entries.forEach(entry => {
+            const dot = document.createElement('div');
+            dot.className = 'timeline-dot';
+            const angle = entry.angle;
+            let color = '#2a2a2a';
+            if (angle === 'absurdni') color = '#c8722a';
+            else if (angle === 'groteskni') color = '#a83060';
+            else if (angle === 'filozoficky') color = '#9b72b5';
+            else if (angle === 'ironicky') color = '#c8722a';
+            else if (angle === 'naivni') color = '#5fa8a0';
+            else if (angle === 'surrealisticky') color = '#8060b0';
+            else if (angle === 'kulturni') color = '#6a9e72';
+            else if (angle === 'introspektivni') color = '#c8a832';
+            dot.style.background = color;
+            dot.title = angle;
+            timeline.appendChild(dot);
+        });
+    }
+
+    // =============================================
+    // ANALÝZA A AKCE
+    // =============================================
+    async function runAnalysis() {
+        const text = document.getElementById('entryText').value.trim();
+        if (!text) { showStatus('Napiš text pro analýzu.', true); return; }
+        const angleKey = analyzeText(text);
+        if (angleKey) {
+            lastAnalysisAngle = angleKey;
+            const angleName = angleNames[angleKey] || angleKey;
+            document.getElementById('analysisResult').innerHTML = `📐 Převažující úhel: <strong>${angleName}</strong>`;
+            document.getElementById('analysisResult').style.display = 'block';
+            setAnglesFromAnalysis(angleKey);
+            showStatus(`Analýza dokončena: ${angleName}`, false);
+        } else {
+            document.getElementById('analysisResult').innerHTML = `📐 Nepodařilo se určit převažující úhel.`;
+            document.getElementById('analysisResult').style.display = 'block';
+        }
+    }
+
+    function togglePerspectives() {
+        const panel = document.getElementById('perspectivePanel');
+        panel.classList.toggle('visible');
+        if (panel.classList.contains('visible')) {
+            renderAngleSelectors();
+            updateJevyTexts();
+        }
+    }
+
+    function showStatus(msg, isError) {
+        const div = document.getElementById('statusMsg');
+        div.textContent = msg;
+        div.style.background = isError ? '#3a1a1a' : '#1a3a1a';
+        setTimeout(() => { div.textContent = ''; div.style.background = ''; }, 3000);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Eventy
+    document.getElementById('analyzeBtn').addEventListener('click', runAnalysis);
+    document.getElementById('togglePerspectivesBtn').addEventListener('click', togglePerspectives);
+    document.getElementById('saveBtn').addEventListener('click', saveEntry);
+    document.getElementById('newEntryBtn').addEventListener('click', () => {
+        if (document.getElementById('entryText').value.trim() && confirm('Opustit neuložený text?')) initNewEntry();
+        else initNewEntry();
+    });
+
+    loadCards();
+    renderHistory();
+</script>
+</body>
+</html>
