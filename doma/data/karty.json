@@ -1,0 +1,122 @@
+[
+  {
+    "id": "mys",
+    "name": "Myš",
+    "snippet": "chceš myš??",
+    "jevy": {
+      "absurdni": "nabídka která mate měřítka",
+      "groteskni": "možná se jen houpe hlavou dolů visí za ocas a hraje si a tím mění pravidla",
+      "filozoficky": "čeho si nevšimne myš - nestalo se",
+      "ironicky": "detail který drží svět",
+      "naivni": "myslela jsem že se bude hodit",
+      "surrealisticky": "otázka je dárek",
+      "kulturni": "symbol ticha v nabídce",
+      "introspektivni": "navazuje kontakt"
+    }
+  },
+  {
+    "id": "kocour",
+    "name": "Kocour",
+    "snippet": "sežral dvě berušky a půl hodiny krkal tečky",
+    "jevy": {
+      "absurdni": "trávení interpunkce",
+      "groteskni": "statistiky trávení",
+      "filozoficky": "náhoda která se tváří jako pravidlo",
+      "ironicky": "přesnost tam kde na ní nezáleží",
+      "naivni": "prostě se to stalo",
+      "surrealisticky": "čísla vycházející z tlamy",
+      "kulturni": "počítání jako tik",
+      "introspektivni": "nemůžu to zastavit jen sledovat"
+    }
+  },
+  {
+    "id": "zajic",
+    "name": "Zajíc",
+    "snippet": "zaječice skočí do plamenů ale neshoří aneb zajicem nezatopíš",
+    "jevy": {
+      "absurdni": "oheň který nefunguje",
+      "groteskni": "zajíc není palivo",
+      "filozoficky": "podstata nezávislá na prostředí",
+      "ironicky": "odolnost tam kde se čeká slabost",
+      "naivni": "oběť která nehoří",
+      "surrealisticky": "skok skrz nemožné",
+      "kulturni": "stereotyp naruby",
+      "introspektivni": "žádný oheň nepálí stejně"
+    }
+  },
+  {
+    "id": "pav",
+    "name": "Páv",
+    "snippet": "oko za okem. páv za pávem",
+    "jevy": {
+      "absurdni": "soutěž pohledů bez poroty",
+      "groteskni": "narcismus s peřím",
+      "filozoficky": "identita vzniká z nekonečného zrcadlení",
+      "ironicky": "okázalost která sleduje sama sebe",
+      "naivni": "čím víc očí tím líp",
+      "surrealisticky": "oči které se rozmnožují",
+      "kulturni": "estetika přebytku",
+      "introspektivni": "dívám se na sebe abych si byl jistý že existuji"
+    }
+  },
+  {
+    "id": "netopyr",
+    "name": "Netopýr",
+    "snippet": "krása, co ráno už se nehodí",
+    "jevy": {
+      "absurdni": "elegance závislá na tmě",
+      "groteskni": "glamour s blánami",
+      "filozoficky": "hodnota věcí se mění s osvětlením",
+      "ironicky": "to co fascinuje po tmě se za světla omlouvá",
+      "naivni": "ve tmě jsem hezčí",
+      "surrealisticky": "šperk který se rozpadne při svítání",
+      "kulturni": "estetika outsiderů",
+      "introspektivni": "mám verzi sebe kterou ukazuji jen nocím"
+    }
+  },
+  {
+    "id": "motyl",
+    "name": "Motýl",
+    "snippet": "motýlů v břiše se nenajíš",
+    "jevy": {
+      "absurdni": "emoce bez kalorií",
+      "groteskni": "dieta z emocí",
+      "filozoficky": "pocit není zdroj",
+      "ironicky": "romantika bez užitku",
+      "naivni": "myslela jsem, že to stačí",
+      "surrealisticky": "létání v prázdném žaludku",
+      "kulturni": "demontáž klišé",
+      "introspektivni": "něco cítím, ale nestačí to"
+    }
+  },
+  {
+    "id": "krokodyl",
+    "name": "Krokodýl",
+    "snippet": "sleva 90 %, tři za cenu jedné, KROKODÝLÍ SLZY totální výprodej",
+    "jevy": {
+      "absurdni": "totální výprodej falešných slz",
+      "groteskni": "marketing empatie",
+      "filozoficky": "hodnota citů v tržní logice",
+      "ironicky": "emoce zlevněná na nulu",
+      "naivni": "proč by si děti nemohly koupit balíček slz na hraní",
+      "surrealisticky": "hypermarket predátorů",
+      "kulturni": "cynismus zabalený do slevy",
+      "introspektivni": "falešný pláč výhodně"
+    }
+  },
+  {
+    "id": "ryba",
+    "name": "Ryba",
+    "snippet": "rybí rap",
+    "jevy": {
+      "absurdni": "hudba bez plic",
+      "groteskni": "flow bez vzduchu",
+      "filozoficky": "komunikace která nepotřebuje porozumění",
+      "ironicky": "projev slyšitelný jen pod hladinou",
+      "naivni": "prostě to plyne",
+      "surrealisticky": "beat z bublin",
+      "kulturni": "underground doslova",
+      "introspektivni": "mluvím i když mě nikdo neposlouchá"
+    }
+  }
+]
