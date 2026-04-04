@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mytodeník – deník, který si všímá mezer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0f0f0f;
+            color: #e8e0d0;
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .wrap {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        header {
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 12px;
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+        }
+        .sub {
+            color: #a89880;
+            margin-top: 8px;
+            font-size: 11px;
+        }
+        .intro {
+            background: #1a1a1a;
+            border-left: 3px solid #a89880;
+            padding: 20px;
+            margin-bottom: 30px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+        .nav {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+        .nav a {
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            color: #e8e0d0;
+            padding: 10px 18px;
+            text-decoration: none;
+            font-family: monospace;
+            font-size: 11px;
+            transition: 0.2s;
+        }
+        .nav a:hover {
+            background: #3a3a3a;
+            border-color: #a89880;
+        }
+        .faq {
+            margin-top: 40px;
+            border-top: 1px solid #2a2a2a;
+            padding-top: 20px;
+        }
+        .faq h3 {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: #a89880;
+        }
+        .faq p {
+            font-size: 11px;
+            margin-bottom: 16px;
+            color: #aaa;
+        }
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 10px;
+            color: #555;
+            border-top: 1px solid #2a2a2a;
+            padding-top: 20px;
+        }
+        .audio-link {
+            display: inline-block;
+            margin-top: 12px;
+            font-size: 11px;
+            color: #a89880;
+            text-decoration: none;
+            border: 1px solid #3a3a3a;
+            padding: 6px 12px;
+        }
+        .audio-link:hover {
+            background: #2a2a2a;
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <header>
+        <h1>Mytodeník</h1>
+        <div class="sub">deník, který si všímá mezer</div>
+    </header>
+
+    <div class="intro">
+        ✧ Bude to deník co se dá napsat o neděli a použít už v pondělí.<br>
+        ✧ Takový co můžou psát děti i dospělí, člověk sám i s přáteli.<br>
+        ✧ Deník bez klíčů a zámků, naopak ke sdílení i materiál na knížku.<br>
+        ✧ Deník, který přetaví dny v mytologii.<br>
+        ✧ Tvoř si vlastní myšlení.
+    </div>
+
+    <div class="nav">
+        <a href="zapisnik.html">✎ Otevřít deník</a>
+        <a href="knihovna_fenomenu.html">📖 Knihovna fenoménů</a>
+        <a href="kniha.html">📚 Moje knihy</a>
+    </div>
+
+    <div class="faq">
+        <h3>🎭 Perspektivy (úhly pohledu)</h3>
+        <p>Každý fenomén (karta) můžeš vidět z různých úhlů. V deníku si můžeš pro každou kartu vybrat úhel (otočný úhloměr) a ukáže se ti krátká věta – inspirace. Po napsání textu ho můžeš analyzovat a systém ti řekne, který úhel v tvém textu převažuje. Potom si můžeš úhloměry nastavit podle této analýzy a porovnat.</p>
+
+        <h3>🐭 Myš</h3>
+        <p>Myš si všímá věcí, které ostatní přehlížejí. Zapíše je do mezer mezi slovy, mezi obrazem a textem, mezi tím, co je řečeno, a tím, co je vynecháno. Tento deník je nástroj, který ti pomůže stát se takovou myší – dívat se na svůj vlastní jazyk a objevovat v něm skryté světy.</p>
+        <a href="https://youtube.com/shorts/..." class="audio-link" target="_blank">🎧 Poslechnout si pohádku o Myši (YouTube)</a>
+
+        <h3>📦 Balíčky karet</h3>
+        <p>Základní verze obsahuje 8 karet. Další balíčky (po 8–10 kartách) si můžeš dokoupit na <strong>Gumroad</strong>. Každý balíček přidá nové fenomény, ilustrace, pohádky i nové jevy pro všechny úhly. Stačí nahrát soubory do složek – kód se nemění.</p>
+
+        <h3>🔧 Jak to funguje</h3>
+        <p>1. Otevři deník – vylosují se ti 3 náhodné karty.<br>
+        2. Napiš cokoliv – příběh, vzpomínku, absurditu.<br>
+        3. Klikni na "Perspektivy" – nad každou kartou se objeví úhloměr. Otáčením zkoušej, jak se mění inspirační věty.<br>
+        4. Klikni na "Analyzovat" – systém určí, jaký úhel v tvém textu převažuje.<br>
+        5. Úhloměry se automaticky nastaví podle analýzy – můžeš porovnat, co jsi chtěl(a) a co vzniklo.<br>
+        6. Ulož si zápis – ten se ti objeví v historii. Časová osa ukazuje barevné proužky podle úhlů.<br>
+        7. Ze zápisů si můžeš vytvořit vlastní knihu (export HTML nebo tisk).</p>
+    </div>
+
+    <footer>
+        Chceš myš? — slovník mezer<br>
+        systém, který si všímá, co ostatní přehlížejí<br>
+        <a href="https://gumroad.com/..." style="color:#a89880;" target="_blank">Další balíčky karet na Gumroad</a>
+    </footer>
+</div>
+</body>
+</html>
