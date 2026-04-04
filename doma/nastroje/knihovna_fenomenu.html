@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knihovna fenoménů – Mytodeník</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0f0f0f;
+            color: #e8e0d0;
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .wrap { max-width: 1200px; margin: 0 auto; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 12px;
+            margin-bottom: 30px;
+        }
+        h1 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 1.8rem; }
+        .back-link { color: #a89880; text-decoration: none; font-size: 11px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .card:hover { border-color: #a89880; background: #1f1f1f; }
+        .card img {
+            max-width: 100%;
+            height: auto;
+            background: #0f0f0f;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .card .name { font-size: 1rem; font-weight: bold; }
+        .detail {
+            margin-top: 40px;
+            border-top: 1px solid #2a2a2a;
+            padding-top: 30px;
+            display: none;
+        }
+        .detail.visible { display: block; }
+        .detail-inner {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            align-items: flex-start;
+        }
+        .detail-image { flex: 0 0 250px; text-align: center; }
+        .detail-image img { max-width: 100%; border: 1px solid #2a2a2a; }
+        .detail-text {
+            flex: 1;
+            white-space: pre-wrap;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            line-height: 1.7;
+            background: #161616;
+            padding: 20px;
+            border-left: 2px solid #2a2a2a;
+        }
+        .detail-text h2 { margin-bottom: 16px; font-weight: 300; border-bottom: 1px solid #2a2a2a; padding-bottom: 6px; }
+        .close-detail {
+            background: none;
+            border: 1px solid #3a3a3a;
+            color: #e8e0d0;
+            padding: 6px 12px;
+            font-family: monospace;
+            font-size: 11px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .close-detail:hover { background: #2a2a2a; }
+        .uhly-link {
+            display: inline-block;
+            margin-top: 12px;
+            font-size: 11px;
+            color: #a89880;
+            text-decoration: none;
+            border: 1px solid #3a3a3a;
+            padding: 4px 8px;
+        }
+        .uhly-link:hover { background: #2a2a2a; }
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 10px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <header>
+        <h1>📖 Knihovna fenoménů</h1>
+        <a href="zapisnik.html" class="back-link">← zpět do zápisníku</a>
+    </header>
+    <div id="cardsGrid" class="grid">Načítám...</div>
+    <div id="detailPanel" class="detail">
+        <div class="detail-inner">
+            <div class="detail-image"><img id="detailImg" src="" alt=""></div>
+            <div class="detail-text">
+                <h2 id="detailTitle"></h2>
+                <div id="detailContent"></div>
+                <a id="detailUhlyLink" class="uhly-link" href="#" target="_blank">📐 Zobrazit 12 úhlů</a>
+                <button class="close-detail" id="closeDetailBtn">✖ Zavřít</button>
+            </div>
+        </div>
+    </div>
+    <footer>Klikni na kartu – zobrazí se ilustrace a celá pohádka.</footer>
+</div>
+<script>
+    const ILLUSTRATION_BASE = "../illustrace/";
+    const TALE_BASE = "../data/kriva_pohadka/";
+    const CARDS_JSON = "../data/karty.json";
+
+    let cardsData = [];
+
+    async function loadCards() {
+        try {
+            const res = await fetch(CARDS_JSON);
+            if (!res.ok) throw new Error(`Chybí ${CARDS_JSON}`);
+            cardsData = await res.json();
+            renderGrid();
+        } catch(e) {
+            document.getElementById('cardsGrid').innerHTML = `<div style="padding:20px;color:#c8722a;">Chyba: ${e.message}</div>`;
+        }
+    }
+
+    function renderGrid() {
+        const grid = document.getElementById('cardsGrid');
+        let html = '';
+        for (let card of cardsData) {
+            html += `
+                <div class="card" data-id="${card.id}">
+                    <img src="${ILLUSTRATION_BASE + card.id}.jpg" alt="${card.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23222\'/%3E%3Ctext x=\'50\' y=\'50\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23666\'%3E?%3C/text%3E%3C/svg%3E'">
+                    <div class="name">${escapeHtml(card.name)}</div>
+                </div>
+            `;
+        }
+        grid.innerHTML = html;
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('click', () => showDetail(card.getAttribute('data-id')));
+        });
+    }
+
+    async function showDetail(cardId) {
+        const card = cardsData.find(c => c.id === cardId);
+        if (!card) return;
+        const panel = document.getElementById('detailPanel');
+        const detailImg = document.getElementById('detailImg');
+        const detailTitle = document.getElementById('detailTitle');
+        const detailContent = document.getElementById('detailContent');
+        const detailUhlyLink = document.getElementById('detailUhlyLink');
+        detailImg.src = ILLUSTRATION_BASE + cardId + '.jpg';
+        detailTitle.innerText = card.name;
+        detailContent.innerText = 'Načítám pohádku...';
+        try {
+            const talePath = TALE_BASE + cardId + '.txt';
+            const resp = await fetch(talePath);
+            if (!resp.ok) throw new Error('Nenalezeno');
+            const text = await resp.text();
+            detailContent.innerText = text;
+        } catch(e) {
+            detailContent.innerText = `Pohádka pro "${card.name}" nebyla nalezena.\n\n${TALE_BASE + cardId}.txt`;
+        }
+        detailUhlyLink.href = `../data/${cardId}_uhly.html`;
+        panel.classList.add('visible');
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;'));
+    }
+
+    document.getElementById('closeDetailBtn').onclick = () => {
+        document.getElementById('detailPanel').classList.remove('visible');
+    };
+    loadCards();
+</script>
+</body>
+</html>
