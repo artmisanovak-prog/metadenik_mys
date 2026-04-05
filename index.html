@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Mytodeník – deník, který si všímá mezer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #f5f5f5;
+            color: #1a1a1a;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 15px;
+            line-height: 1.5;
+            padding: 20px;
+        }
+        .wrap { max-width: 1000px; margin: 0 auto; }
+        header {
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-weight: 400;
+            font-size: 2.8rem;
+            letter-spacing: -0.5px;
+        }
+        .sub {
+            color: #555;
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+        .hero {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: center;
+        }
+        .hero-image {
+            flex: 0 0 200px;
+            text-align: center;
+        }
+        .hero-image img {
+            max-width: 100%;
+            border-radius: 4px;
+        }
+        .hero-text {
+            flex: 1;
+        }
+        .intro-text {
+            background: #eaeaea;
+            padding: 20px;
+            margin-bottom: 30px;
+            font-family: Georgia, serif;
+            font-size: 1rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        .nav {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+        .nav a {
+            background: #1a1a1a;
+            color: #f5f5f5;
+            padding: 12px 24px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.2s;
+            border-radius: 4px;
+        }
+        .nav a:hover { background: #333; }
+        .section {
+            margin-top: 40px;
+            border-top: 1px solid #ddd;
+            padding-top: 30px;
+        }
+        .section h3 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 400;
+            margin-bottom: 12px;
+        }
+        .section p {
+            color: #333;
+            margin-bottom: 16px;
+        }
+        .gumroad-link {
+            display: inline-block;
+            margin-top: 8px;
+            color: #1a1a1a;
+            text-decoration: underline;
+        }
+        footer {
+            margin-top: 60px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        @media (max-width: 700px) {
+            h1 { font-size: 2rem; }
+            .hero { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <header>
+        <h1>Mytodeník</h1>
+        <div class="sub">deník, který si všímá mezer</div>
+    </header>
+    <div class="hero">
+        <div class="hero-image">
+            <img src="../illustrace/mys_ikonka.png" alt="Myš" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'150\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%23ccc\'/%3E%3Ctext x=\'50\' y=\'55\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23666\'%3E?%3C/text%3E%3C/svg%3E'">
+        </div>
+        <div class="hero-text">
+            <p><strong>Myš</strong> si všímá věcí, které ostatní přehlížejí. Zapíše je do mezer mezi slovy, mezi obrazem a textem, mezi tím, co je řečeno, a tím, co je vynecháno. Tento deník je nástroj, který ti pomůže stát se takovou myší – dívat se na svůj vlastní jazyk a objevovat v něm skryté světy.</p>
+        </div>
+    </div>
+    <div class="intro-text">
+        ✧ Bude to deník co se dá napsat o neděli a použít už v pondělí.<br>
+        ✧ Takový co můžou psát děti i dospělí, člověk sám i s přáteli.<br>
+        ✧ Deník bez klíčů a zámků, naopak ke sdílení i materiál na knížku.<br>
+        ✧ Deník, který přetaví dny v mytologii.<br>
+        ✧ Tvoř si vlastní myšlení.
+    </div>
+    <div class="nav">
+        <a href="zapisnik.html">✎ Otevřít deník</a>
+        <a href="knihovna_fenomenu.html">📖 Knihovna fenoménů</a>
+        <a href="kniha.html">📚 Moje knihy</a>
+    </div>
+    <div class="section">
+        <h3>🎭 Perspektivy (úhly pohledu)</h3>
+        <p>Každý fenomén (karta) můžeš vidět z různých úhlů. V deníku si můžeš pro každou kartu vybrat úhel (otočný půlkruh) a ukáže se ti krátká věta – inspirace. Po napsání textu ho můžeš analyzovat a systém ti řekne, který úhel v tvém textu převažuje. Potom si můžeš úhloměry nastavit podle této analýzy a porovnat.</p>
+    </div>
+    <div class="section">
+        <h3>📦 Balíčky karet</h3>
+        <p>Základní verze obsahuje 8 karet. Další balíčky (po 8–10 kartách) si můžeš dokoupit na <strong>Gumroad</strong>. Každý balíček přidá nové fenomény, ilustrace, pohádky i nové jevy pro všechny úhly. Stačí nahrát soubory do složek – kód se nemění.</p>
+        <a href="#" class="gumroad-link">➜ Zobrazit na Gumroad (odkaz)</a>
+    </div>
+    <div class="section">
+        <h3>🔧 Jak to funguje</h3>
+        <p>1. Otevři deník – vylosují se ti 3 náhodné karty.<br>
+        2. Napiš cokoliv – příběh, vzpomínku, absurditu.<br>
+        3. Klikni na "Perspektivy" – nad každou kartou se objeví půlkruhový úhloměr. Otáčením (kolečko, šipky, dotyk) zkoušej, jak se mění inspirační věty.<br>
+        4. Klikni na "Analyzovat" – systém určí, jaký úhel v tvém textu převažuje.<br>
+        5. Úhloměry se automaticky nastaví podle analýzy – můžeš porovnat, co jsi chtěl(a) a co vzniklo.<br>
+        6. Ulož si zápis – ten se ti objeví v historii. Časová osa ukazuje barevné proužky podle úhlů.<br>
+        7. Ze zápisů si můžeš vytvořit vlastní knihu (export HTML nebo tisk).</p>
+    </div>
+    <footer>
+        Chceš myš? — slovník mezer<br>
+        systém, který si všímá, co ostatní přehlížejí
+    </footer>
+</div>
+</body>
+</html>
