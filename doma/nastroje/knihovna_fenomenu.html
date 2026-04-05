@@ -7,11 +7,9 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: #0f0f0f;
-            color: #e8e0d0;
-            font-family: 'DM Mono', monospace;
-            font-size: 13px;
-            line-height: 1.6;
+            background: #f5f5f5;
+            color: #1a1a1a;
+            font-family: 'Inter', sans-serif;
             padding: 20px;
         }
         .wrap { max-width: 1200px; margin: 0 auto; }
@@ -19,38 +17,32 @@
             display: flex;
             justify-content: space-between;
             align-items: baseline;
-            border-bottom: 1px solid #2a2a2a;
+            border-bottom: 1px solid #ccc;
             padding-bottom: 12px;
             margin-bottom: 30px;
         }
-        h1 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 1.8rem; }
-        .back-link { color: #a89880; text-decoration: none; font-size: 11px; }
+        h1 { font-family: 'Playfair Display', serif; font-weight: 400; font-size: 1.8rem; }
+        .back-link { color: #555; text-decoration: none; }
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 24px;
             margin-bottom: 40px;
         }
         .card {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            padding: 12px;
+            background: white;
+            padding: 16px;
             text-align: center;
             cursor: pointer;
             transition: 0.2s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
         }
-        .card:hover { border-color: #a89880; background: #1f1f1f; }
-        .card img {
-            max-width: 100%;
-            height: auto;
-            background: #0f0f0f;
-            display: block;
-            margin-bottom: 10px;
-        }
-        .card .name { font-size: 1rem; font-weight: bold; }
+        .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .card img { max-width: 100%; height: auto; margin-bottom: 12px; }
+        .card .name { font-weight: 600; }
         .detail {
             margin-top: 40px;
-            border-top: 1px solid #2a2a2a;
+            border-top: 1px solid #ccc;
             padding-top: 30px;
             display: none;
         }
@@ -59,48 +51,50 @@
             display: flex;
             flex-wrap: wrap;
             gap: 30px;
-            align-items: flex-start;
         }
-        .detail-image { flex: 0 0 250px; text-align: center; }
-        .detail-image img { max-width: 100%; border: 1px solid #2a2a2a; }
-        .detail-text {
-            flex: 1;
-            white-space: pre-wrap;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1rem;
-            line-height: 1.7;
-            background: #161616;
-            padding: 20px;
-            border-left: 2px solid #2a2a2a;
-        }
-        .detail-text h2 { margin-bottom: 16px; font-weight: 300; border-bottom: 1px solid #2a2a2a; padding-bottom: 6px; }
-        .close-detail {
-            background: none;
-            border: 1px solid #3a3a3a;
-            color: #e8e0d0;
-            padding: 6px 12px;
-            font-family: monospace;
-            font-size: 11px;
-            cursor: pointer;
+        .detail-image { flex: 0 0 200px; text-align: center; }
+        .detail-image img { max-width: 100%; }
+        .detail-text { flex: 1; white-space: pre-wrap; background: white; padding: 20px; border-left: 3px solid #ddd; }
+        .detail-text h2 { margin-bottom: 12px; }
+        .stats {
             margin-top: 20px;
+            background: #eaeaea;
+            padding: 16px;
         }
-        .close-detail:hover { background: #2a2a2a; }
-        .uhly-link {
-            display: inline-block;
-            margin-top: 12px;
-            font-size: 11px;
-            color: #a89880;
-            text-decoration: none;
-            border: 1px solid #3a3a3a;
-            padding: 4px 8px;
+        .stats h3 { margin-bottom: 8px; font-size: 1rem; }
+        .histogram {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+            flex-wrap: wrap;
         }
-        .uhly-link:hover { background: #2a2a2a; }
-        footer {
-            margin-top: 50px;
-            text-align: center;
-            font-size: 10px;
-            color: #555;
+        .histo-bar {
+            height: 20px;
+            background: #1a1a1a;
+            color: white;
+            font-size: 0.7rem;
+            padding: 0 4px;
+            line-height: 20px;
         }
+        .timeline-mini {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+        }
+        .timeline-mini-dot {
+            width: 16px;
+            height: 16px;
+            background: #ccc;
+        }
+        .close-detail {
+            margin-top: 16px;
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+        footer { margin-top: 50px; text-align: center; font-size: 0.7rem; color: #aaa; }
     </style>
 </head>
 <body>
@@ -116,81 +110,67 @@
             <div class="detail-text">
                 <h2 id="detailTitle"></h2>
                 <div id="detailContent"></div>
-                <a id="detailUhlyLink" class="uhly-link" href="#" target="_blank">📐 Zobrazit 12 úhlů</a>
+                <div id="detailStats" class="stats"></div>
                 <button class="close-detail" id="closeDetailBtn">✖ Zavřít</button>
             </div>
         </div>
     </div>
-    <footer>Klikni na kartu – zobrazí se ilustrace a celá pohádka.</footer>
+    <footer>Klikni na kartu – zobrazí se ilustrace, pohádka a statistiky tvého použití.</footer>
 </div>
 <script>
-    const ILLUSTRATION_BASE = "../illustrace/";
-    const TALE_BASE = "../data/kriva_pohadka/";
-    const CARDS_JSON = "../data/karty.json";
-
     let cardsData = [];
-
     async function loadCards() {
         try {
-            const res = await fetch(CARDS_JSON);
-            if (!res.ok) throw new Error(`Chybí ${CARDS_JSON}`);
+            const res = await fetch('../data/karty.json');
             cardsData = await res.json();
             renderGrid();
         } catch(e) {
-            document.getElementById('cardsGrid').innerHTML = `<div style="padding:20px;color:#c8722a;">Chyba: ${e.message}</div>`;
+            document.getElementById('cardsGrid').innerHTML = `<div>Chyba: ${e.message}</div>`;
         }
     }
-
     function renderGrid() {
         const grid = document.getElementById('cardsGrid');
-        let html = '';
-        for (let card of cardsData) {
-            html += `
-                <div class="card" data-id="${card.id}">
-                    <img src="${ILLUSTRATION_BASE + card.id}.jpg" alt="${card.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23222\'/%3E%3Ctext x=\'50\' y=\'50\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23666\'%3E?%3C/text%3E%3C/svg%3E'">
-                    <div class="name">${escapeHtml(card.name)}</div>
-                </div>
-            `;
-        }
-        grid.innerHTML = html;
-        document.querySelectorAll('.card').forEach(card => {
-            card.addEventListener('click', () => showDetail(card.getAttribute('data-id')));
+        grid.innerHTML = cardsData.map(card => `
+            <div class="card" data-id="${card.id}">
+                <img src="../illustrace/${card.id}.jpg" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23ddd\'/%3E%3Ctext x=\'50\' y=\'50\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23666\'%3E?%3C/text%3E%3C/svg%3E'">
+                <div class="name">${escapeHtml(card.name)}</div>
+            </div>
+        `).join('');
+        document.querySelectorAll('.card').forEach(el => {
+            el.addEventListener('click', () => showDetail(el.getAttribute('data-id')));
         });
     }
-
     async function showDetail(cardId) {
         const card = cardsData.find(c => c.id === cardId);
         if (!card) return;
-        const panel = document.getElementById('detailPanel');
-        const detailImg = document.getElementById('detailImg');
-        const detailTitle = document.getElementById('detailTitle');
-        const detailContent = document.getElementById('detailContent');
-        const detailUhlyLink = document.getElementById('detailUhlyLink');
-        detailImg.src = ILLUSTRATION_BASE + cardId + '.jpg';
-        detailTitle.innerText = card.name;
-        detailContent.innerText = 'Načítám pohádku...';
+        document.getElementById('detailImg').src = `../illustrace/${cardId}.jpg`;
+        document.getElementById('detailTitle').innerText = card.name;
         try {
-            const talePath = TALE_BASE + cardId + '.txt';
-            const resp = await fetch(talePath);
-            if (!resp.ok) throw new Error('Nenalezeno');
-            const text = await resp.text();
-            detailContent.innerText = text;
-        } catch(e) {
-            detailContent.innerText = `Pohádka pro "${card.name}" nebyla nalezena.\n\n${TALE_BASE + cardId}.txt`;
+            const resp = await fetch(`../data/kriva_pohadka/${cardId}.txt`);
+            const text = resp.ok ? await resp.text() : 'Pohádka nenalezena.';
+            document.getElementById('detailContent').innerText = text;
+        } catch(e) { document.getElementById('detailContent').innerText = 'Pohádka nenalezena.'; }
+        // Statistiky z localStorage
+        const meta = JSON.parse(localStorage.getItem('mytodenik_card_metadata') || '{}');
+        const cardMeta = meta[cardId] || { count: 0, angles: {} };
+        let histHtml = '<h3>📊 Tvé použití této karty</h3>';
+        histHtml += `<p>Počet výskytů v losování: ${cardMeta.count}</p>`;
+        if (Object.keys(cardMeta.angles).length) {
+            histHtml += '<div class="histogram">';
+            for (let [ang, cnt] of Object.entries(cardMeta.angles)) {
+                const width = Math.min(100, cnt * 10);
+                histHtml += `<div class="histo-bar" style="width:${width}px;">${angleNames[ang] || ang}: ${cnt}</div>`;
+            }
+            histHtml += '</div>';
+        } else {
+            histHtml += '<p>Zatím žádné uložené zápisy s touto kartou.</p>';
         }
-        detailUhlyLink.href = `../data/${cardId}_uhly.html`;
-        panel.classList.add('visible');
-        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('detailStats').innerHTML = histHtml;
+        document.getElementById('detailPanel').classList.add('visible');
     }
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;'));
-    }
-
-    document.getElementById('closeDetailBtn').onclick = () => {
-        document.getElementById('detailPanel').classList.remove('visible');
-    };
+    const angleNames = { absurdni:"Absurdní", groteskni:"Groteskní", filozoficky:"Filozofický", ironicky:"Ironický", naivni:"Naivní", surrealisticky:"Surrealistický", kulturni:"Kulturní", introspektivni:"Introspektivní" };
+    function escapeHtml(s) { return s.replace(/[&<>]/g, m => m==='&'?'&amp;':(m==='<'?'&lt;':'&gt;')); }
+    document.getElementById('closeDetailBtn').onclick = () => document.getElementById('detailPanel').classList.remove('visible');
     loadCards();
 </script>
 </body>
