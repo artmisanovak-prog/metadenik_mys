@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Mytodeník – deník, který si všímá mezer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f5f5f5;
+            color: #1a1a1a;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            font-size: 15px;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+        .wrap {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        /* Animace myši */
+        .mouse-scroll {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .mouse-icon {
+            position: fixed;
+            top: -80px;
+            left: -80px;
+            width: 60px;
+            height: 60px;
+            opacity: 0;
+            transition: none;
+            z-index: 1001;
+            pointer-events: none;
+        }
+        .mouse-icon img {
+            width: 100%;
+            height: auto;
+            transform: rotate(0deg);
+            transition: transform 0.3s;
+        }
+        /* Animované třídy */
+        .mouse-fall {
+            animation: fallRotate 1.2s ease-out forwards;
+        }
+        .mouse-run {
+            animation: runAcross 1.5s ease-in-out forwards;
+        }
+        @keyframes fallRotate {
+            0% {
+                top: -80px;
+                left: -80px;
+                opacity: 0;
+                transform: rotate(0deg);
+            }
+            20% {
+                opacity: 1;
+            }
+            80% {
+                top: 70vh;
+                left: 15vw;
+                opacity: 1;
+                transform: rotate(540deg);
+            }
+            100% {
+                top: 80vh;
+                left: 10vw;
+                opacity: 0.5;
+                transform: rotate(720deg);
+            }
+        }
+        @keyframes runAcross {
+            0% {
+                left: -80px;
+                bottom: 20px;
+                opacity: 0;
+                transform: rotate(180deg) scaleX(-1);
+            }
+            20% {
+                opacity: 1;
+            }
+            80% {
+                left: calc(100% - 80px);
+                opacity: 1;
+            }
+            100% {
+                left: calc(100% + 80px);
+                opacity: 0;
+            }
+        }
+        /* Hlavní styl */
+        header {
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-weight: 400;
+            font-size: 2.8rem;
+            letter-spacing: -0.5px;
+        }
+        .sub {
+            color: #555;
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+        .hero {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: center;
+        }
+        .hero-image {
+            flex: 0 0 240px;
+            text-align: center;
+        }
+        .hero-image img {
+            width: 100%;
+            aspect-ratio: 3 / 4;
+            object-fit: cover;
+            display: block;
+            background: #eee;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .hero-text {
+            flex: 1;
+        }
+        .intro-text {
+            background: #eaeaea;
+            padding: 20px;
+            margin-bottom: 30px;
+            font-family: Georgia, serif;
+            font-size: 1rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        .nav {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+        .nav a {
+            background: #1a1a1a;
+            color: #f5f5f5;
+            padding: 12px 24px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.2s;
+            border-radius: 4px;
+        }
+        .nav a:hover {
+            background: #333;
+        }
+        .section {
+            margin-top: 40px;
+            border-top: 1px solid #ddd;
+            padding-top: 30px;
+        }
+        .section h3 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 400;
+            margin-bottom: 12px;
+            font-size: 1.4rem;
+        }
+        .section p {
+            color: #333;
+            margin-bottom: 16px;
+        }
+        .steps {
+            background: #fafafa;
+            padding: 16px 20px;
+            margin: 16px 0;
+            list-style-position: inside;
+        }
+        .steps li {
+            margin-bottom: 8px;
+        }
+        .pack-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 20px;
+            justify-content: flex-start;
+        }
+        .pack-item {
+            background: white;
+            padding: 8px;
+            text-align: center;
+            width: 80px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .pack-item img {
+            width: 100%;
+            aspect-ratio: 3/4;
+            object-fit: cover;
+            background: #eee;
+        }
+        .pack-item .name {
+            font-size: 0.65rem;
+            margin-top: 6px;
+            color: #333;
+        }
+        .gumroad-link {
+            display: inline-block;
+            margin-top: 8px;
+            color: #1a1a1a;
+            text-decoration: underline;
+            font-size: 0.85rem;
+        }
+        .story-box {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 16px;
+            max-height: 250px;
+            overflow-y: auto;
+            margin: 16px 0;
+            font-family: Georgia, serif;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .repo-link {
+            display: inline-block;
+            margin-top: 8px;
+            color: #1a1a1a;
+            text-decoration: underline;
+        }
+        footer {
+            margin-top: 60px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #aaa;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        @media (max-width: 700px) {
+            h1 { font-size: 2rem; }
+            .hero { flex-direction: column; }
+            .hero-image { flex: auto; max-width: 240px; margin: 0 auto; }
+            .pack-item { width: 70px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="mouse-scroll">
+    <div id="mouseIcon" class="mouse-icon">
+        <img src="doma/ilustrace/mys_ikonka.png" alt="myš">
+    </div>
+</div>
+
+<div class="wrap">
+    <header>
+        <h1>Mytodeník</h1>
+        <div class="sub">deník, který si všímá mezer</div>
+    </header>
+
+    <div class="hero">
+        <div class="hero-image">
+            <img src="doma/ilustrace/mys.jpg" alt="Myš" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23ddd\'/%3E%3Ctext x=\'50\' y=\'50\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23666\'%3E?%3C/text%3E%3C/svg%3E'">
+        </div>
+        <div class="hero-text">
+            <p><strong>Myš</strong> si všímá věcí, které ostatní přehlížejí. Zapíše je do mezer mezi slovy, mezi obrazem a textem, mezi tím, co je řečeno, a tím, co je vynecháno. Tento deník je nástroj, který ti pomůže stát se takovou myší – dívat se na svůj vlastní jazyk a objevovat v něm skryté světy.</p>
+        </div>
+    </div>
+
+    <div class="intro-text">
+        ✧ Bude to deník co se dá napsat o neděli a použít už v pondělí.<br>
+        ✧ Takový co můžou psát děti i dospělí, člověk sám i s přáteli.<br>
+        ✧ Deník bez klíčů a zámků, naopak ke sdílení i materiál na knížku.<br>
+        ✧ Deník, který přetaví dny v mytologii.<br>
+        ✧ Tvoř si vlastní myšlení.
+    </div>
+
+    <div class="nav">
+        <a href="doma/nastroje/zapisnik.html">✎ Otevřít deník</a>
+        <a href="doma/nastroje/galerie_jevu.html">📖 Galerie jevů</a>
+        <a href="doma/nastroje/kniha.html">📚 Moje knihy</a>
+    </div>
+
+    <div class="section">
+        <h3>🎭 Perspektivy (12 úhlů pohledu)</h3>
+        <p>Každý fenomén (karta) můžeš vidět z různých úhlů. V deníku si můžeš pro každou kartu vybrat úhel – otočný půlkruhový úhloměr – a ukáže se ti krátká inspirační věta. Úhloměry jsou zpočátku nastaveny náhodně, můžeš si je před psaním projít a zkoušet. Po napsání textu ho analyzuj a systém určí, které úhly v tvém textu převažují. Úhloměry se pak automaticky nastaví podle této analýzy – uvidíš rozdíl mezi svým záměrem a výsledkem. Potom můžeš úhloměry dále otáčet ručně a zkoušet jiné perspektivy.</p>
+        <p><strong>Analýzu provádí Myš pouze z jazykové struktury</strong> – nevšímá si významu, jen tvaru, rytmu, opakování, vět, čárek a mezer. To, co ostatní přehlížejí, Myš zapisuje do mezer mezi slovy.</p>
+    </div>
+
+    <div class="section">
+        <h3>🔧 Jak to funguje</h3>
+        <ul class="steps">
+            <li>1. Otevři deník – vylosují se ti 3 náhodné karty.</li>
+            <li>2. <strong>Před psaním</strong> si můžeš otočit úhloměry nad kartami (tlačítko "Perspektivy") a prohlížet inspirační věty – úhloměry jsou nastaveny náhodně.</li>
+            <li>3. Napiš cokoliv – příběh, vzpomínku, absurditu.</li>
+            <li>4. Klikni na "Analyzovat" – systém určí převažující úhly tvého textu (1–3).</li>
+            <li>5. Úhloměry se automaticky nastaví podle analýzy – porovnej, co jsi chtěl(a) a co vzniklo.</li>
+            <li>6. Můžeš dále otáčet úhloměry ručně a zkoušet jiné perspektivy.</li>
+            <li>7. Ulož si zápis – ten se objeví v historii. Časová osa ukazuje barevné proužky podle úhlů.</li>
+            <li>8. Z vybraných zápisů si můžeš vytvořit vlastní knihu (export HTML nebo tisk).</li>
+        </ul>
+        <p><strong>Jazyk bez myšlení používat jde, ale myšlení bez jazyka těžko. Mytodeník ti pomůže rozšiřovat myšlení skrze jazyk – skrze 12 úhlů pohledu, které ukazují, že na jednu věc se dá podívat z mnoha stran.</strong></p>
+    </div>
+
+    <div class="section">
+        <h3>📦 Další balíčky karet (Gumroad)</h3>
+        <p>Základní verze obsahuje 8 karet. Doplňkové balíčky (po 10 kartách) si můžeš zakoupit na Gumroad. Každý balíček přidá nové fenomény, ilustrace a jevy.</p>
+        <h4 style="margin: 20px 0 8px 0;">Balíček 1</h4>
+        <div class="pack-grid">
+            <div class="pack-item"><img src="doma/ilustrace/cap.jpg" alt="čáp"><div class="name">čáp</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/slon.jpg" alt="slon"><div class="name">slon</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/osel.jpg" alt="osel"><div class="name">osel</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/lemur.jpg" alt="lemur"><div class="name">lemur</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/pavouk.jpg" alt="pavouk"><div class="name">pavouk</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/plamenak.jpg" alt="plameňák"><div class="name">plameňák</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/psi_smecka.jpg" alt="psi smečka"><div class="name">psi smečka</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/opice.jpg" alt="opice"><div class="name">opice</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/panda.jpg" alt="panda"><div class="name">panda</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/vlk.jpg" alt="vlk"><div class="name">vlk</div></div>
+        </div>
+        <a href="#" class="gumroad-link">➜ Zakoupit balíček 1 na Gumroad</a>
+
+        <h4 style="margin: 20px 0 8px 0;">Balíček 2</h4>
+        <div class="pack-grid">
+            <div class="pack-item"><img src="doma/ilustrace/liska.jpg" alt="liška"><div class="name">liška</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/kozel.jpg" alt="kozel"><div class="name">kozel</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/hyeny.jpg" alt="hyeny"><div class="name">hyeny</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/kravy.jpg" alt="krávy"><div class="name">krávy</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/vrabec.jpg" alt="vrabec"><div class="name">vrabec</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/zralok.jpg" alt="žralok"><div class="name">žralok</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/had.jpg" alt="had"><div class="name">had</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/drak.jpg" alt="drak"><div class="name">drak</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/tygr.jpg" alt="tygr"><div class="name">tygr</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/jednorozec.jpg" alt="jednorožec"><div class="name">jednorožec</div></div>
+        </div>
+        <a href="#" class="gumroad-link">➜ Zakoupit balíček 2 na Gumroad</a>
+
+        <h4 style="margin: 20px 0 8px 0;">Balíček 3</h4>
+        <div class="pack-grid">
+            <div class="pack-item"><img src="doma/ilustrace/prase.jpg" alt="prase"><div class="name">prase</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/husy.jpg" alt="husy"><div class="name">husy</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/zizala.jpg" alt="žížala"><div class="name">žížala</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/veverka.jpg" alt="veverka"><div class="name">veverka</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/beran.jpg" alt="beran"><div class="name">beran</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/moucha.jpg" alt="moucha"><div class="name">moucha</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/parohy.jpg" alt="parohy"><div class="name">parohy</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/zelva.jpg" alt="želva"><div class="name">želva</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/hvezdice.jpg" alt="hvězdice"><div class="name">hvězdice</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/tucnak.jpg" alt="tučňák"><div class="name">tučňák</div></div>
+        </div>
+        <a href="#" class="gumroad-link">➜ Zakoupit balíček 3 na Gumroad</a>
+
+        <h4 style="margin: 20px 0 8px 0;">Balíček 4</h4>
+        <div class="pack-grid">
+            <div class="pack-item"><img src="doma/ilustrace/vazky.jpg" alt="vážky"><div class="name">vážky</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/vlastovky.jpg" alt="vlaštovky"><div class="name">vlaštovky</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/chameleon.jpg" alt="chameleon"><div class="name">chameleon</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/gepard.jpg" alt="gepard"><div class="name">gepard</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/rybi_kost.jpg" alt="rybí kost"><div class="name">rybí kost</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/pes.jpg" alt="pes"><div class="name">pes</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/zebra.jpg" alt="zebra"><div class="name">zebra</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/kohout.jpg" alt="kohout"><div class="name">kohout</div></div>
+            <div class="pack-item"><img src="doma/ilustrace/morsky_konik.jpg" alt="mořský koník"><div class="name">mořský koník</div></div>
+        </div>
+        <a href="#" class="gumroad-link">➜ Zakoupit balíček 4 na Gumroad</a>
+    </div>
+
+    <div class="section">
+        <h3>🐭 O Myši – pohádka</h3>
+        <div class="story-box">
+            <p><strong>O MYŠI a o tom, co se stane, když si jí NEvšimneš</strong></p>
+            <p>Kdysi – zároveň ne tak docela dávno. A ne úplně blízko, ale zase ani ne nijak moc daleko. Žila jedna myš. Byla malá, tak jak to u myší normálně bývá. A měla dvě veliké uši, což také není u myši žádná vzácnost.</p>
+            <p>Nebyla nijak zvlášť rychlá, ale ani úplně pomalá. Nebyla hloupá, ale ani kdovíjak chytrá. Na první pohled obyčejná, běžná myš. Ale ne – normální. Všímala si věcí, které ostatní přehlíželi.</p>
+            <p>Například toho, že se ve vzduchu občas zadrhne věta. Nebo že páv, když se nikdo nedívá, přepočítává svá oka. Nebo že čáp někdy jen tak přistane na komíně a zapomene, koho měl donést.</p>
+            <p>A tahle myš si začala věci zapisovat. Ne na papír. Ale tak nějak. Do ticha. Do koutů. Do skulin mezi slovama, kde to obvykle nikdo nečte.</p>
+            <p>A pak si jednoho dne všimla, že se kolem ní začínají hromadit zvířata. Ne v řadě. Ne v kruhu. Prostě… tak nějak. A každé si neslo něco, co nevysvětlovalo. Zajíc měl popálené uši a voněl po kouři. Kocour se dusil smíchem, protože spolkl tečku. Slon si v chobotu nesl třešně, co nikdy nedozrají. A lemur se nedíval na nic, jen na stranu, kde nic nebylo.</p>
+            <p>Myš neříkala nic. Ale všechno si poznamenala. A pak se jednoho dne zeptala první větu. Ne velkou. Ne důležitou. Jenom tu jednu: „Chceš myš?“</p>
+            <p>A to nebyla otázka, co se ptá na ni samotnou. To byla otázka, co se ptá na všechno. Na smysl. Na jazyk. Na strach. Na to, co si z nás kdo udělá. A taky na to, jestli si tuhle pohádku necháš vyprávět do konce. Nebo zapištíš a utečeš. Nebo si ji složíš jinak.</p>
+            <p>Protože od té chvíle už to nebyla jen myš. Byl to klíč. A pádlo. A past. A konec úvodu. Ale začátek něčeho dalšího.</p>
+        </div>
+        <a href="https://youtu.be/oGZr8erlyIc?is=IiYzsZWYPHV9V5tk" class="repo-link" target="_blank">🎧 Poslechnout si pohádku o Myši (YouTube)</a>
+    </div>
+
+    <div class="section">
+        <h3>📁 RepoDům – více o systému</h3>
+        <p>Celý systém „Chceš myš?“ – slovník mezer – je postaven na principu mapování toho, co ostatní přehlížejí. Více se dozvíš v RepoDomu:</p>
+        <a href="https://artmisanovak-prog.github.io/chces_MYS_slovnik_mezer/doma/data/repo_dum.html" class="repo-link" target="_blank">➜ Otevřít RepoDům</a>
+    </div>
+
+    <footer>
+        Chceš myš? — slovník mezer<br>
+        systém, který si všímá, co ostatní přehlížejí<br>
+        <a href="#" style="color:#a89880;">Další balíčky karet na Gumroad</a>
+    </footer>
+</div>
+
+<script>
+    // Animace myši při scrollu (fall + run)
+    let lastScrollY = window.scrollY;
+    let animationTriggered = false;
+    const mouseDiv = document.getElementById('mouseIcon');
+
+    function startMouseAnimation() {
+        if (animationTriggered) return;
+        animationTriggered = true;
+        mouseDiv.classList.remove('mouse-fall', 'mouse-run');
+        // Force reflow
+        void mouseDiv.offsetWidth;
+        mouseDiv.classList.add('mouse-fall');
+        // Po pádu spustíme běh
+        setTimeout(() => {
+            mouseDiv.classList.remove('mouse-fall');
+            mouseDiv.classList.add('mouse-run');
+        }, 1200);
+        // Po doběhnutí reset
+        setTimeout(() => {
+            mouseDiv.classList.remove('mouse-run');
+            mouseDiv.style.opacity = '0';
+            animationTriggered = false;
+        }, 2700);
+    }
+
+    window.addEventListener('scroll', function() {
+        const currentScroll = window.scrollY;
+        if (currentScroll > 200 && !animationTriggered) {
+            startMouseAnimation();
+        }
+        lastScrollY = currentScroll;
+    });
+    // Touch scroll podpora (pro mobil)
+    window.addEventListener('touchmove', function() {
+        if (window.scrollY > 200 && !animationTriggered) {
+            startMouseAnimation();
+        }
+    });
+</script>
+</body>
+</html>
