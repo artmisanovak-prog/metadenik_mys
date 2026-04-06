@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chceš myš? — Deník mezer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: #fafaf8;
+            color: #2a2a2a;
+            line-height: 1.6;
+        }
+
+        /* ANIMACE MYŠI */
+        @keyframes mousefall {
+            0% {
+                left: -30px;
+                top: -30px;
+                opacity: 0;
+                transform: rotateZ(0deg) scaleY(1);
+            }
+            10% {
+                opacity: 1;
+            }
+            85% {
+                opacity: 1;
+            }
+            100% {
+                left: -30px;
+                top: calc(100vh - 30px);
+                opacity: 0;
+                transform: rotateZ(0deg) scaleY(1);
+            }
+        }
+
+        @keyframes mouserun {
+            0% {
+                left: -30px;
+                opacity: 1;
+            }
+            100% {
+                left: calc(100vw + 30px);
+                opacity: 0;
+            }
+        }
+
+        @keyframes mouseflip {
+            0% {
+                transform: rotateZ(0deg) rotateX(0deg);
+            }
+            85% {
+                transform: rotateZ(0deg) rotateX(0deg);
+            }
+            90% {
+                transform: rotateZ(90deg) rotateX(180deg);
+            }
+            100% {
+                transform: rotateZ(90deg) rotateX(180deg);
+            }
+        }
+
+        .falling-mouse {
+            position: fixed;
+            width: 30px;
+            height: 40px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 40"><path d="M15 0 Q20 5 20 12 L20 30 Q20 35 15 38 Q10 35 10 30 L10 12 Q10 5 15 0" fill="black"/><circle cx="12" cy="8" r="2" fill="black"/><path d="M15 35 Q16 38 15 40" stroke="black" stroke-width="1.5" fill="none"/></svg>') center/contain no-repeat;
+            z-index: 9999;
+            pointer-events: none;
+            animation: mousefall 8s ease-in forwards;
+            transform-origin: center;
+        }
+
+        .falling-mouse.at-bottom {
+            animation: none;
+            bottom: 0;
+            left: -30px;
+            top: auto;
+            animation: mouserun 4s ease-out forwards;
+        }
+
+        /* HERO SECTION */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: linear-gradient(135deg, #fafaf8 0%, #f0ede8 100%);
+            overflow: hidden;
+        }
+
+        .hero-image {
+            position: absolute;
+            right: -10%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50%;
+            max-width: 600px;
+            opacity: 0.9;
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: auto;
+        }
+
+        .hero-content {
+            max-width: 600px;
+            z-index: 10;
+            padding: 40px;
+        }
+
+        .hero h1 {
+            font-size: 4em;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            color: #1a1a1a;
+        }
+
+        .hero .tagline {
+            font-size: 1.3em;
+            color: #666;
+            font-weight: 300;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+
+        .hero .subtitle {
+            font-size: 0.95em;
+            color: #999;
+            margin-bottom: 40px;
+            font-style: italic;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 14px 40px;
+            background: #1a1a1a;
+            color: #fafaf8;
+            text-decoration: none;
+            border-radius: 3px;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            border: 2px solid #1a1a1a;
+        }
+
+        .cta-button:hover {
+            background: transparent;
+            color: #1a1a1a;
+        }
+
+        /* CONTENT SECTIONS */
+        .section {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 80px 40px;
+            background: #fafaf8;
+        }
+
+        .section.alt {
+            background: #f5f3f0;
+        }
+
+        .section h2 {
+            font-size: 2.2em;
+            font-weight: 300;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+            color: #1a1a1a;
+        }
+
+        .section h3 {
+            font-size: 1.4em;
+            font-weight: 400;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #2a2a2a;
+        }
+
+        .section p {
+            margin-bottom: 15px;
+            color: #555;
+            font-size: 1em;
+            line-height: 1.8;
+        }
+
+        .intro-text {
+            font-size: 1.1em;
+            color: #666;
+            line-height: 2;
+            margin-bottom: 30px;
+        }
+
+        .intro-text em {
+            color: #1a1a1a;
+            font-style: italic;
+        }
+
+        /* POHÁDKA */
+        .story-container {
+            background: #fff;
+            border-left: 4px solid #1a1a1a;
+            padding: 40px;
+            margin: 30px 0;
+            font-size: 1.05em;
+            line-height: 2;
+            color: #444;
+        }
+
+        .story-container p {
+            margin-bottom: 20px;
+        }
+
+        .story-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            color: #1a1a1a;
+        }
+
+        .story-subtitle {
+            font-size: 0.9em;
+            color: #999;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        /* NÁVOD */
+        .instruction {
+            background: #fff8f3;
+            border: 1px solid #e0d5c7;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 3px;
+        }
+
+        .instruction ol {
+            margin-left: 20px;
+            color: #555;
+        }
+
+        .instruction li {
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        /* LINKS SECTION */
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .link-card {
+            background: #fff;
+            padding: 25px;
+            border: 1px solid #e0d5c7;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+
+        .link-card:hover {
+            border-color: #1a1a1a;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .link-card h4 {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+        }
+
+        .link-card p {
+            font-size: 0.85em;
+            color: #999;
+            margin-bottom: 15px;
+        }
+
+        .link-card a {
+            display: inline-block;
+            color: #1a1a1a;
+            text-decoration: none;
+            font-size: 0.85em;
+            border-bottom: 1px solid #1a1a1a;
+            transition: all 0.3s;
+        }
+
+        .link-card a:hover {
+            color: #666;
+            border-bottom-color: #666;
+        }
+
+        /* FOOTER */
+        footer {
+            background: #2a2a2a;
+            color: #ccc;
+            text-align: center;
+            padding: 40px;
+            font-size: 0.85em;
+        }
+
+        footer a {
+            color: #e0e0e0;
+            text-decoration: none;
+            border-bottom: 1px solid #666;
+        }
+
+        footer a:hover {
+            border-bottom-color: #e0e0e0;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .hero-image {
+                width: 60%;
+            }
+            .hero h1 {
+                font-size: 3em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                justify-content: flex-start;
+                padding-left: 30px;
+            }
+            .hero-image {
+                right: -20%;
+                width: 100%;
+                max-width: 400px;
+            }
+            .hero h1 {
+                font-size: 2.2em;
+            }
+            .hero-content {
+                max-width: 100%;
+            }
+            .section {
+                padding: 60px 30px;
+            }
+            .links-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .nav-top {
+            position: fixed;
+            top: 20px;
+            right: 40px;
+            z-index: 100;
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-top a {
+            color: #1a1a1a;
+            text-decoration: none;
+            font-size: 0.85em;
+            border-bottom: 1px solid #1a1a1a;
+            transition: all 0.3s;
+        }
+
+        .nav-top a:hover {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-top">
+        <a href="#tools">Nástroje</a>
+        <a href="#about">O projektu</a>
+        <a href="doma/nastroje/zapisnik.html">Deník</a>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Chceš myš?</h1>
+            <div class="tagline">Slovník myšlení.<br>Deník bez zámku.<br>Práce se strukturou jazyka.</div>
+            <p class="subtitle">Všímej si toho, co ostatní přehlížejí. Píši do mezer mezi slovy.</p>
+            <a href="doma/nastroje/zapisnik.html" class="cta-button">Otevřít deník</a>
+        </div>
+        <div class="hero-image">
+            <img src="doma/ilustrace/mys.jpg" alt="Chceš myš">
+        </div>
+    </section>
+
+    <!-- POHÁDKA -->
+    <section class="section">
+        <h2>Křivá pohádka — Rovné svědectví</h2>
+        <p class="subtitle" style="font-size: 0.95em; margin-bottom: 30px;">Zapsáno rukou, která nechtěla nic vysvětlit.</p>
+
+        <div class="story-container">
+            <div class="story-subtitle">Tyto pohádky nevyprávějí příběhy tak, jak by měly.<br>Místo kouzel tu vládne nedorozumění.<br>Místo dobra a zla – podivný klid mezi nimi.</div>
+
+            <div class="story-title">O MYŠI</div>
+            <p>a o tom, co se stane, když si jí NEvšimneš</p>
+
+            <p>Kdysi – zároveň ne tak docela dávno.<br>A ne úplně blízko, ale zase ani ne nijak moc daleko.<br>Žila jedna myš.</p>
+
+            <p>Byla malá, tak jak to u myší normálně bývá.<br>A měla dvě veliké uši, což také není u myši žádná vzácnost.</p>
+
+            <p>Nebyla nijak zvlášť rychlá, ale ani úplně pomalá.<br>Nebyla hloupá, ale ani kdovíjak chytrá.<br>Na první pohled obyčejná, běžná myš.</p>
+
+            <p><strong>Ale ne — normální</strong><br>Všímala si věcí, které ostatní přehlíželi.</p>
+
+            <p>Například toho, že se ve vzduchu občas zadrhne věta.<br>Nebo že páv, když se nikdo nedívá, přepočítává svá oka.<br>Nebo že čáp, někdy jen tak přistane na komíně a zapomene, koho měl donést.</p>
+
+            <p>A tahle myš si začala věci zapisovat.<br>Ne na papír.<br>Ale tak nějak. Do ticha. Do koutů. Do skulin mezi slovama,<br>kde to obvykle nikdo nečte.</p>
+
+            <p>A pak si jednoho dne všimla, že se kolem ní začínají hromadit zvířata.<br>Ne v řadě. Ne v kruhu. Prostě… tak nějak.</p>
+
+            <p>A každé si neslo něco, co nevysvětlovalo.</p>
+
+            <p>Zajíc měl popálené uši a voněl po kouři.<br>Kocour se dusil smíchem, protože spolkl tečku.<br>Slon si v chobotu nesl třešně, co nikdy nedozrají.<br>A lemur se nedíval na nic, jen na stranu, kde nic nebylo.</p>
+
+            <p>Myš neříkala nic.<br>Ale všechno si poznamenala.<br>A pak se jednoho dne zeptala první větu.</p>
+
+            <p>Ne velkou. Ne důležitou. Jenom tu jednu:</p>
+
+            <p style="text-align: center; font-size: 1.2em; margin: 30px 0;"><strong>„Chceš myš?"</strong></p>
+
+            <p>A to nebyla otázka, co se ptá na ni samotnou.<br>To byla otázka, co se ptá na všechno.</p>
+
+            <p>Na smysl. Na jazyk. Na strach.<br>Na to, co si z nás kdo udělá.</p>
+
+            <p>A taky na to, jestli si tuhle pohádku necháš vyprávět do konce.<br>Nebo zapištíš a utečeš.<br>Nebo si ji složíš jinak.</p>
+
+            <p>Protože od té chvíle, už to nebyla jen myš.</p>
+
+            <p><strong>Byl to klíč.<br>A pádlo.<br>A past.</strong></p>
+
+            <p style="margin-top: 40px; text-align: center; color: #999;">— konec úvodu. Ale začátek něčeho dalšího.</p>
+        </div>
+
+        <p style="text-align: center; margin-top: 40px;">
+            <a href="https://youtu.be/oGZr8erlyIc" target="_blank" style="color: #1a1a1a; border-bottom: 1px solid #1a1a1a; text-decoration: none;">🎧 Poslechnout audiopohadku</a>
+        </p>
+    </section>
+
+    <!-- O PROJEKTU -->
+    <section class="section alt" id="about">
+        <h2>Co je to „Chceš myš?"</h2>
+
+        <div class="intro-text">
+            <p><strong>Deník bez zámku, bez klíčů, bez diag nóz.</strong></p>
+            <p>Můžeš psát o neděli a používat už v pondělí. Sám, se přáteli, s dětmi, s dospělými.</p>
+            <p>Systém, který <em>nemapuje tvou psychiku</em>, ale <em>ukazuje strukturu tvého jazyka</em>.</p>
+        </div>
+
+        <h3>Jak to funguje</h3>
+        <p>Každý deník začíná třemi náhodně vybranými kartami. Každá karta je zvíře — myš, pavouk, zajíc… — a nese s sebou poetickou větu.</p>
+
+        <p>Když píšeš text, systém jej analyzuje. Ale ne obsah — <strong>jen strukturu</strong>. Hledá fragmenty, opakování, rytmus, inverze. To, co ostatní přehlížejí, Myš zapisuje do mezer mezi slovy.</p>
+
+        <p>Výsledek: 1–3 úhly pohledu, které tvůj text obsahuje. Každý úhel je jiný způsob myšlení — Kulturní, Filozofický, Naivní, Jazykový, Introspektivní, Ironický, Groteskní, Absurdní, Surrealistický.</p>
+
+        <h3>12 perspektiv</h3>
+        <p>Každý fenomén (karta) se dá vidět z 12 různých úhlů. Před psaním si je můžeš prohlédnout — otočná svítilna s inspiračními větami. Nebo píšeš bez nich. Je to tvoje volba.</p>
+
+        <p>Po analýze se úhly automaticky nastaví podle toho, co jsi napsal(a). Vidíš rozdíl mezi svým záměrem a výsledkem. Pak můžeš dál experimentovat.</p>
+
+        <h3>Jak psát deník</h3>
+        <ol style="margin-left: 20px; color: #555;">
+            <li><strong>Otevři deník</strong> — vylosují se ti 3 karty.</li>
+            <li><strong>Prohlédni si perspektivy</strong> — tlačítko "Myší klíče" ti ukáže 12 úhlů s inspiračními větami.</li>
+            <li><strong>Napiš cokoliv</strong> — příběh, vzpomínku, nesmysl, absurditu, reflexi.</li>
+            <li><strong>Klikni „Analyzovat"</strong> — systém určí 1–3 převažující úhly.</li>
+            <li><strong>Uložit se uložit</strong> — zápis se přidá do časové osy s barevnými proužky.</li>
+            <li><strong>Experimentuj dál</strong> — můžeš vrátit úhly a psát znovu.</li>
+        </ol>
+
+        <p style="margin-top: 30px;"><em>Systém se nepokouší "diagnostikovat" nebo "měřit" tvou osobnost. Jen ti ukazuje, jak funguje jazyk, který píšeš.</em></p>
+    </section>
+
+    <!-- NÁSTROJE -->
+    <section class="section" id="tools">
+        <h2>Nástroje Chceš myš?</h2>
+
+        <h3>V deníku</h3>
+        <div class="links-grid">
+            <div class="link-card">
+                <h4>📝 Zápisník</h4>
+                <p>Denní zápisy se strukturální analýzou. Tvůj myšlenkový prostor bez zámků.</p>
+                <a href="doma/nastroje/zapisnik.html">Otevřít →</a>
+            </div>
+
+            <div class="link-card">
+                <h4>📖 Kniha</h4>
+                <p>Vytvářej vlastní publikace ze svých záznamů. Export do HTML nebo tisk.</p>
+                <a href="doma/nastroje/kniha.html">Otevřít →</a>
+            </div>
+
+            <div class="link-card">
+                <h4>🎨 Galerie jevů</h4>
+                <p>Prohlídni si všechny fenomény s jejich perspektivami a audio vysvětlením.</p>
+                <a href="doma/nastroje/galerie_jevu.html">Otevřít →</a>
+            </div>
+        </div>
+
+        <h3 style="margin-top: 50px;">Další projekty Chceš myš?</h3>
+        <div class="links-grid">
+            <div class="link-card">
+                <h4>🔍 Fyzika jazyka</h4>
+                <p>Interaktivní průvodce 60+ lingvistickými jevy. Jak funguje struktura textu.</p>
+                <a href="https://artmisanovak-prog.github.io/Fenomeny_Kreativni_Slovnik_Mezer_Chces_Mys/" target="_blank">Otevřít →</a>
+            </div>
+
+            <div class="link-card">
+                <h4>📊 Dataset</h4>
+                <p>Vícefenoménová analýza. Jak se jevů kombinují a vyvíjejí v textu.</p>
+                <a href="https://artmisanovak-prog.github.io/dataset_multi_fenomen/" target="_blank">Otevřít →</a>
+            </div>
+
+            <div class="link-card">
+                <h4>⚖️ Forenzní mapování</h4>
+                <p>Analýza anomálií v textu. Detekce anomálií a jejich kontextu.</p>
+                <a href="https://artmisanovak-prog.github.io/Chces_MYS-_forezni_jazykove_mapovani/" target="_blank">Otevřít →</a>
+            </div>
+
+            <div class="link-card">
+                <h4>📚 Slovník mezer</h4>
+                <p>Archiv pojmů, které padají mezi obvyklé slova. Terminologie Chceš myš?</p>
+                <a href="https://artmisanovak-prog.github.io/chces_MYS_slovnik_mezer/" target="_blank">Otevřít →</a>
+            </div>
+        </div>
+
+        <h3 style="margin-top: 50px;">Balíčky karet</h3>
+        <p>Nástroj funguje se základními 9 kartami (Myš, Pavouk, Zajíc, Netopýr, Čáp, Páv, Kocour, Slon, Prasátko). Další balíčky si můžeš koupit:</p>
+        <div class="links-grid">
+            <div class="link-card">
+                <h4>🎁 Balíčky na Gumroad</h4>
+                <p>Rozšiř si deník o další zvířata, speciální edice, workshopové balíčky.</p>
+                <a href="https://gumroad.com/chcesmys" target="_blank">Gumroad →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- REPO DŮM -->
+    <section class="section alt">
+        <h2>Repo dům — Web bez webu</h2>
+
+        <p>Všechny nástroje Chceš myš? jsou postaveny na metodě <strong>Repo dům</strong>: web bez serveru, bez předplatného, bez závislostí.</p>
+
+        <p><strong>Co to znamená:</strong></p>
+        <ul style="margin-left: 20px; color: #555; margin-bottom: 30px;">
+            <li>Stáhneš si HTML soubor — máš ho.</li>
+            <li>Všechna data se ukládají do tvého počítače (localStorage).</li>
+            <li>Žádné cloud. Žádné sledování. Žádné předplatné.</li>
+            <li>Můžeš si věci upravit — je to tvoje.</li>
+        </ul>
+
+        <p><strong>Jak to funguje s Githubem:</strong></p>
+        <ol style="margin-left: 20px; color: #555; margin-bottom: 30px;">
+            <li>Klonuješ si repo: <code>git clone https://github.com/artmisanovak-prog/chces-mys</code></li>
+            <li>Otevřeš si <code>index.html</code> v prohlížeči.</li>
+            <li>Všechno funguje lokálně — bez internetu (po prvním načtení).</li>
+            <li>Pokud chceš, můžeš si data exportovat jako JSON nebo HTML.</li>
+        </ol>
+
+        <p><strong>Proč Repo dům?</strong></p>
+        <p>Protože věříme, že <em>tvoje práce ti patří</em>. Ne korporaci. Ne algoritmu. Tobě. Repo dům je filozofie: prostor, který si vlastníš. Strukturu, kterou chápíš. Nářadí, které si můžeš vzít s sebou.</p>
+
+        <p style="text-align: center; margin-top: 40px;">
+            <a href="https://artmisanovak-prog.github.io/chces_MYS_slovnik_mezer/doma/data/repo_dum.html" target="_blank" style="color: #1a1a1a; border-bottom: 1px solid #1a1a1a; text-decoration: none;">Více o Repo dům metodice →</a>
+        </p>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>Chceš myš? © 2024 | Michaela Nováková</p>
+        <p style="margin-top: 15px; font-size: 0.8em;">
+            <a href="mailto:chcesmys@gmail.com">chcesmys@gmail.com</a> | 
+            <a href="https://github.com/artmisanovak-prog" target="_blank">GitHub</a>
+        </p>
+    </footer>
+
+    <script>
+        // Animace myši při scrollu
+        let mouseFalling = false;
+
+        function createFallingMouse() {
+            if (mouseFalling) return;
+            
+            const mouse = document.createElement('div');
+            mouse.className = 'falling-mouse';
+            document.body.appendChild(mouse);
+            mouseFalling = true;
+
+            // Jakmile dopadne, běží po dně
+            setTimeout(() => {
+                mouse.classList.add('at-bottom');
+            }, 8000);
+
+            // Smaž po skončení animace
+            setTimeout(() => {
+                mouse.remove();
+                mouseFalling = false;
+            }, 12000);
+        }
+
+        // Spusť myš když se scrollne od heroes
+        let heroHeight = document.querySelector('.hero').offsetHeight;
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > heroHeight && !mouseFalling) {
+                createFallingMouse();
+            }
+        }, { once: true });
+    </script>
+</body>
+</html>
