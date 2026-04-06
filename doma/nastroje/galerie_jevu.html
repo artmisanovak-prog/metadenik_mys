@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Galerie jevů – Mytodeník</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f5f5f5;
+            color: #1a1a1a;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            font-size: 15px;
+            line-height: 1.5;
+            padding: 20px;
+        }
+        .wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        h1 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-weight: 400;
+            font-size: 1.8rem;
+            letter-spacing: -0.3px;
+        }
+        .back-link {
+            color: #555;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: white;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: box-shadow 0.2s, transform 0.1s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .card-img {
+            width: 100%;
+            aspect-ratio: 3 / 4;
+            background: #eee;
+            margin-bottom: 10px;
+        }
+        .card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .card-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .detail {
+            background: #fafafa;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.2s ease;
+        }
+        .detail.visible {
+            display: block;
+        }
+        .detail-inner {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            align-items: flex-start;
+        }
+        .detail-image {
+            flex: 0 0 180px;
+            text-align: center;
+        }
+        .detail-image img {
+            width: 100%;
+            aspect-ratio: 3 / 4;
+            object-fit: cover;
+            background: #eee;
+        }
+        .detail-info {
+            flex: 1;
+        }
+        .detail-info h2 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 400;
+            margin-bottom: 12px;
+        }
+        .stats {
+            background: white;
+            padding: 16px;
+            margin: 16px 0;
+            border: 1px solid #eee;
+        }
+        .stats p {
+            margin: 6px 0;
+        }
+        .histogram {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .histo-bar {
+            background: #1a1a1a;
+            color: white;
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+        }
+        .uhly-link {
+            display: inline-block;
+            background: #1a1a1a;
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+        .uhly-link:hover {
+            background: #333;
+        }
+        .close-detail {
+            margin-top: 20px;
+            background: none;
+            border: 1px solid #aaa;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.8rem;
+            transition: background 0.2s;
+        }
+        .close-detail:hover {
+            background: #eaeaea;
+        }
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #aaa;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            .detail-inner {
+                flex-direction: column;
+                align-items: center;
+            }
+            .detail-image {
+                flex: auto;
+                max-width: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <header>
+        <h1>📖 Galerie jevů</h1>
+        <a href="zapisnik.html" class="back-link">← zpět do zápisníku</a>
+    </header>
+
+    <div id="cardsGrid" class="grid">Načítám...</div>
+
+    <div id="detailPanel" class="detail">
+        <div class="detail-inner">
+            <div class="detail-image">
+                <img id="detailImg" src="" alt="">
+            </div>
+            <div class="detail-info">
+                <h2 id="detailTitle"></h2>
+                <div id="detailStats" class="stats"></div>
+                <a id="detailUhlyLink" class="uhly-link" href="#" target="_blank">📐 Zobrazit 12 úhlů</a><br>
+                <button class="close-detail" id="closeDetailBtn">✖ Zavřít</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>Klikni na kartu – zobrazí se statistiky tvého použití a odkaz na detail úhlů.</footer>
+</div>
+
+<script>
+    // ============================================================
+    // GLOBÁLNÍ DATA
+    // ============================================================
+    let cardsData = [];
+
+    // Seznam úhlů pro hezké názvy (stejný jako v zápisníku)
+    const angleNames = {
+        analyticky: "Analytický",
+        kulturni: "Kulturní",
+        filozoficky: "Filozofický",
+        naivni: "Naivní",
+        jazykovedny: "Jazykový",
+        metaforicky: "Metaforický",
+        asociacni: "Asociační",
+        introspektivni: "Introspektivní",
+        ironicky: "Ironický",
+        groteskni: "Groteskní",
+        absurdni: "Absurdní",
+        surrealisticky: "Surrealistický"
+    };
+
+    // ============================================================
+    // NAČTENÍ KARET Z JSON
+    // ============================================================
+    async function loadCards() {
+        try {
+            const res = await fetch('../data/karty.json');
+            if (!res.ok) throw new Error('Chybí doma/data/karty.json');
+            cardsData = await res.json();
+            renderGrid();
+        } catch(e) {
+            document.getElementById('cardsGrid').innerHTML = `<div style="color:red;">Chyba: ${e.message}</div>`;
+        }
+    }
+
+    function renderGrid() {
+        const grid = document.getElementById('cardsGrid');
+        grid.innerHTML = cardsData.map(card => `
+            <div class="card" data-id="${card.id}">
+                <div class="card-img">
+                    <img src="../illustrace/${card.id}.jpg" alt="${card.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23ddd\'/%3E%3Ctext x=\'50\' y=\'50\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23666\'%3E?%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div class="card-name">${escapeHtml(card.name)}</div>
+            </div>
+        `).join('');
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('click', () => showDetail(card.getAttribute('data-id')));
+        });
+    }
+
+    // ============================================================
+    // ZOBRAZENÍ DETAILU KARTY
+    // ============================================================
+    function showDetail(cardId) {
+        const card = cardsData.find(c => c.id === cardId);
+        if (!card) return;
+
+        // Nastavení obrázku a názvu
+        document.getElementById('detailImg').src = `../illustrace/${cardId}.jpg`;
+        document.getElementById('detailTitle').innerText = card.name;
+
+        // Načtení metadat z localStorage
+        const meta = JSON.parse(localStorage.getItem('mytodenik_card_metadata') || '{}');
+        const cardMeta = meta[cardId] || { count: 0, angles: {} };
+
+        let statsHtml = `<h3>📊 Tvé použití</h3>`;
+        statsHtml += `<p>Počet výskytů v losování: ${cardMeta.count}</p>`;
+
+        const angleEntries = Object.entries(cardMeta.angles);
+        if (angleEntries.length) {
+            statsHtml += `<p>Dominantní úhly:</p><div class="histogram">`;
+            for (let [angleKey, cnt] of angleEntries) {
+                const angleName = angleNames[angleKey] || angleKey;
+                statsHtml += `<div class="histo-bar">${angleName}: ${cnt}</div>`;
+            }
+            statsHtml += `</div>`;
+        } else {
+            statsHtml += `<p>Zatím žádné uložené zápisy s touto kartou.</p>`;
+        }
+
+        document.getElementById('detailStats').innerHTML = statsHtml;
+
+        // Odkaz na detail 12 úhlů
+        const uhlyLink = document.getElementById('detailUhlyLink');
+        uhlyLink.href = `../data/${cardId}_uhly/${cardId}_uhly.html`;
+        // Pokud soubor neexistuje, chyba se zobrazí v konzoli, ale odkaz zůstane – uživatel uvidí 404.
+        // Lze ošetřit přes fetch, ale pro jednoduchost necháme tak.
+
+        // Zobrazení panelu
+        const panel = document.getElementById('detailPanel');
+        panel.classList.add('visible');
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ============================================================
+    // POMOCNÉ FUNKCE
+    // ============================================================
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;'));
+    }
+
+    // Zavření detailu
+    document.getElementById('closeDetailBtn').addEventListener('click', () => {
+        document.getElementById('detailPanel').classList.remove('visible');
+    });
+
+    // Inicializace
+    loadCards();
+</script>
+</body>
+</html>
