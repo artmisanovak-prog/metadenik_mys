@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deník mezer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            color: #e0e0e0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1600px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-size: 2.5em; letter-spacing: 2px; margin-bottom: 5px; background: linear-gradient(135deg, #e0e0e0, #999); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .header p { color: #999; font-size: 0.95em; }
+        .nav { display: flex; gap: 15px; justify-content: center; margin-bottom: 30px; flex-wrap: wrap; }
+        .nav a { color: #999; text-decoration: none; font-size: 0.85em; padding: 6px 12px; border: 1px solid #4a4a4a; transition: all 0.3s; }
+        .nav a:hover { color: #e0e0e0; border-color: #e0e0e0; }
+        .main-layout { display: grid; grid-template-columns: 250px 1fr 400px; gap: 20px; }
+        .left-panel { display: flex; flex-direction: column; gap: 20px; }
+        .cards-mini { border: 1px solid #4a4a4a; padding: 15px; background: rgba(42, 42, 42, 0.5); border-radius: 4px; display: flex; flex-direction: column; gap: 10px; }
+        .card-mini { border: 1px solid #3a3a3a; padding: 10px; background: #1a1a1a; text-align: center; border-radius: 3px; font-size: 0.75em; }
+        .card-mini-name { font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .card-mini-text { color: #999; font-size: 0.65em; line-height: 1.2; }
+        .wheel-wrapper { border: 1px solid #4a4a4a; padding: 15px; background: rgba(42, 42, 42, 0.5); border-radius: 4px; }
+        .wheel-title { font-size: 0.85em; font-weight: bold; text-transform: uppercase; margin-bottom: 12px; text-align: center; color: #999; }
+        .wheel-container { width: 220px; height: 220px; margin: 0 auto; }
+        .wheel-svg { width: 100%; height: 100%; }
+        .wheel-segment { cursor: pointer; transition: all 0.2s; }
+        .wheel-segment:hover { filter: brightness(1.2); }
+        .wheel-segment.active { filter: brightness(1.5); stroke: #e0e0e0; stroke-width: 1.5; }
+        .wheel-label { font-size: 8px; font-weight: bold; text-anchor: middle; pointer-events: none; }
+        .wheel-info { margin-top: 15px; padding: 10px; background: #1a1a1a; border-radius: 3px; font-size: 0.7em; text-align: center; color: #ccc; min-height: 40px; display: flex; align-items: center; justify-content: center; }
+        .middle-panel { display: flex; flex-direction: column; gap: 15px; }
+        .inputs-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: rgba(42, 42, 42, 0.5); padding: 20px; border: 1px solid #4a4a4a; border-radius: 4px; }
+        .input-field { display: flex; flex-direction: column; gap: 8px; }
+        .input-label { font-size: 0.75em; font-weight: bold; text-transform: uppercase; color: #999; }
+        textarea { width: 100%; height: 200px; background: #1a1a1a; color: #e0e0e0; border: 1px solid #4a4a4a; padding: 10px; font-family: 'DM Mono', monospace; font-size: 0.8em; border-radius: 3px; resize: none; }
+        textarea:focus { outline: none; border-color: #e0e0e0; }
+        .buttons-container { display: flex; gap: 10px; }
+        button { background: #3a3a3a; color: #e0e0e0; border: 1px solid #4a4a4a; padding: 10px 15px; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 0.8em; border-radius: 3px; transition: all 0.3s; flex: 1; }
+        button:hover { background: #4a4a4a; border-color: #e0e0e0; }
+        button.primary { background: linear-gradient(135deg, #4a7bc1, #6a9fd4); border-color: #e0e0e0; }
+        .analysis-result { background: rgba(42, 42, 42, 0.5); border: 1px solid #4a4a4a; padding: 15px; border-radius: 4px; }
+        .analysis-result h3 { font-size: 0.9em; margin-bottom: 10px; }
+        .analysis-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .analysis-card { background: #1a1a1a; padding: 10px; border-radius: 3px; font-size: 0.7em; border: 1px solid #3a3a3a; }
+        .analysis-card-title { font-weight: bold; margin-bottom: 6px; font-size: 0.75em; }
+        .angle-badges { display: flex; gap: 4px; flex-wrap: wrap; }
+        .angle-badge { padding: 2px 6px; border-radius: 12px; font-size: 0.65em; font-weight: bold; border: 1px solid; }
+        .right-panel { display: flex; flex-direction: column; gap: 20px; }
+        .history-header { border-bottom: 2px solid #4a4a4a; padding-bottom: 10px; }
+        .history-header h2 { font-size: 1.1em; margin-bottom: 3px; }
+        .history-header p { color: #666; font-size: 0.75em; }
+        .history-list { display: flex; flex-direction: column; gap: 10px; max-height: 600px; overflow-y: auto; }
+        .history-item { background: rgba(42, 42, 42, 0.5); border: 1px solid #4a4a4a; padding: 12px; border-radius: 3px; cursor: pointer; transition: all 0.3s; font-size: 0.8em; }
+        .history-item:hover { border-color: #e0e0e0; background: rgba(42, 42, 42, 0.8); }
+        .history-date { font-weight: bold; margin-bottom: 6px; font-size: 0.75em; }
+        .history-cards { color: #999; font-size: 0.7em; margin-bottom: 6px; }
+        .history-angles { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
+        .history-actions { display: flex; gap: 4px; }
+        .history-actions button { flex: 1; padding: 4px 6px; font-size: 0.65em; }
+        .empty-state { color: #666; text-align: center; padding: 30px 10px; font-style: italic; font-size: 0.85em; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: #4a4a4a; border-radius: 2px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Deník mezer</h1>
+            <p>Pij 3 karty • Napiš • Vidíš úhly</p>
+        </div>
+
+        <div class="nav">
+            <a href="../../index.html">← Domů</a>
+            <a href="galerie_jevu.html">📚 Galerie jevů</a>
+            <a href="kniha.html">📖 Kniha</a>
+        </div>
+
+        <div class="main-layout">
+            <div class="left-panel">
+                <div class="cards-mini" id="cardsMini"></div>
+                <div class="wheel-wrapper">
+                    <div class="wheel-title">Myší klíče</div>
+                    <div class="wheel-container">
+                        <svg class="wheel-svg" viewBox="0 0 220 220">
+                            <circle cx="110" cy="110" r="105" fill="none" stroke="#3a3a3a" stroke-width="0.5"/>
+                            <g id="wheelSegments"></g>
+                        </svg>
+                    </div>
+                    <div class="wheel-info" id="wheelInfo">Klikni</div>
+                </div>
+                <button onclick="generateNewCards()" class="primary">🎲 Nové</button>
+            </div>
+
+            <div class="middle-panel">
+                <div class="inputs-container" id="inputsContainer"></div>
+                <div class="buttons-container">
+                    <button onclick="analyzeText()">🔍 Analyzovat</button>
+                    <button onclick="saveEntry()" class="primary">💾 Uložit</button>
+                </div>
+                <div id="analysisResult"></div>
+            </div>
+
+            <div class="right-panel">
+                <div class="history-header">
+                    <h2>📋 Osa</h2>
+                    <p>Zápisy</p>
+                </div>
+                <div class="history-list" id="historyList">
+                    <div class="empty-state">Zatím nic</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let CARDS = [], currentCards = [], historyData = [], selectedAngle = "Kulturní";
+
+        const ANGLES_DEF = {
+            "Kulturní": { color: "#9b59b6", desc: "Tradice, umění", active: true },
+            "Filozofický": { color: "#16a085", desc: "Paradoxy, otázky", active: true },
+            "Naivní": { color: "#3498db", desc: "Jednoduše", active: true },
+            "Jazykový": { color: "#2980b9", desc: "Zvuk, rytmus", active: true },
+            "Metaforický": { color: "#27ae60", desc: "Věc je věc", active: false },
+            "Asociační": { color: "#e67e22", desc: "Nečekaná", active: false },
+            "Introspektivní": { color: "#e74c3c", desc: "Dovnitř", active: true },
+            "Ironický": { color: "#f39c12", desc: "Rozpor", active: true },
+            "Groteskní": { color: "#c0392b", desc: "Zveličení", active: true },
+            "Absurdní": { color: "#8e44ad", desc: "Bez logiky", active: true },
+            "Surrealistický": { color: "#d35400", desc: "Sny", active: true },
+            "Analytický": { color: "#4a7bc1", desc: "Logika", active: false }
+        };
+
+        const FIGURE_ANGLES = {
+            "Kulturní": ["Intertextualita"], "Filozofický": ["Paradox"], "Naivní": ["Fragment"],
+            "Jazykový": ["Aliterace"], "Introspektivní": ["Apostrofa"], "Ironický": ["Ironie"],
+            "Groteskní": ["Hyperbola"], "Absurdní": ["Negace"], "Surrealistický": ["Anafora"]
+        };
+
+        const FIGURES = {
+            "Fragment": t => t.trim().split(/\s+/).length < 5,
+            "Anafora": t => { const s = t.split(/[.!?]/); return s.length > 2 && s[0]?.trim().split(/\s+/)[0] === s[1]?.trim().split(/\s+/)[0]; },
+            "Apostrofa": t => /^(Ó|Ach)/.test(t),
+            "Paradox": t => t.includes('a') && t.includes('ne'),
+            "Ironie": t => (t.includes('!') || t.includes('?')) && t.length < 50,
+            "Hyperbola": t => /tisíc|milion/.test(t),
+            "Negace": t => /ne[a-z]+|bez/.test(t),
+            "Aliterace": t => { const w = t.split(/\s+/).slice(0, 3); return w.length > 1 && w.every(x => x[0]?.toLowerCase() === w[0][0]?.toLowerCase()); },
+            "Intertextualita": t => /["„]/.test(t)
+        };
+
+        function init() { loadCards(); loadHistory(); drawWheel(); }
+
+        function loadCards() {
+            fetch('../../doma/data/karty.json')
+                .then(r => r.json())
+                .then(d => { CARDS = d; generateNewCards(); })
+                .catch(e => console.log(e));
+        }
+
+        function generateNewCards() {
+            const s = CARDS.sort(() => 0.5 - Math.random());
+            currentCards = s.slice(0, 3);
+            displayCards();
+            document.getElementById('analysisResult').innerHTML = '';
+        }
+
+        function displayCards() {
+            document.getElementById('cardsMini').innerHTML = currentCards.map(c => `
+                <div class="card-mini">
+                    <div class="card-mini-name">${c.name}</div>
+                    <div class="card-mini-text">${c.text}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('inputsContainer').innerHTML = currentCards.map((c, i) => `
+                <div class="input-field">
+                    <div class="input-label">${c.name}</div>
+                    <textarea id="card-${i}"></textarea>
+                </div>
+            `).join('');
+        }
+
+        function drawWheel() {
+            const svg = document.getElementById('wheelSegments');
+            svg.innerHTML = '';
+            const angles = Object.keys(ANGLES_DEF);
+            angles.forEach((a, i) => {
+                const deg = (360 / 12) * i;
+                const r1 = 50, r2 = 105;
+                const s1 = deg - 15, e1 = deg + 15;
+                const def = ANGLES_DEF[a];
+                
+                const p = createArcPath(110, 110, r1, r2, s1, e1);
+                const seg = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                seg.setAttribute('d', p);
+                seg.setAttribute('fill', def.color);
+                seg.setAttribute('fill-opacity', def.active ? 1 : 0.25);
+                seg.setAttribute('stroke', '#4a4a4a');
+                seg.setAttribute('stroke-width', '0.5');
+                seg.setAttribute('class', a === selectedAngle ? 'wheel-segment active' : 'wheel-segment');
+                seg.addEventListener('click', () => selectAngle(a));
+                svg.appendChild(seg);
+
+                const rad = (deg * Math.PI) / 180;
+                const x = 110 + 75 * Math.cos(rad);
+                const y = 110 + 75 * Math.sin(rad);
+                const l = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                l.setAttribute('x', x);
+                l.setAttribute('y', y);
+                l.setAttribute('text-anchor', 'middle');
+                l.setAttribute('class', 'wheel-label');
+                l.setAttribute('fill', def.active ? '#e0e0e0' : '#555');
+                l.textContent = a;
+                svg.appendChild(l);
+            });
+        }
+
+        function createArcPath(cx, cy, r1, r2, s, e) {
+            const start1 = polarToCartesian(cx, cy, r1, e);
+            const end1 = polarToCartesian(cx, cy, r1, s);
+            const start2 = polarToCartesian(cx, cy, r2, e);
+            const end2 = polarToCartesian(cx, cy, r2, s);
+            return [`M ${start1.x} ${start1.y}`, `A ${r1} ${r1} 0 0 0 ${end1.x} ${end1.y}`, `L ${end2.x} ${end2.y}`, `A ${r2} ${r2} 0 0 1 ${start2.x} ${start2.y}`, 'Z'].join(' ');
+        }
+
+        function polarToCartesian(cx, cy, r, a) {
+            const rad = (a * Math.PI) / 180;
+            return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+        }
+
+        function selectAngle(a) {
+            selectedAngle = a;
+            document.getElementById('wheelInfo').textContent = ANGLES_DEF[a].desc;
+            drawWheel();
+        }
+
+        function analyzeText() {
+            const t = [document.getElementById('card-0').value, document.getElementById('card-1').value, document.getElementById('card-2').value];
+            if (!t.some(x => x.trim())) { alert('Napiš'); return; }
+
+            const r = t.map(tx => {
+                if (!tx.trim()) return { angles: [] };
+                const s = tx.split(/[.!?]+/).filter(x => x.trim());
+                const f = {};
+                s.forEach(st => Object.keys(FIGURES).forEach(fig => { try { if (FIGURES[fig](st)) f[fig] = (f[fig] || 0) + 1; } catch (e) {} }));
+                const sc = {};
+                Object.keys(FIGURE_ANGLES).forEach(an => sc[an] = FIGURE_ANGLES[an].reduce((su, fi) => su + (f[fi] || 0), 0));
+                const top = Object.entries(sc).filter(([a]) => ANGLES_DEF[a].active).sort((a, b) => b[1] - a[1]).slice(0, 3).filter(([, s]) => s > 0).map(([a]) => a);
+                return { angles: top };
+            });
+
+            document.getElementById('analysisResult').innerHTML = `
+                <div class="analysis-result">
+                    <h3>Úhly</h3>
+                    <div class="analysis-cards">${r.map((rr, i) => `<div class="analysis-card"><div class="analysis-card-title">K${i + 1}</div><div class="angle-badges">${rr.angles.length ? rr.angles.map(a => `<div class="angle-badge" style="background-color: ${ANGLES_DEF[a].color}40; border: 1px solid ${ANGLES_DEF[a].color};">${a}</div>`).join('') : 'nic'}</div></div>`).join('')}</div>
+                </div>
+            `;
+            window.lastAnalysis = r.map(x => x.angles);
+        }
+
+        function saveEntry() {
+            const t = [document.getElementById('card-0').value, document.getElementById('card-1').value, document.getElementById('card-2').value];
+            if (!t.some(x => x.trim())) { alert('Napiš'); return; }
+            const e = { id: Date.now(), timestamp: new Date().toLocaleString('cs-CZ'), cards: currentCards.map(c => c.name), angles: window.lastAnalysis || [[], [], []] };
+            historyData.unshift(e);
+            localStorage.setItem('diaryEntries', JSON.stringify(historyData));
+            loadHistory();
+            document.getElementById('card-0').value = '';
+            document.getElementById('card-1').value = '';
+            document.getElementById('card-2').value = '';
+            document.getElementById('analysisResult').innerHTML = '';
+            window.lastAnalysis = null;
+            alert('✓');
+            generateNewCards();
+        }
+
+        function loadHistory() {
+            const s = localStorage.getItem('diaryEntries');
+            historyData = s ? JSON.parse(s) : [];
+            const c = document.getElementById('historyList');
+            if (!historyData.length) { c.innerHTML = '<div class="empty-state">-</div>'; return; }
+            c.innerHTML = historyData.map(e => {
+                const aa = [...new Set(e.angles.flat())];
+                return `
+                    <div class="history-item">
+                        <div class="history-date">${e.timestamp}</div>
+                        <div class="history-cards">${e.cards.join(', ')}</div>
+                        <div class="history-angles">${aa.length ? aa.map(a => `<div class="angle-badge" style="background-color: ${ANGLES_DEF[a]?.color}40; border: 1px solid ${ANGLES_DEF[a]?.color};">${a}</div>`).join('') : '-'}</div>
+                        <div class="history-actions">
+                            <button onclick="deleteEntry(${e.id})">X</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function deleteEntry(id) {
+            if (confirm('Smazat?')) {
+                historyData = historyData.filter(e => e.id !== id);
+                localStorage.setItem('diaryEntries', JSON.stringify(historyData));
+                loadHistory();
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
