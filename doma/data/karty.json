@@ -1,122 +1,181 @@
-[
-  {
-    "id": "mys",
-    "name": "Myš",
-    "snippet": "chceš myš??",
-    "jevy": {
-      "absurdni": "nabídka která mate měřítka",
-      "groteskni": "možná se jen houpe hlavou dolů visí za ocas a hraje si a tím mění pravidla",
-      "filozoficky": "čeho si nevšimne myš - nestalo se",
-      "ironicky": "detail který drží svět",
-      "naivni": "myslela jsem že se bude hodit",
-      "surrealisticky": "otázka je dárek",
-      "kulturni": "symbol ticha v nabídce",
-      "introspektivni": "navazuje kontakt"
+{
+  "myš": {
+    "id": "myš",
+    "ilustrace": "doma/ilustrace/mys.jpg",
+    "pohadka": "doma/data/mys_uhly/mys_uhly.html",
+    "uhly": {
+      "absurdní": "nabídka která mate měřítka",
+      "jazykový": "zvíře i myšlenka tělo i idea",
+      "ironický": "detail který drží svět",
+      "filozofický": "čeho si nevšimne myš - nestalo se",
+      "naivní": "myslela jsem že se bude hodit",
+      "groteskní": "možná se jen houpe hlavou dolů visí za ocas a hraje si a tím mění pravidla",
+      "kulturní": "symbol ticha v nabídce",
+      "introspektivní": "navazuje kontakt",
+      "surrealistický": "otázka je dárek",
+      "analytický": "",
+      "asociační": "",
+      "metaforický": ""
     }
   },
-  {
+
+  "kocour": {
     "id": "kocour",
-    "name": "Kocour",
-    "snippet": "sežral dvě berušky a půl hodiny krkal tečky",
-    "jevy": {
-      "absurdni": "trávení interpunkce",
-      "groteskni": "statistiky trávení",
-      "filozoficky": "náhoda která se tváří jako pravidlo",
-      "ironicky": "přesnost tam kde na ní nezáleží",
-      "naivni": "prostě se to stalo",
-      "surrealisticky": "čísla vycházející z tlamy",
-      "kulturni": "počítání jako tik",
-      "introspektivni": "nemůžu to zastavit jen sledovat"
+    "ilustrace": "doma/ilustrace/kocour.jpg",
+    "pohadka": "doma/data/mys_uhly/kocour_uhly.html",
+    "uhly": {
+      "absurdní": "trávení interpunkce",
+      "jazykový": "tečka jako vedlejší produkt věty",
+      "ironický": "přesnost tam kde na ní nezáleží",
+      "filozofický": "náhoda která se tváří jako pravidlo",
+      "naivní": "prostě se to stalo",
+      "groteskní": "statistiky trávení",
+      "kulturní": "počítání jako tik",
+      "introspektivní": "nemůžu to zastavit jen sledovat",
+      "surrealistický": "čísla vycházející z tlamy",
+      "analytický": "",
+      "asociační": "",
+      "metaforický": ""
     }
   },
-  {
-    "id": "zajic",
-    "name": "Zajíc",
-    "snippet": "zaječice skočí do plamenů ale neshoří aneb zajicem nezatopíš",
-    "jevy": {
-      "absurdni": "oheň který nefunguje",
-      "groteskni": "zajíc není palivo",
-      "filozoficky": "podstata nezávislá na prostředí",
-      "ironicky": "odolnost tam kde se čeká slabost",
-      "naivni": "oběť která nehoří",
-      "surrealisticky": "skok skrz nemožné",
-      "kulturni": "stereotyp naruby",
-      "introspektivni": "žádný oheň nepálí stejně"
+
+  "zajíc": {
+    "id": "zajíc",
+    "ilustrace": "doma/ilustrace/zajic.jpg",
+    "pohadka": "doma/data/mys_uhly/zajic_uhly.html",
+    "uhly": {
+      "absurdní": "oheň který nefunguje",
+      "jazykový": "negace přísloví",
+      "ironický": "odolnost tam kde se čeká slabost",
+      "filozofický": "podstata nezávislá na prostředí",
+      "naivní": "oběť která nehoří",
+      "groteskní": "zajíc není palivo",
+      "kulturní": "stereotyp naruby",
+      "introspektivní": "žádný oheň nepálí stejně",
+      "surrealistický": "skok skrz nemožné",
+      "analytický": "",
+      "asociační": "",
+      "metaforický": ""
     }
   },
-  {
-    "id": "pav",
-    "name": "Páv",
-    "snippet": "oko za okem. páv za pávem",
-    "jevy": {
-      "absurdni": "soutěž pohledů bez poroty",
-      "groteskni": "narcismus s peřím",
-      "filozoficky": "identita vzniká z nekonečného zrcadlení",
-      "ironicky": "okázalost která sleduje sama sebe",
-      "naivni": "čím víc očí tím líp",
-      "surrealisticky": "oči které se rozmnožují",
-      "kulturni": "estetika přebytku",
-      "introspektivni": "dívám se na sebe abych si byl jistý že existuji"
-    }
-  },
-  {
-    "id": "netopyr",
-    "name": "Netopýr",
-    "snippet": "krása, co ráno už se nehodí",
-    "jevy": {
-      "absurdni": "elegance závislá na tmě",
-      "groteskni": "glamour s blánami",
-      "filozoficky": "hodnota věcí se mění s osvětlením",
-      "ironicky": "to co fascinuje po tmě se za světla omlouvá",
-      "naivni": "ve tmě jsem hezčí",
-      "surrealisticky": "šperk který se rozpadne při svítání",
-      "kulturni": "estetika outsiderů",
-      "introspektivni": "mám verzi sebe kterou ukazuji jen nocím"
-    }
-  },
-  {
-    "id": "motyl",
-    "name": "Motýl",
-    "snippet": "motýlů v břiše se nenajíš",
-    "jevy": {
-      "absurdni": "emoce bez kalorií",
-      "groteskni": "dieta z emocí",
-      "filozoficky": "pocit není zdroj",
-      "ironicky": "romantika bez užitku",
-      "naivni": "myslela jsem, že to stačí",
-      "surrealisticky": "létání v prázdném žaludku",
-      "kulturni": "demontáž klišé",
-      "introspektivni": "něco cítím, ale nestačí to"
-    }
-  },
-  {
-    "id": "krokodyl",
-    "name": "Krokodýl",
-    "snippet": "sleva 90 %, tři za cenu jedné, KROKODÝLÍ SLZY totální výprodej",
-    "jevy": {
-      "absurdni": "totální výprodej falešných slz",
-      "groteskni": "marketing empatie",
-      "filozoficky": "hodnota citů v tržní logice",
-      "ironicky": "emoce zlevněná na nulu",
-      "naivni": "proč by si děti nemohly koupit balíček slz na hraní",
-      "surrealisticky": "hypermarket predátorů",
-      "kulturni": "cynismus zabalený do slevy",
-      "introspektivni": "falešný pláč výhodně"
-    }
-  },
-  {
+
+  "ryba": {
     "id": "ryba",
-    "name": "Ryba",
-    "snippet": "rybí rap",
-    "jevy": {
-      "absurdni": "hudba bez plic",
-      "groteskni": "flow bez vzduchu",
-      "filozoficky": "komunikace která nepotřebuje porozumění",
-      "ironicky": "projev slyšitelný jen pod hladinou",
-      "naivni": "prostě to plyne",
-      "surrealisticky": "beat z bublin",
-      "kulturni": "underground doslova",
-      "introspektivni": "mluvím i když mě nikdo neposlouchá"
+    "ilustrace": "doma/ilustrace/ryba.jpg",
+    "pohadka": "doma/data/mys_uhly/ryba_uhly.html",
+    "uhly": {
+      "absurdní": "hudba bez plic",
+      "jazykový": "rytmus místo slov",
+      "ironický": "projev slyšitelný jen pod hladinou",
+      "filozofický": "komunikace která nepotřebuje porozumění",
+      "naivní": "prostě to plyne",
+      "groteskní": "flow bez vzduchu",
+      "kulturní": "underground doslova",
+      "introspektivní": "mluvím i když mě nikdo neposlouchá",
+      "surrealistický": "beat z bublin",
+      "analytický": "",
+      "asociační": "",
+      "metaforický": ""
+    }
+  },
+
+  "páv": {
+    "id": "páv",
+    "ilustrace": "doma/ilustrace/pav.jpg",
+    "pohadka": "doma/data/mys_uhly/pav_uhly.html",
+    "uhly": {
+      "absurdní": "soutěž pohledů bez poroty",
+      "jazykový": "redundance jako ornament",
+      "ironický": "okázalost která sleduje sama sebe",
+      "filozofický": "identita vzniká z nekonečného zrcadlení",
+      "naivní": "čím víc očí tím líp",
+      "groteskní": "narcismus s peřím",
+      "kulturní": "estetika přebytku",
+      "introspektivní": "dívám se na sebe abych si byl jistý že existuji",
+      "surrealistický": "oči které se rozmnožují",
+      "analytický": "",
+      "asociační": "",
+      "metaforický": ""
+    }
+  },
+
+  "netopýr": {
+    "id": "netopýr",
+    "ilustrace": "doma/ilustrace/krokodyl.jpg",
+    "pohadka": "doma/data/mys_uhly/netopyr_uhly.html",
+    "uhly": {
+      "absurdní": "elegance závislá na tmě",
+      "jazykový": "přídavné jméno platné jen v noci",
+      "ironický": "to co fascinuje po tmě se za světla omlouvá",
+      "filozofický": "hodnota věcí se mění s osvětlením",
+      "naivní": "ve tmě jsem hezčí",
+      "groteskní": "glamour s blánami",
+      "kulturní": "estetika outsiderů",
+      "introspektivní": "mám verzi sebe kterou ukazuji jen nocím",
+      "surrealistický": "šperk který se rozpadne při svítání",
+      "analytický": "",
+      "asociační": "",
+      "metaforický": ""
+    }
+  },
+
+  "motýl": {
+    "id": "motýl",
+    "ilustrace": "doma/ilustrace/motyl.jpg",
+    "pohadka": "doma/data/mys_uhly/motyl_uhly.html",
+    "uhly": {
+      "absurdní": "emoce bez kalorií",
+      "jazykový": "metafora, která selhala",
+      "ironický": "romantika bez užitku",
+      "filozofický": "pocit není zdroj",
+      "naivní": "myslela jsem, že to stačí",
+      "groteskní": "dieta z emocí",
+      "kulturní": "demontáž klišé",
+      "introspektivní": "něco cítím, ale nestačí to",
+      "surrealistický": "létání v prázdném žaludku",
+      "analytický": "",
+      "asociační": "",
+      "metaforický": ""
+    }
+  },
+
+  "pavouk": {
+    "id": "pavouk",
+    "ilustrace": "doma/ilustrace/pavouk.jpg",
+    "pohadka": "doma/data/mys_uhly/pavouk_uhly.html",
+    "uhly": {
+      "absurdní": "pauza která se odmítá stát pokračováním",
+      "jazykový": "věta bez slovesa",
+      "ironický": "struktura bez děje",
+      "filozofický": "stav mezi začátkem a koncem",
+      "naivní": "ono se to nějak vyřeší",
+      "groteskní": "architektura váhání",
+      "kulturní": "estetika nedokončení",
+      "introspektivní": "nechávám věci být otevřené",
+      "surrealistický": "čas zachycený ve vlákně",
+      "analytický": "",
+      "asociační": "",
+      "metaforický": ""
+    }
+  },
+
+  "krokodýl": {
+    "id": "krokodýl",
+    "ilustrace": "doma/ilustrace/krokodyl.jpg",
+    "pohadka": "doma/data/mys_uhly/krokodyl_uhly.html",
+    "uhly": {
+      "absurdní": "totální výprodej falešných slz",
+      "jazykový": "reklama jako vyznání",
+      "ironický": "emoce zlevněná na nulu",
+      "filozofický": "hodnota citů v tržní logice",
+      "naivní": "proč by si děti nemohly koupit balíček slz na hraní",
+      "groteskní": "marketing empatie",
+      "kulturní": "cynismus zabalený do slevy",
+      "introspektivní": "falešný pláč výhodně",
+      "surrealistický": "hypermarket predátorů",
+      "analytický": "",
+      "asociační": "",
+      "metaforický": ""
     }
   }
-]
+}
