@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deník mezer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            background: #0f0d0a;
+            color: #f5f3f0;
+            padding: 40px 20px;
+        }
+        
+        .container { max-width: 1600px; margin: 0 auto; }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #999;
+            font-size: 1em;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        
+        .nav a {
+            color: #f5f3f0;
+            text-decoration: none;
+            border-bottom: 1px solid #f5f3f0;
+            padding-bottom: 3px;
+            font-size: 0.95em;
+        }
+        
+        .layout {
+            display: grid;
+            grid-template-columns: 250px 1fr 320px;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        /* LEVÁ — PREVIEW + KOLEČKO */
+        .sidebar-left {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .cards-mini-box {
+            border: 1px solid #444;
+            padding: 20px;
+            background: #1a1815;
+        }
+        
+        .mini-card {
+            margin-bottom: 15px;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .mini-card:last-child {
+            border-bottom: none;
+        }
+        
+        .mini-name {
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+        
+        .mini-text {
+            font-size: 0.8em;
+            color: #999;
+            line-height: 1.4;
+        }
+        
+        .wheel-container {
+            border: 1px solid #444;
+            padding: 20px;
+            background: #1a1815;
+            text-align: center;
+        }
+        
+        .wheel-title {
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            color: #999;
+        }
+        
+        .wheel {
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 15px;
+        }
+        
+        .wheel-segment {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .wheel-segment:hover {
+            filter: brightness(1.3);
+        }
+        
+        .wheel-segment.active {
+            filter: brightness(1.6);
+            stroke: #f5f3f0;
+            stroke-width: 2;
+        }
+        
+        .wheel-label {
+            font-size: 8px;
+            font-weight: bold;
+            pointer-events: none;
+        }
+        
+        .btn-new {
+            padding: 12px 20px;
+            background: #f5f3f0;
+            color: #0f0d0a;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: bold;
+            letter-spacing: 1px;
+            width: 100%;
+        }
+        
+        .btn-new:hover {
+            background: #fff;
+        }
+        
+        /* STŘED — KARTY + ZÁPIS */
+        .middle {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .cards-main {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            background: #1a1815;
+            border: 1px solid #444;
+            padding: 25px;
+        }
+        
+        .card {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card-img-box {
+            margin-bottom: 15px;
+            background: #0f0d0a;
+            padding: 10px;
+            border: 1px solid #333;
+        }
+        
+        .card-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .card-name {
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1em;
+            margin-bottom: 15px;
+        }
+        
+        .card-wheel {
+            width: 160px;
+            height: 160px;
+            margin: 0 auto 15px;
+        }
+        
+        .card-text {
+            font-size: 0.85em;
+            color: #ccc;
+            text-align: center;
+            min-height: 40px;
+            padding: 10px;
+            background: #0f0d0a;
+            border: 1px solid #333;
+            line-height: 1.5;
+        }
+        
+        .input-box {
+            background: #1a1815;
+            border: 1px solid #444;
+            padding: 25px;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 220px;
+            padding: 15px;
+            background: #0f0d0a;
+            border: 1px solid #333;
+            color: #f5f3f0;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 0.95em;
+            resize: vertical;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #f5f3f0;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px;
+            background: #f5f3f0;
+            color: #0f0d0a;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        
+        button:hover {
+            background: #fff;
+        }
+        
+        .analysis {
+            background: #1a1815;
+            border: 1px solid #444;
+            padding: 25px;
+            margin-top: 25px;
+        }
+        
+        .analysis h3 {
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+        
+        .analysis-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .analysis-card {
+            background: #0f0d0a;
+            padding: 15px;
+            border: 1px solid #333;
+        }
+        
+        .analysis-card-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+        
+        .angle-badges {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .badge {
+            padding: 6px 10px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        /* PRAVÁ — HISTORIA */
+        .sidebar-right {
+            border: 1px solid #444;
+            padding: 20px;
+            background: #1a1815;
+            max-height: 800px;
+            overflow-y: auto;
+        }
+        
+        .history-title {
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            color: #999;
+        }
+        
+        .history-items {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .history-item {
+            background: #0f0d0a;
+            padding: 12px;
+            border: 1px solid #333;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        
+        .history-item:hover {
+            border-color: #f5f3f0;
+        }
+        
+        .hist-date {
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #ccc;
+        }
+        
+        .hist-cards {
+            color: #999;
+            margin-bottom: 6px;
+            font-size: 0.75em;
+        }
+        
+        .hist-strip {
+            display: flex;
+            gap: 3px;
+            margin-bottom: 8px;
+        }
+        
+        .strip-bar {
+            height: 6px;
+            flex: 1;
+            border-radius: 2px;
+        }
+        
+        .hist-delete {
+            width: 100%;
+            padding: 4px;
+            background: #333;
+            color: #f5f3f0;
+            border: none;
+            cursor: pointer;
+            font-size: 0.7em;
+            margin-top: 6px;
+        }
+        
+        .empty-state {
+            color: #666;
+            text-align: center;
+            padding: 30px 10px;
+            font-style: italic;
+        }
+        
+        @media (max-width: 1200px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+            .cards-main {
+                grid-template-columns: 1fr;
+            }
+            .analysis-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Deník mezer</h1>
+            <p>Pij 3 karty • Napiš • Vidíš úhly</p>
+        </div>
+        
+        <div class="nav">
+            <a href="../../index.html">← Domů</a>
+            <a href="galerie_jevu.html">Galerie jevů</a>
+            <a href="kniha.html">Kniha</a>
+        </div>
+        
+        <div class="layout">
+            <!-- LEVÁ -->
+            <div class="sidebar-left">
+                <div class="cards-mini-box" id="preview"></div>
+                
+                <div class="wheel-container">
+                    <div class="wheel-title">Myší klíče</div>
+                    <div class="wheel">
+                        <svg viewBox="0 0 220 220" id="wheelMain"></svg>
+                    </div>
+                    <button class="btn-new" onclick="newCards()">🎲 Nové</button>
+                </div>
+            </div>
+            
+            <!-- STŘED -->
+            <div class="middle">
+                <div class="cards-main" id="cardsMain"></div>
+                
+                <div class="input-box">
+                    <textarea id="text" placeholder="Napiš zápis pro všechny tři karty..."></textarea>
+                    <div class="buttons">
+                        <button onclick="analyze()">🔍 Analyzovat</button>
+                        <button onclick="save()">💾 Uložit</button>
+                    </div>
+                </div>
+                
+                <div id="analysisBox"></div>
+            </div>
+            
+            <!-- PRAVÁ -->
+            <div class="sidebar-right">
+                <div class="history-title">Časová osa</div>
+                <div class="history-items" id="history"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+const ANGLES = {
+    "Analytický": { color: "#4a7bc1", deg: 0, active: false },
+    "Asociační": { color: "#e67e22", deg: 180, active: false },
+    "Kulturní": { color: "#9b59b6", deg: 30, active: true },
+    "Introspektivní": { color: "#e74c3c", deg: 210, active: true },
+    "Filozofický": { color: "#16a085", deg: 60, active: true },
+    "Ironický": { color: "#f39c12", deg: 240, active: true },
+    "Naivní": { color: "#3498db", deg: 90, active: true },
+    "Groteskní": { color: "#c0392b", deg: 270, active: true },
+    "Jazykový": { color: "#2980b9", deg: 120, active: true },
+    "Absurdní": { color: "#8e44ad", deg: 300, active: true },
+    "Metaforický": { color: "#27ae60", deg: 150, active: false },
+    "Surrealistický": { color: "#d35400", deg: 330, active: true }
+};
+
+const FEATURES = {
+    "Analytický": ["Opakování"],
+    "Asociační": ["Přeskok"],
+    "Kulturní": ["Posun kontextu"],
+    "Introspektivní": ["Záměna rolí"],
+    "Filozofický": ["Ticho / Mezera"],
+    "Ironický": ["Emocionální zlom"],
+    "Naivní": ["Cizí těleso"],
+    "Groteskní": ["Rozpad syntaxe"],
+    "Jazykový": ["Prázdná slova"],
+    "Absurdní": ["Ztráta souseda"],
+    "Metaforický": ["Fixace"],
+    "Surrealistický": ["Přetržení"]
+};
+
+const DETECT = {
+    "Opakování": t => /(\b\w+\b)(?:\s+\w+){0,20}?\s+\1\b/i.test(t),
+    "Přeskok": t => /\.\.\.|\-\-/.test(t),
+    "Posun kontextu": t => /(tam|tady|doma)/i.test(t) && /(včera|dnes|zítra)/i.test(t),
+    "Záměna rolí": t => /(já|my)/i.test(t) && /(on|ona|oni)/i.test(t),
+    "Ticho / Mezera": t => /(nevím|nepamatuji|nemůžu|nemohu)/i.test(t),
+    "Emocionální zlom": t => /!|\?/.test(t),
+    "Cizí těleso": t => {
+        const s = t.split(/[.!?]/);
+        return s.some(x => x.split(/\s+/).length < 5) && s.some(x => x.split(/\s+/).length > 10);
+    },
+    "Rozpad syntaxe": t => /(prostě|no tak|ale no)/i.test(t),
+    "Prázdná slova": t => /(vlastně|jakože|víš co|chci říct)/i.test(t),
+    "Ztráta souseda": t => {
+        const s = t.split(/[.!?]/).filter(x => x.trim());
+        return s.length > 1 && s[0].match(/\w+/) && s[1].match(/\w+/);
+    },
+    "Fixace": t => {
+        const w = t.toLowerCase().split(/\s+/);
+        const c = {};
+        w.forEach(x => c[x] = (c[x] || 0) + 1);
+        return Object.values(c).some(v => v >= 4);
+    },
+    "Přetržení": t => /"|„|"|\s{2,}|[A-Z]{4,}/.test(t)
+};
+
+let CARDS = [], cards = [], hist = [], lastAnalysis = null;
+
+async function init() {
+    try {
+        const r = await fetch('../../doma/data/karty.json');
+        CARDS = Object.values(await r.json());
+    } catch (e) {
+        console.error("Chyba načítání karet:", e);
+        CARDS = [];
+    }
+    newCards();
+    loadHist();
+}
+
+function newCards() {
+    cards = CARDS.sort(() => 0.5 - Math.random()).slice(0, 3);
+    draw();
+    document.getElementById('analysisBox').innerHTML = '';
+    document.getElementById('text').value = '';
+    lastAnalysis = null;
+}
+
+function draw() {
+    // PREVIEW
+    document.getElementById('preview').innerHTML = cards.map(c => `
+        <div class="mini-card">
+            <div class="mini-name">${c.id}</div>
+            <div class="mini-text">"${c.uhly.kulturní || '—'}"</div>
+        </div>
+    `).join('');
+    
+    // HLAVNÍ KARTY
+    document.getElementById('cardsMain').innerHTML = cards.map((c, i) => `
+        <div class="card">
+            <div class="card-img-box">
+                <img src="../../${c.ilustrace}" alt="${c.id}" class="card-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23333%22 width=%22100%22 height=%22100%22/%3E%3Ctext fill=%22%23999%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22%3E${c.id}%3C/text%3E%3C/svg%3E'">
+            </div>
+            <div class="card-name">${c.id}</div>
+            <div class="card-wheel">
+                <svg viewBox="0 0 160 160" id="wheel-${i}"></svg>
+            </div>
+            <div class="card-text" id="text-${i}">—</div>
+        </div>
+    `).join('');
+    
+    drawMainWheel();
+    cards.forEach((c, i) => drawCardWheel(c, i));
+    updateCardTexts();
+}
+
+function drawMainWheel() {
+    const svg = document.getElementById('wheelMain');
+    svg.innerHTML = '';
+    Object.entries(ANGLES).forEach(([name, data]) => {
+        const start = data.deg - 15;
+        const end = data.deg + 15;
+        const path = createArc(110, 110, 50, 105, start, end);
+        const seg = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        seg.setAttribute('d', path);
+        seg.setAttribute('fill', data.color);
+        seg.setAttribute('fill-opacity', data.active ? '1' : '0.2');
+        seg.setAttribute('stroke', '#444');
+        seg.setAttribute('stroke-width', '0.5');
+        seg.setAttribute('class', 'wheel-segment');
+        svg.appendChild(seg);
+        
+        const rad = (data.deg * Math.PI) / 180;
+        const x = 110 + 75 * Math.cos(rad);
+        const y = 110 + 75 * Math.sin(rad);
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', x);
+        text.setAttribute('y', y);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('dominant-baseline', 'middle');
+        text.setAttribute('class', 'wheel-label');
+        text.setAttribute('fill', data.active ? '#f5f3f0' : '#666');
+        text.setAttribute('font-size', '8');
+        text.textContent = name.substring(0, 3);
+        svg.appendChild(text);
+    });
+}
+
+function drawCardWheel(card, idx) {
+    const svg = document.getElementById(`wheel-${idx}`);
+    svg.innerHTML = '';
+    Object.entries(ANGLES).forEach(([name, data]) => {
+        const start = data.deg - 15;
+        const end = data.deg + 15;
+        const path = createArc(80, 80, 30, 70, start, end);
+        const seg = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        seg.setAttribute('d', path);
+        seg.setAttribute('fill', data.color);
+        seg.setAttribute('fill-opacity', data.active ? '1' : '0.2');
+        seg.setAttribute('stroke', '#333');
+        seg.setAttribute('stroke-width', '0.3');
+        seg.setAttribute('class', 'wheel-segment');
+        seg.onclick = () => updateCardText(card, name, idx);
+        svg.appendChild(seg);
+    });
+}
+
+function createArc(cx, cy, r1, r2, start, end) {
+    const s1 = polar(cx, cy, r1, end);
+    const e1 = polar(cx, cy, r1, start);
+    const s2 = polar(cx, cy, r2, end);
+    const e2 = polar(cx, cy, r2, start);
+    return `M ${s1.x} ${s1.y} A ${r1} ${r1} 0 0 0 ${e1.x} ${e1.y} L ${e2.x} ${e2.y} A ${r2} ${r2} 0 0 1 ${s2.x} ${s2.y} Z`;
+}
+
+function polar(cx, cy, r, angle) {
+    const rad = (angle * Math.PI) / 180;
+    return {
+        x: cx + r * Math.cos(rad),
+        y: cy + r * Math.sin(rad)
+    };
+}
+
+function updateCardText(card, angle, idx) {
+    const text = card.uhly[angle.toLowerCase()] || '—';
+    document.getElementById(`text-${idx}`).textContent = text;
+    document.getElementById(`wheel-${idx}`).querySelectorAll('.wheel-segment').forEach(seg => {
+        seg.classList.remove('active');
+    });
+}
+
+function updateCardTexts() {
+    cards.forEach((c, i) => {
+        document.getElementById(`text-${i}`).textContent = c.uhly.kulturní || '—';
+    });
+}
+
+function analyze() {
+    const text = document.getElementById('text').value;
+    if (!text.trim()) { alert('Napiš něco'); return; }
+    
+    lastAnalysis = cards.map(card => {
+        const angles = [];
+        Object.entries(FEATURES).forEach(([angle, features]) => {
+            if (ANGLES[angle].active) {
+                features.forEach(feature => {
+                    try {
+                        if (DETECT[feature] && DETECT[feature](text)) {
+                            if (!angles.includes(angle)) angles.push(angle);
+                        }
+                    } catch (e) {}
+                });
+            }
+        });
+        return angles.slice(0, 3);
+    });
+    
+    const html = `<div class="analysis">
+        <h3>Analýza — detekované úhly</h3>
+        <div class="analysis-cards">
+            ${lastAnalysis.map((angles, i) => `
+                <div class="analysis-card">
+                    <div class="analysis-card-title">Karta ${i + 1}: ${cards[i].id}</div>
+                    <div class="angle-badges">
+                        ${angles.length ? angles.map(a => `<div class="badge" style="background-color: ${ANGLES[a].color}80; color: #f5f3f0">${a}</div>`).join('') : '<span style="color: #666;">—</span>'}
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    </div>`;
+    
+    document.getElementById('analysisBox').innerHTML = html;
+}
+
+function save() {
+    const text = document.getElementById('text').value;
+    if (!text.trim()) { alert('Napiš něco'); return; }
+    
+    const entry = {
+        id: Date.now(),
+        ts: new Date().toLocaleString('cs-CZ'),
+        cards: cards.map(c => c.id),
+        angles: lastAnalysis || [[], [], []],
+        text: text
+    };
+    
+    hist.unshift(entry);
+    localStorage.setItem('diaryEntries', JSON.stringify(hist));
+    loadHist();
+    
+    document.getElementById('text').value = '';
+    document.getElementById('analysisBox').innerHTML = '';
+    lastAnalysis = null;
+    alert('✓ Uloženo');
+    newCards();
+}
+
+function loadHist() {
+    const saved = localStorage.getItem('diaryEntries');
+    hist = saved ? JSON.parse(saved) : [];
+    
+    const box = document.getElementById('history');
+    if (!hist.length) {
+        box.innerHTML = '<div class="empty-state">Zatím nic</div>';
+        return;
+    }
+    
+    box.innerHTML = hist.map(e => {
+        const allAngles = [...new Set(e.angles.flat())];
+        return `<div class="history-item">
+            <div class="hist-date">${e.ts}</div>
+            <div class="hist-cards">${e.cards.join(' • ')}</div>
+            <div class="hist-strip">
+                ${allAngles.length ? allAngles.map(a => `<div class="strip-bar" style="background: ${ANGLES[a].color}"></div>`).join('') : '<span style="color: #666;">—</span>'}
+            </div>
+            <button class="hist-delete" onclick="deleteHist(${e.id})">✕ Smazat</button>
+        </div>`;
+    }).join('');
+}
+
+function deleteHist(id) {
+    if (confirm('Smazat zápis?')) {
+        hist = hist.filter(e => e.id !== id);
+        localStorage.setItem('diaryEntries', JSON.stringify(hist));
+        loadHist();
+    }
+}
+
+init();
+    </script>
+</body>
+</html>
+Hotovo. Zkopíruj jako doma/nastroje/zapisnik.html.
