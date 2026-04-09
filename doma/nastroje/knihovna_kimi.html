@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chceš myš? — Knihovna</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Space+Mono&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@300;400;500;600&family=EB+Garamond:ital@0;1&family=Syne:wght@400;700;800&family=Spectral:ital@0;1&family=Sora:wght@300;400;600&family=Literata:ital@0;1&family=STIX+Two+Text:ital@0;1&family=Baskervville:ital@0;1&family=Unna:ital,wght@0,400;0,700;1,400&family=Archivo:wght@400;600&family=Manrope:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0a0a0a;
+            --bg-panel: #111;
+            --bg-card: #181818;
+            --bg-hover: #222;
+            --text: #e6e6e6;
+            --text-muted: #888;
+            --border: #2a2a2a;
+            --accent: #c9a227;
+            
+            --a7-width: 74mm;
+            --a7-height: 105mm;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 100;
+        }
+
+        .logo { color: var(--text); text-decoration: none; font-weight: 500; }
+
+        main { padding-top: 60px; }
+
+        /* Sekce */
+        .section {
+            padding: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        /* A7 náhledy - všech 12 */
+        .a7-showcase {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+            padding-right: 2rem;
+        }
+
+        .a7-book {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+            transition: opacity 0.3s;
+        }
+
+        .a7-book.selected {
+            opacity: 1;
+        }
+
+        .a7-book:not(.selected) {
+            opacity: 0.7;
+        }
+
+        .a7-book:hover {
+            opacity: 1;
+        }
+
+        .a7-stack {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            width: var(--a7-width);
+            height: var(--a7-height);
+        }
+
+        .a7-page {
+            width: var(--a7-width);
+            height: var(--a7-height);
+            background: white;
+            color: black;
+            position: absolute;
+            top: 0;
+            left: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .a7-page:hover {
+            transform: translateY(-4px);
+        }
+
+        .a7-page:nth-child(2) {
+            top: 3px;
+            left: 3px;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .a7-page:nth-child(3) {
+            top: 6px;
+            left: 6px;
+            z-index: -2;
+            opacity: 0.3;
+        }
+
+        /* Akce vedle knihy */
+        .a7-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .a7-book:hover .a7-actions {
+            opacity: 1;
+        }
+
+        .a7-btn {
+            padding: 0.4rem 0.8rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .a7-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg);
+        }
+
+        .a7-btn.danger:hover {
+            background: #c44;
+            border-color: #c44;
+            color: white;
+        }
+
+        /* Vytvořené knihy - police */
+        .books-shelf {
+            display: flex;
+            gap: 0.8rem;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+
+        .book-spine {
+            width: 36px;
+            height: 160px;
+            background: linear-gradient(90deg, var(--bg-card), var(--bg-hover));
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .book-spine:hover {
+            transform: translateY(-5px);
+            background: var(--bg-hover);
+        }
+
+        .book-spine.active {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .spine-title {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            transform: rotate(180deg);
+            max-height: 130px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Čtečka */
+        .reader {
+            display: none;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg);
+            z-index: 90;
+            overflow-y: auto;
+        }
+
+        .reader.active {
+            display: block;
+        }
+
+        .reader-toolbar {
+            position: sticky;
+            top: 0;
+            background: var(--bg);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reader-nav {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .reader-page {
+            max-width: 210mm;
+            margin: 2rem auto;
+            background: white;
+            color: black;
+            min-height: 297mm;
+            padding: 20mm;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        /* 12 stylů A7 */
+        .style-roman { font-family: 'Source Serif 4', serif; font-size: 8pt; line-height: 1.5; padding: 8mm; }
+        .style-roman .book-title { font-family: 'Playfair Display', serif; font-size: 12pt; text-align: center; margin-bottom: 5mm; border-bottom: 1px solid #ccc; padding-bottom: 3mm; }
+        .style-roman .entry-title { font-size: 10pt; font-weight: 600; margin: 4mm 0 2mm; }
+        .style-roman .entry-text { text-indent: 3mm; }
+
+        .style-ctverec { font-family: 'Sora', sans-serif; font-size: 7pt; line-height: 1.4; padding: 6mm; border: 2px solid #000; height: 100%; }
+        .style-ctverec .book-title { font-size: 10pt; font-weight: 600; text-align: center; margin-bottom: 4mm; text-transform: uppercase; }
+        .style-ctverec .entry-text { column-count: 2; column-gap: 3mm; }
+
+        .style-basne { font-family: 'EB Garamond', serif; font-size: 9pt; line-height: 1.8; padding: 10mm 8mm; text-align: center; }
+        .style-basne .book-title { font-size: 11pt; font-style: italic; margin-bottom: 6mm; }
+        .style-basne .entry-text { margin-top: 4mm; }
+
+        .style-esej { font-family: 'Literata', serif; font-size: 8pt; line-height: 1.6; padding: 8mm; }
+        .style-esej .book-title { font-size: 11pt; font-weight: 600; text-align: center; margin-bottom: 3mm; }
+        .style-esej .entry-title { font-size: 9pt; font-weight: 600; margin: 3mm 0 1mm; }
+        .style-esej .entry-text { text-indent: 3mm; }
+
+        .style-denik { font-family: 'Crimson Text', serif; font-size: 8pt; line-height: 1.6; padding: 6mm; }
+        .style-denik .book-title { font-size: 9pt; text-align: right; border-bottom: 1px solid #000; margin-bottom: 4mm; padding-bottom: 2mm; text-transform: uppercase; }
+        .style-denik .entry { display: flex; gap: 3mm; margin-bottom: 3mm; }
+        .style-denik .entry-day { font-size: 14pt; font-weight: 600; line-height: 1; }
+        .style-denik .entry-text { flex: 1; }
+
+        .style-fragmenty { font-family: 'Inter', sans-serif; font-size: 6.5pt; line-height: 1.4; padding: 5mm; position: relative; }
+        .style-fragmenty .book-title { position: absolute; top: 3mm; left: 3mm; font-size: 6pt; text-transform: uppercase; }
+        .style-fragmenty .frag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2mm; margin-top: 6mm; }
+        .style-fragmenty .frag-item { border: 1px solid #ddd; padding: 2mm; }
+        .style-fragmenty .frag-num { font-size: 14pt; color: #eee; font-weight: 600; }
+
+        .style-siroky { font-family: 'Syne', sans-serif; font-size: 7pt; line-height: 1.3; padding: 6mm; width: 100%; height: 100%; }
+        .style-siroky .book-title { font-size: 11pt; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid #000; margin-bottom: 4mm; padding-bottom: 2mm; }
+        .style-siroky .entry-title { font-weight: 600; margin-bottom: 1mm; }
+        .style-siroky .entry-text { column-count: 2; column-gap: 3mm; }
+
+        .style-kapitoly { font-family: 'Baskervville', serif; font-size: 8pt; line-height: 1.5; padding: 8mm; text-align: center; }
+        .style-kapitoly .book-title { font-size: 10pt; margin-bottom: 4mm; }
+        .style-kapitoly .chapter-num { font-size: 24pt; color: #eee; font-weight: 600; }
+        .style-kapitoly .entry-title { font-style: italic; margin-top: -3mm; }
+
+        .style-dopisy { font-family: 'Unna', serif; font-size: 8pt; line-height: 1.5; padding: 6mm; }
+        .style-dopisy .book-title { font-size: 9pt; text-align: center; letter-spacing: 2px; margin-bottom: 4mm; text-transform: uppercase; }
+        .style-dopisy .letter-head { border-bottom: 1px solid #ccc; margin-bottom: 3mm; padding-bottom: 1mm; font-size: 6pt; color: #666; text-align: right; }
+        .style-dopisy .entry-title { font-weight: 600; margin-bottom: 2mm; }
+
+        .style-vyzkum { font-family: 'STIX Two Text', serif; font-size: 7pt; line-height: 1.4; padding: 5mm; }
+        .style-vyzkum .book-title { font-size: 9pt; font-weight: 600; text-align: center; border-bottom: 1px solid #000; margin-bottom: 3mm; padding-bottom: 2mm; }
+        .style-vyzkum .abstract { background: #f5f5f5; padding: 2mm; margin-bottom: 3mm; font-size: 6pt; }
+        .style-vyzkum .entry-num { font-weight: 600; color: #666; }
+
+        .style-notebook { font-family: 'Manrope', sans-serif; font-size: 7.5pt; line-height: 1.6; padding: 5mm; background: #fffef8; height: 100%; background-image: repeating-linear-gradient(transparent, transparent 11px, #e8e4dc 11px, #e8e4dc 12px); }
+        .style-notebook .book-title { font-weight: 600; margin-bottom: 3mm; margin-left: 4mm; }
+        .style-notebook .entry { margin-left: 4mm; position: relative; }
+        .style-notebook .entry::before { content: '—'; position: absolute; left: -4mm; color: #999; }
+
+        .style-kronika { font-family: 'Archivo', sans-serif; font-size: 7pt; line-height: 1.4; padding: 6mm; }
+        .style-kronika .book-title { font-size: 10pt; font-weight: 600; text-align: center; letter-spacing: 2px; margin-bottom: 4mm; text-transform: uppercase; }
+        .style-kronika .timeline { position: relative; padding-left: 8mm; }
+        .style-kronika .timeline::before { content: ''; position: absolute; left: 2mm; top: 0; bottom: 0; width: 1px; background: #000; }
+        .style-kronika .entry { position: relative; margin-bottom: 3mm; }
+        .style-kronika .entry::before { content: ''; position: absolute; left: -7mm; top: 1mm; width: 4px; height: 4px; background: #000; border-radius: 50%; }
+        .style-kronika .entry-year { font-weight: 600; font-size: 9pt; }
+
+        /* Velká čtečka */
+        .style-roman-big { font-family: 'Source Serif 4', serif; font-size: 11pt; line-height: 1.7; }
+        .style-roman-big .book-title { font-family: 'Playfair Display', serif; font-size: 24pt; text-align: center; margin-bottom: 15mm; border-bottom: 1px solid #ccc; padding-bottom: 10mm; }
+        .style-roman-big .entry-title { font-size: 14pt; font-weight: 600; margin-bottom: 5mm; }
+        .style-roman-big .entry-text { text-align: justify; text-indent: 1.5em; }
+
+        .style-ctverec-big { font-family: 'Sora', sans-serif; font-size: 10pt; line-height: 1.6; padding: 15mm; border: 2px solid #000; min-height: 267mm; }
+        .style-ctverec-big .book-title { font-size: 16pt; font-weight: 600; text-align: center; margin-bottom: 10mm; text-transform: uppercase; }
+        .style-ctverec-big .entry-text { column-count: 2; column-gap: 5mm; }
+
+        .style-basne-big { font-family: 'EB Garamond', serif; font-size: 12pt; line-height: 2.2; text-align: center; }
+        .style-basne-big .book-title { font-size: 20pt; font-style: italic; margin-bottom: 20mm; }
+        .style-basne-big .entry-title { font-size: 14pt; margin-bottom: 8mm; }
+
+        .style-esej-big { font-family: 'Literata', serif; font-size: 11pt; line-height: 1.8; }
+        .style-esej-big .book-title { font-size: 18pt; font-weight: 600; text-align: center; margin-bottom: 10mm; }
+        .style-esej-big .entry-subtitle { font-size: 12pt; color: #666; font-style: italic; margin-bottom: 5mm; }
+        .style-esej-big .entry-text { text-align: justify; text-indent: 1.5em; }
+
+        .style-denik-big { font-family: 'Crimson Text', serif; font-size: 11pt; line-height: 1.9; }
+        .style-denik-big .book-title { font-size: 14pt; text-align: right; border-bottom: 1px solid #000; margin-bottom: 15mm; padding-bottom: 5mm; text-transform: uppercase; }
+        .style-denik-big .entry { display: flex; gap: 5mm; margin-bottom: 10mm; }
+        .style-denik-big .entry-day { font-size: 18pt; font-weight: 600; }
+        .style-denik-big .entry-title { font-size: 12pt; font-weight: 600; font-style: italic; margin-bottom: 3mm; }
+
+        .style-fragmenty-big { font-family: 'Inter', sans-serif; font-size: 10pt; line-height: 1.6; }
+        .style-fragmenty-big .fragments-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; }
+        .style-fragmenty-big .frag-item { border: 1px solid #ddd; padding: 5mm; }
+        .style-fragmenty-big .frag-num { font-size: 24pt; color: #eee; font-weight: 600; margin-bottom: 2mm; }
+
+        .style-siroky-big { font-family: 'Syne', sans-serif; font-size: 14pt; line-height: 1.4; }
+        .style-siroky-big .book-title { font-size: 32pt; font-weight: 800; text-transform: uppercase; border-bottom: 3px solid #000; margin-bottom: 10mm; padding-bottom: 5mm; }
+        .style-siroky-big .entry { display: grid; grid-template-columns: 60mm 1fr; gap: 10mm; }
+        .style-siroky-big .entry-text { column-count: 2; column-gap: 8mm; }
+
+        .style-kapitoly-big { font-family: 'Baskervville', serif; font-size: 11pt; line-height: 1.8; }
+        .style-kapitoly-big .toc { margin-bottom: 20mm; page-break-after: always; }
+        .style-kapitoly-big .toc-title { font-size: 18pt; margin-bottom: 10mm; text-align: center; }
+        .style-kapitoly-big .toc-item { display: flex; justify-content: space-between; margin-bottom: 3mm; }
+        .style-kapitoly-big .chapter-header { text-align: center; margin-bottom: 15mm; }
+        .style-kapitoly-big .chapter-num { font-size: 48pt; color: #eee; font-weight: 600; }
+        .style-kapitoly-big .entry-title { font-size: 20pt; font-style: italic; margin-top: -10mm; }
+
+        .style-dopisy-big { font-family: 'Unna', serif; font-size: 11pt; line-height: 1.7; }
+        .style-dopisy-big .book-title { font-size: 16pt; text-align: center; letter-spacing: 3px; margin-bottom: 15mm; text-transform: uppercase; }
+        .style-dopisy-big .letter-header { border-bottom: 1px solid #ccc; margin-bottom: 8mm; padding-bottom: 3mm; }
+        .style-dopisy-big .letter-date { text-align: right; font-size: 10pt; color: #666; }
+        .style-dopisy-big .letter-signature { text-align: right; margin-top: 15mm; font-style: italic; }
+
+        .style-vyzkum-big { font-family: 'STIX Two Text', serif; font-size: 10pt; line-height: 1.6; }
+        .style-vyzkum-big .book-title { font-size: 16pt; font-weight: 600; text-align: center; border-bottom: 2px solid #000; margin-bottom: 10mm; padding-bottom: 8mm; }
+        .style-vyzkum-big .abstract { background: #f5f5f5; padding: 5mm; margin-bottom: 10mm; }
+        .style-vyzkum-big .entry-header { display: flex; gap: 5mm; margin-bottom: 3mm; }
+        .style-vyzkum-big .entry-num { font-weight: 600; }
+
+        .style-notebook-big { font-family: 'Manrope', sans-serif; font-size: 11pt; line-height: 1.8; background: #fffef8; background-image: repeating-linear-gradient(transparent, transparent 17px, #e8e4dc 17px, #e8e4dc 18px); }
+        .style-notebook-big .book-title { font-weight: 600; margin-bottom: 10mm; margin-left: 15mm; }
+        .style-notebook-big .entry { margin-left: 15mm; position: relative; }
+        .style-notebook-big .margin-note { position: absolute; left: -35mm; width: 30mm; font-size: 9pt; color: #999; text-align: right; }
+
+        .style-kronika-big { font-family: 'Archivo', sans-serif; font-size: 10pt; line-height: 1.5; }
+        .style-kronika-big .book-title { font-size: 20pt; font-weight: 600; text-align: center; letter-spacing: 2px; margin-bottom: 15mm; text-transform: uppercase; }
+        .style-kronika-big .timeline { position: relative; padding-left: 30mm; }
+        .style-kronika-big .timeline::before { content: ''; position: absolute; left: 15mm; top: 0; bottom: 0; width: 2px; background: #000; }
+        .style-kronika-big .entry { position: relative; margin-bottom: 10mm; }
+        .style-kronika-big .entry::before { content: ''; position: absolute; left: -17.5mm; top: 1mm; width: 8px; height: 8px; background: #000; border-radius: 50%; }
+        .style-kronika-big .entry-year { position: absolute; left: -30mm; font-size: 14pt; font-weight: 600; }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; }
+        .modal-overlay.active { display: block; }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-card); border: 1px solid var(--border); padding: 1.5rem; min-width: 300px; z-index: 201; }
+        .modal.active { display: block; }
+        .modal h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 1rem; }
+        .modal-input { width: 100%; padding: 0.8rem; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: inherit; margin-bottom: 1rem; }
+        .modal-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
+        .modal-btn { padding: 0.6rem 1.2rem; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: inherit; font-size: 0.75rem; cursor: pointer; }
+        .modal-btn.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+
+        /* Kontextové menu */
+        .context-menu { display: none; position: fixed; background: var(--bg-card); border: 1px solid var(--border); padding: 0.5rem 0; min-width: 150px; z-index: 300; }
+        .context-menu.active { display: block; }
+        .context-item { padding: 0.6rem 1rem; font-size: 0.8rem; cursor: pointer; transition: background 0.2s; }
+        .context-item:hover { background: var(--bg-hover); }
+
+        @media (max-width: 768px) {
+            .a7-showcase { gap: 1rem; }
+            .a7-actions { opacity: 1; }
+            .book-spine { height: 120px; }
+        }
+
+        @media print {
+            header, .section, .modal, .modal-overlay, .context-menu { display: none !important; }
+            .reader { display: block !important; position: static; overflow: visible; }
+            .reader-toolbar { display: none; }
+            .reader-page { box-shadow: none; margin: 0; max-width: none; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="../../index.html" class="logo">Chceš myš?</a>
+        <a href="zapisnik.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;">Zápisník</a>
+    </header>
+
+    <main>
+        <!-- Šablony - 12 A7 náhledů -->
+        <section class="section">
+            <div class="section-title">Vyber formát knihy (12 šablon)</div>
+            <div class="a7-showcase" id="templatesShowcase"></div>
+        </section>
+
+        <!-- Vytvořené knihy -->
+        <section class="section">
+            <div class="section-title">Tvé knihy — klikni pro listování, pravé tlačítko pro akce</div>
+            <div class="books-shelf" id="booksShelf"></div>
+        </section>
+    </main>
+
+    <!-- Čtečka -->
+    <div class="reader" id="reader">
+        <div class="reader-toolbar">
+            <div id="readerTitle">Kniha</div>
+            <div class="reader-nav">
+                <button class="a7-btn" onclick="prevPage()">← Předchozí</button>
+                <span id="pageNum" style="font-size: 0.75rem; color: var(--text-muted);">1 / 1</span>
+                <button class="a7-btn" onclick="nextPage()">Další →</button>
+                <button class="a7-btn" onclick="closeReader()">Zavřít</button>
+            </div>
+        </div>
+        <div class="reader-page style-roman-big" id="readerPage"></div>
+    </div>
+
+    <!-- Modaly -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+    
+    <div class="modal" id="createModal">
+        <h3>Vytvořit knihu</h3>
+        <input type="text" class="modal-input" id="newBookTitle" placeholder="Název knihy">
+        <div class="modal-actions">
+            <button class="modal-btn" onclick="closeModal()">Zrušit</button>
+            <button class="modal-btn primary" onclick="confirmCreate()">Vytvořit</button>
+        </div>
+    </div>
+
+    <div class="modal" id="renameModal">
+        <h3>Přejmenovat knihu</h3>
+        <input type="text" class="modal-input" id="renameInput">
+        <div class="modal-actions">
+            <button class="modal-btn" onclick="closeModal()">Zrušit</button>
+            <button class="modal-btn primary" onclick="confirmRename()">Uložit</button>
+        </div>
+    </div>
+
+    <!-- Kontextové menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="context-item" onclick="contextAction('open')">Otevřít</div>
+        <div class="context-item" onclick="contextAction('rename')">Přejmenovat</div>
+        <div class="context-item" onclick="contextAction('share')">Sdílet</div>
+        <div class="context-item" onclick="contextAction('delete')">Smazat</div>
+    </div>
+
+    <script>
+        const styles = [
+            { id: 'roman', name: 'Román' },
+            { id: 'ctverec', name: 'Čtverec' },
+            { id: 'basne', name: 'Básně' },
+            { id: 'esej', name: 'Esej' },
+            { id: 'denik', name: 'Deník' },
+            { id: 'fragmenty', name: 'Fragmenty' },
+            { id: 'siroky', name: 'Široký' },
+            { id: 'kapitoly', name: 'Kapitoly' },
+            { id: 'dopisy', name: 'Dopisy' },
+            { id: 'vyzkum', name: 'Výzkum' },
+            { id: 'notebook', name: 'Notebook' },
+            { id: 'kronika', name: 'Kronika' }
+        ];
+
+        let books = [];
+        let currentBook = null;
+        let currentPage = 0;
+        let selectedTemplate = null;
+        let contextBook = null;
+
+        function init() {
+            renderTemplates();
+            loadBooks();
+            loadFromURL();
+        }
+
+        function renderTemplates() {
+            const container = document.getElementById('templatesShowcase');
+            container.innerHTML = styles.map(s => `
+                <div class="a7-book" data-style="${s.id}">
+                    <div class="a7-stack">
+                        <div class="a7-page style-${s.id}">
+                            ${getPreviewContent(s.id)}
+                        </div>
+                        <div class="a7-page style-${s.id}"></div>
+                        <div class="a7-page style-${s.id}"></div>
+                    </div>
+                    <div class="a7-actions">
+                        <button class="a7-btn" onclick="showCreate('${s.id}')">Vytvořit</button>
+                        <button class="a7-btn" onclick="previewTemplate('${s.id}')">Náhled</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getPreviewContent(style) {
+            const previews = {
+                roman: '<div class="book-title">ROMÁN</div><div class="entry-title">Kapitola první</div><div class="entry-text">Začátek příběhu o myši, která visela za ocas...</div>',
+                ctverec: '<div class="book-title">ČTVEREC</div><div class="entry-text">Kompaktní text ve čtvercovém formátu. Dva sloupce, rámeček, minimalistický design.</div>',
+                basne: '<div class="book-title">Básně</div><div class="entry-text">Visí myš<br>za ocas<br>a svět se<br>otáčí</div>',
+                esej: '<div class="book-title">ESEJ</div><div class="entry-title">O perspektivě myši</div><div class="entry-text">Úvaha o tom, jak viset hlavou dolů a přitom vidět víc.</div>',
+                denik: '<div class="book-title">DENÍK</div><div class="entry"><div class="entry-day">12</div><div class="entry-text">Dnešní zápis o setkání s myší...</div></div>',
+                fragmenty: '<div class="book-title">FRAGMENTY</div><div class="frag-grid"><div class="frag-item"><div class="frag-num">1</div>Krátký útržek...</div><div class="frag-item"><div class="frag-num">2</div>Další myšlenka...</div></div>',
+                siroky: '<div class="book-title">ŠIROKÝ</div><div class="entry-title">Nadpis na šířku</div><div class="entry-text">Text ve dvou sloupcích na širokém formátu.</div>',
+                kapitoly: '<div class="book-title">Kapitoly</div><div class="chapter-num">I</div><div class="entry-title">První kapitola</div>',
+                dopisy: '<div class="book-title">DOPISY</div><div class="letter-head">12. 4. 2024</div><div class="entry-title">Milý čtenáři</div><div class="entry-text">Píšu ti o myši...</div>',
+                vyzkum: '<div class="book-title">VÝZKUM</div><div class="abstract"><b>Abstrakt:</b> Studie myší perspektivy.</div><div class="entry-num">1. Úvod</div><div class="entry-text">Metodologie pozorování...</div>',
+                notebook: '<div class="book-title">Notebook</div><div class="entry">Zápis v linkovaném sešitu s marginálií...</div>',
+                kronika: '<div class="book-title">KRONIKA</div><div class="timeline"><div class="entry"><div class="entry-year">2024</div>Událost roku...</div></div>'
+            };
+            return previews[style] || '<div class="book-title">' + style.toUpperCase() + '</div>';
+        }
+
+        function selectTemplate(id) {
+            selectedTemplate = id;
+            document.querySelectorAll('.a7-book').forEach(el => {
+                el.classList.toggle('selected', el.dataset.style === id);
+            });
+        }
+
+        function showCreate(style) {
+            selectedTemplate = style;
+            document.getElementById('newBookTitle').value = '';
+            document.getElementById('modalOverlay').classList.add('active');
+            document.getElementById('createModal').classList.add('active');
+        }
+
+        function confirmCreate() {
+            const title = document.getElementById('newBookTitle').value.trim();
+            if (!title) return;
+            
+            const book = {
+                id: Date.now().toString(),
+                title: title,
+                style: selectedTemplate,
+                entries: [],
+                created: new Date().toISOString()
+            };
+            
+            books.push(book);
+            saveBooks();
+            closeModal();
+            renderShelf();
+            openBook(book);
+        }
+
+        function previewTemplate(style) {
+            const previewBook = {
+                title: 'Náhled: ' + styles.find(s => s.id === style).name,
+                style: style,
+                entries: [{
+                    title: 'Ukázkový zápis',
+                    text: 'Dnes jsem viděla myš. Visela za ocas a dívala se na svět z jiného úhlu. Všechno vypadalo jinak, když člověk visel hlavou dolů.\n\nMyš neposuzovala, jen ukazovala. A já jsem pochopila, že i já mohu viset za ocas — metaforicky řečeno.\n\nTři karty ležely na stole. Krokodýl, Myš, Pavouk. Každý svým úhlem.',
+                    timestamp: new Date().toISOString(),
+                    angles: [0, 120, 240],
+                    cards: ['myš', 'krokodýl', 'pavouk']
+                }]
+            };
+            openBook(previewBook, true);
+        }
+
+        function loadBooks() {
+            const saved = localStorage.getItem('mys-books');
+            if (saved) books = JSON.parse(saved);
+            renderShelf();
+        }
+
+        function saveBooks() {
+            localStorage.setItem('mys-books', JSON.stringify(books));
+        }
+
+        function renderShelf() {
+            const shelf = document.getElementById('booksShelf');
+            if (books.length === 0) {
+                shelf.innerHTML = '<div style="color: var(--text-muted); font-size: 0.75rem; padding: 2rem;">Zatím žádné knihy. Vyber šablonu výše a vytvoř první.</div>';
+                return;
+            }
+            
+            shelf.innerHTML = books.map(b => `
+                <div class="book-spine ${currentBook?.id === b.id ? 'active' : ''}" 
+                     data-id="${b.id}"
+                     onclick="openBookById('${b.id}')"
+                     oncontextmenu="showContextMenu(event, '${b.id}')">
+                    <span class="spine-title">${b.title}</span>
+                </div>
+            `).join('');
+        }
+
+        function openBookById(id) {
+            const book = books.find(b => b.id === id);
+            if (book) openBook(book);
+        }
+
+        function openBook(book, isPreview = false) {
+            currentBook = book;
+            currentPage = 0;
+            renderShelf();
+            renderReader();
+            document.getElementById('reader').classList.add('active');
+        }
+
+        function renderReader() {
+            if (!currentBook) return;
+            
+            document.getElementById('readerTitle').textContent = currentBook.title;
+            const total = Math.max(1, currentBook.entries?.length || 1);
+            document.getElementById('pageNum').textContent = `${currentPage + 1} / ${total}`;
+            
+            const page = document.getElementById('readerPage');
+            page.className = 'reader-page style-' + (currentBook.style || 'roman') + '-big';
+            
+            if (!currentBook.entries || currentBook.entries.length === 0) {
+                page.innerHTML = '<div style="text-align: center; padding: 4rem; color: #666;">Prázdná stránka — přidej zápisy v zápisníku</div>';
+                return;
+            }
+            
+            const entry = currentBook.entries[currentPage];
+            page.innerHTML = formatEntryFull(entry, currentBook.style);
+        }
+
+        function formatEntryFull(entry, style) {
+            const d = new Date(entry.timestamp);
+            const date = d.toLocaleDateString('cs', { day: 'numeric', month: 'long', year: 'numeric' });
+            
+            const formats = {
+                roman: `<div class="book-title">${currentBook.title}</div><div class="entry-title">${entry.title || 'Kapitola ' + (currentPage + 1)}</div><div class="entry-text">${escape(entry.text)}</div>`,
+                ctverec: `<div class="book-title">${currentBook.title}</div><div class="entry-text">${escape(entry.text)}</div>`,
+                basne: `<div class="book-title">${currentBook.title}</div><div class="entry-title">${entry.title || 'Báseň'}</div><div class="entry-text">${escape(entry.text).replace(/\n/g, '<br>')}</div>`,
+                esej: `<div class="book-title">${currentBook.title}</div><div class="entry-title">${entry.title || 'Esej'}</div>${entry.notes ? `<div class="entry-subtitle">${escape(entry.notes)}</div>` : ''}<div class="entry-text">${escape(entry.text)}</div>`,
+                denik: `<div class="book-title">${currentBook.title}</div><div class="entry"><div class="entry-day">${d.getDate()}<br><small>${d.toLocaleDateString('cs', {month:'short'})}</small></div><div><div class="entry-title">${entry.title || 'Zápis'}</div><div class="entry-text">${escape(entry.text)}</div></div></div>`,
+                fragmenty: `<div class="fragments-grid"><div class="frag-item"><div class="frag-num">${currentPage + 1}</div><div>${escape(entry.text)}</div><div style="margin-top: 2mm; font-size: 8pt; color: #999;">${date}</div></div></div>`,
+                siroky: `<div class="book-title">${currentBook.title}</div><div class="entry"><div class="entry-meta"><div class="entry-title">${entry.title || 'Zápis'}</div><div>${date}</div></div><div class="entry-text">${escape(entry.text)}</div></div>`,
+                kapitoly: currentPage === 0 ? `<div class="toc"><div class="toc-title">Obsah</div>${currentBook.entries.map((e, i) => `<div class="toc-item"><span>${e.title || `Kapitola ${i+1}`}</span><span>${i+1}</span></div>`).join('')}</div>` : `<div class="chapter-header"><div class="chapter-num">${toRoman(currentPage)}</div><div class="entry-title">${entry.title || 'Kapitola'}</div></div><div class="entry-text">${escape(entry.text)}</div>`,
+                dopisy: `<div class="book-title">${currentBook.title}</div><div class="letter-header"><div class="letter-date">${date}</div></div><div class="entry-title">${entry.title || 'Dopis'}</div><div class="entry-text">${escape(entry.text)}</div><div class="letter-signature">S pozdravem,<br>Myš</div>`,
+                vyzkum: `<div class="book-title">${currentBook.title}</div>${currentPage === 0 ? '<div class="abstract"><div style="font-weight: 600; margin-bottom: 2mm;">Abstrakt</div>Studie myší perspektivy a kognitivních úhlů.</div>' : ''}<div class="entry-header"><span class="entry-num">${currentPage + 1}.</span><span>${entry.title || 'Sekce'}</span></div><div class="entry-text">${escape(entry.text)}</div>`,
+                notebook: `<div class="book-title">${currentBook.title}</div><div class="entry"><div class="margin-note">${date}</div>${escape(entry.text)}</div>`,
+                kronika: `<div class="book-title">${currentBook.title}</div><div class="timeline"><div class="entry"><div class="entry-year">${d.getFullYear()}</div><div><div style="font-weight: 600; margin-bottom: 2mm;">${entry.title || 'Událost'}</div><div>${escape(entry.text)}</div></div></div></div>`
+            };
+            return formats[style] || formats.roman;
+        }
+
+        function toRoman(num) {
+            const romans = ['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV'];
+            return romans[num] || num;
+        }
+
+        function escape(t) {
+            const d = document.createElement('div');
+            d.textContent = t;
+            return d.innerHTML.replace(/\n/g, '<br>');
+        }
+
+        function prevPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                renderReader();
+            }
+        }
+
+        function nextPage() {
+            if (currentBook && currentPage < (currentBook.entries?.length || 1) - 1) {
+                currentPage++;
+                renderReader();
+            }
+        }
+
+        function closeReader() {
+            document.getElementById('reader').classList.remove('active');
+            currentBook = null;
+            renderShelf();
+        }
+
+        function showContextMenu(e, bookId) {
+            e.preventDefault();
+            contextBook = books.find(b => b.id === bookId);
+            const menu = document.getElementById('contextMenu');
+            menu.style.left = e.pageX + 'px';
+            menu.style.top = e.pageY + 'px';
+            menu.classList.add('active');
+        }
+
+        function contextAction(action) {
+            document.getElementById('contextMenu').classList.remove('active');
+            if (!contextBook) return;
+            
+            switch(action) {
+                case 'open': openBook(contextBook); break;
+                case 'rename': showRename(contextBook); break;
+                case 'share': shareBook(contextBook); break;
+                case 'delete': deleteBook(contextBook.id); break;
+            }
+            contextBook = null;
+        }
+
+        function showRename(book) {
+            document.getElementById('renameInput').value = book.title;
+            document.getElementById('modalOverlay').classList.add('active');
+            document.getElementById('renameModal').classList.add('active');
+        }
+
+        function confirmRename() {
+            const newTitle = document.getElementById('renameInput').value.trim();
+            if (!newTitle || !contextBook) return;
+            
+            contextBook.title = newTitle;
+            saveBooks();
+            closeModal();
+            renderShelf();
+        }
+
+        function deleteBook(id) {
+            if (!confirm('Opravdu smazat knihu "' + books.find(b => b.id === id)?.title + '"?')) return;
+            books = books.filter(b => b.id !== id);
+            saveBooks();
+            renderShelf();
+        }
+
+        function shareBook(book) {
+            const data = btoa(JSON.stringify(book));
+            const url = `${window.location.origin}${window.location.pathname}?book=${data}`;
+            navigator.clipboard.writeText(url).then(() => alert('Odkaz zkopírován do schránky'));
+        }
+
+        function closeModal() {
+            document.querySelectorAll('.modal-overlay, .modal').forEach(el => el.classList.remove('active'));
+            contextBook = null;
+        }
+
+        function loadFromURL() {
+            const p = new URLSearchParams(window.location.search);
+            const d = p.get('book');
+            if (d) {
+                try {
+                    const book = JSON.parse(atob(d));
+                    books.push(book);
+                    saveBooks();
+                    renderShelf();
+                    openBook(book);
+                } catch(e) { console.error(e); }
+            }
+        }
+
+        // Zavřít kontextové menu kliknutím jinde
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.context-menu')) {
+                document.getElementById('contextMenu').classList.remove('active');
+            }
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeReader();
+                document.getElementById('contextMenu').classList.remove('active');
+            }
+            if (e.key === 'ArrowLeft' && document.getElementById('reader').classList.contains('active')) prevPage();
+            if (e.key === 'ArrowRight' && document.getElementById('reader').classList.contains('active')) nextPage();
+        });
+
+        init();
+    </script>
+</body>
+</html>
