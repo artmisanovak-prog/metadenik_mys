@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zápisník — Chceš myš?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+          :root {
+        --bg: #0a0a0b;
+        --bg-card: rgba(255, 255, 255, 0.03);
+        --border: rgba(255, 255, 255, 0.08);
+        --text: #e8e6e3;
+        --text-muted: #666;
+        --accent: #d4a574;
+        
+        /* 9 aktivních úhlů */
+        --u30: #4ecdc4;   /* kulturní */
+        --u60: #ffe66d;   /* filozofický */
+        --u90: #95e1d3;   /* naivní */
+        --u120: #f38181;  /* jazykový */
+        --u210: #ffffd2;  /* introspektivní */
+        --u240: #a8e6cf;  /* ironický */
+        --u270: #fdffb6;  /* groteskní */
+        --u300: #ffd93d;  /* absurdní */
+        --u330: #6bcb77;  /* surrealistický */
+        
+        /* 3 neaktivní */
+        --u0: #444;       /* analytický - disabled */
+        --u150: #444;     /* metaforický - disabled */
+        --u180: #444;     /* asociační - disabled */
+    }
+
+    body {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        line-height: 1.6;
+    }
+
+    /* Padající myš - jednou při načtení */
+    .mouse-fall {
+        position: fixed;
+        top: -100px;
+        left: 10%;
+        width: 40px;
+        height: 60px;
+        z-index: 1000;
+        pointer-events: none;
+        animation: mouseFall 3s ease-in forwards;
+    }
+
+    @keyframes mouseFall {
+        0% { 
+            top: -100px; 
+            transform: rotate(0deg); 
+            opacity: 0;
+        }
+        10% { opacity: 1; }
+        40% { 
+            top: 80vh; 
+            transform: rotate(15deg);
+        }
+        50% {
+            top: 85vh;
+            transform: rotate(-75deg);
+        }
+        100% { 
+            top: 85vh; 
+            left: 110%;
+            transform: rotate(-75deg);
+            opacity: 0;
+        }
+    }
+
+    .mouse-fall img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter: brightness(0) invert(1) drop-shadow(0 0 10px rgba(255,255,255,0.3));
+    }
+
+    /* Header */
+    .header {
+        text-align: center;
+        padding: 60px 20px 40px;
+        opacity: 0;
+        animation: fadeIn 1s ease 2.5s forwards;
+    }
+
+    @keyframes fadeIn {
+        to { opacity: 1; }
+    }
+
+    h1 {
+        font-size: 2rem;
+        font-weight: 300;
+        letter-spacing: -0.02em;
+        margin-bottom: 8px;
+    }
+
+    .subtitle {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    /* Karty container */
+    .cards-section {
+        padding: 20px;
+        opacity: 0;
+        animation: fadeIn 1s ease 2.8s forwards;
+    }
+
+    .cards-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        max-width: 1000px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .card-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        flex: 1;
+        max-width: 280px;
+    }
+
+    .card {
+        aspect-ratio: 74/105; /* A7 poměr stran */
+        width: 100%;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    .card.active {
+        transform: scale(0.95);
+        border-color: var(--accent);
+    }
+
+    .card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: grayscale(100%) contrast(1.1);
+        transition: filter 0.3s;
+    }
+
+    .card:hover img {
+        filter: grayscale(80%) contrast(1.1);
+    }
+
+    /* Úhloměry */
+    .protractor-container {
+        height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .protractor-container.visible {
+        height: 140px;
+        opacity: 1;
+    }
+
+    .protractor {
+        width: 100px;
+        height: 100px;
+        position: relative;
+    }
+
+    .protractor svg {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg); /* Start zhora */
+    }
+
+    .segment {
+        fill: none;
+        stroke-width: 12;
+        cursor: pointer;
+        transition: all 0.2s;
+        opacity: 0.7;
+    }
+
+    .segment:hover {
+        opacity: 1;
+        stroke-width: 14;
+    }
+
+    .segment.active {
+        opacity: 1;
+        stroke-width: 16;
+        filter: drop-shadow(0 0 8px currentColor);
+    }
+
+    .segment.disabled {
+        opacity: 0.2;
+        cursor: not-allowed;
+    }
+
+    .center-dot {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 12px;
+        height: 12px;
+        background: var(--accent);
+        border-radius: 50%;
+        box-shadow: 0 0 10px var(--accent);
+    }
+
+    /* Inspirativní věty */
+    .inspiration {
+        width: 100%;
+        padding: 15px;
+        background: rgba(255,255,255,0.02);
+        border-left: 3px solid var(--accent);
+        font-size: 0.85rem;
+        line-height: 1.5;
+        font-style: italic;
+        color: var(--text-muted);
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        transition: all 0.3s;
+    }
+
+    .inspiration.has-content {
+        color: var(--text);
+        border-left-color: var(--accent);
+    }
+
+    /* Tlačítko perspektivy */
+    .perspective-btn {
+        display: block;
+        margin: 30px auto;
+        padding: 12px 30px;
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 30px;
+        color: var(--text);
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        opacity: 0;
+        animation: fadeIn 1s ease 3s forwards;
+    }
+
+    .perspective-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    .perspective-btn.active {
+        background: var(--accent);
+        color: var(--bg);
+        border-color: var(--accent);
+    }
+
+    /* Psací sekce */
+    .write-section {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 0 20px 40px;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+    }
+
+    .write-section.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+    .input-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .input-group input,
+    .input-group textarea {
+        width: 100%;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 15px;
+        color: var(--text);
+        font-size: 1rem;
+        font-family: inherit;
+        transition: all 0.3s;
+    }
+
+    .input-group input:focus,
+    .input-group textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        background: rgba(255,255,255,0.05);
+    }
+
+    .input-group textarea {
+        min-height: 120px;
+        resize: vertical;
+        line-height: 1.8;
+    }
+
+    .input-group textarea.expanded {
+        min-height: 300px;
+    }
+
+    /* Analýza */
+    .analysis-section {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        display: none;
+    }
+
+    .analysis-section.visible {
+        display: block;
+    }
+
+    .analysis-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .angle-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 12px;
+        background: rgba(255,255,255,0.02);
+        border-radius: 6px;
+        font-size: 0.85rem;
+    }
+
+    .angle-bar {
+        width: 100px;
+        height: 6px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 6px;
+    }
+
+    .angle-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.5s ease;
+    }
+
+    /* Tlačítka akcí */
+    .actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+
+    .btn {
+        padding: 12px 30px;
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 30px;
+        color: var(--text);
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    .btn.primary {
+        background: var(--accent);
+        color: var(--bg);
+        border-color: var(--accent);
+    }
+
+    .btn.primary:hover {
+        box-shadow: 0 10px 30px rgba(212, 165, 116, 0.3);
+    }
+
+    /* Časová osa */
+    .timeline-section {
+        max-width: 1000px;
+        margin: 60px auto;
+        padding: 0 20px;
+        border-top: 1px solid var(--border);
+        padding-top: 40px;
+    }
+
+    .timeline-section h3 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-weight: 300;
+        color: var(--text-muted);
+        font-size: 1.1rem;
+    }
+
+    .timeline {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 20px 0;
+        scrollbar-width: thin;
+        scrollbar-color: var(--accent) transparent;
+    }
+
+    .timeline-item {
+        min-width: 50px;
+        height: 70px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s;
+    }
+
+    .timeline-item:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent);
+    }
+
+    .timeline-strip {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .timeline-segment {
+        flex: 1;
+        width: 100%;
+    }
+
+    .timeline-date {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        background: rgba(0,0,0,0.7);
+        padding: 2px 4px;
+        border-radius: 3px;
+    }
+
+    /* Responzivita */
+    @media (max-width: 768px) {
+        .cards-container {
+            gap: 10px;
+        }
+        
+        .card-wrapper {
+            max-width: 120px;
+        }
+        
+        .protractor {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .inspiration {
+            font-size: 0.75rem;
+            padding: 10px;
+            min-height: 50px;
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+        }
+    }
+
+    /* Zvýraznění v textu */
+    .highlight {
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-weight: 500;
+    }
+</style>
+</head>
+<body>
+    <!-- Padající myš -->
+    <div class="mouse-fall">
+        <img src="../ilustrace/mys_ikonka.png" alt="Myš">
+    </div>
+
+<!-- Header -->
+<header class="header">
+    <h1>Zápisník</h1>
+    <p class="subtitle">Tři karty. Dvanáct úhlů. Jedna myš.</p>
+</header>
+
+<!-- Karty -->
+<section class="cards-section">
+    <div class="cards-container" id="cardsContainer">
+        <!-- Generováno JS -->
+    </div>
+    
+    <button class="perspective-btn" id="perspectiveBtn" onclick="togglePerspectives()">
+        Zobrazit perspektivy
+    </button>
+</section>
+
+<!-- Psací sekce -->
+<section class="write-section" id="writeSection">
+    <div class="input-group">
+        <label>Název zápisu</label>
+        <input type="text" id="entryTitle" placeholder="např. Nedělní odpoledne...">
+    </div>
+    
+    <div class="input-group">
+        <label>Text</label>
+        <textarea id="entryText" placeholder="Začni psát... (textová oblast se rozšíří při psaní)"></textarea>
+    </div>
+
+    <div class="input-group">
+        <label>Poznámky</label>
+        <input type="text" id="entryNotes" placeholder="Soukromé poznámky...">
+    </div>
+
+    <!-- Analýza -->
+    <div class="analysis-section" id="analysisSection">
+        <h4 style="margin-bottom: 10px; color: var(--text-muted); font-weight: 400;">Strukturální analýza</h4>
+        <div class="analysis-grid" id="analysisGrid">
+            <!-- Generováno JS -->
+        </div>
+        <div id="highlightedText" style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; line-height: 2; font-size: 0.9rem;"></div>
+    </div>
+
+    <div class="actions">
+        <button class="btn" onclick="analyzeText()">Analyzovat strukturu</button>
+        <button class="btn primary" onclick="saveEntry()">Uložit do knihy</button>
+    </div>
+</section>
+
+<!-- Časová osa -->
+<section class="timeline-section">
+    <h3>Historie zápisů</h3>
+    <div class="timeline" id="timeline">
+        <!-- Generováno JS -->
+    </div>
+</section>
+
+<script>
+    // Data karet z JSON
+    const cardsData = {
+        "myš": {
+            "id": "myš",
+            "ilustrace": "../ilustrace/mys.jpg",
+            "uhly": {
+                "absurdní": "nabídka která mate měřítka",
+                "jazykový": "zvíře i myšlenka tělo i idea",
+                "ironický": "detail který drží svět",
+                "filozofický": "čeho si nevšimne myš - nestalo se",
+                "naivní": "myslela jsem že se bude hodit",
+                "groteskní": "možná se jen houpe hlavou dolů visí za ocas a hraje si a tím mění pravidla",
+                "kulturní": "symbol ticha v nabídce",
+                "introspektivní": "navazuje kontakt",
+                "surrealistický": "otázka je dárek",
+                "analytický": "",
+                "asociační": "",
+                "metaforický": ""
+            }
+        },
+        "kocour": {
+            "id": "kocour",
+            "ilustrace": "../ilustrace/kocour.jpg",
+            "uhly": {
+                "absurdní": "trávení interpunkce",
+                "jazykový": "tečka jako vedlejší produkt věty",
+                "ironický": "přesnost tam kde na ní nezáleží",
+                "filozofický": "náhoda která se tváří jako pravidlo",
+                "naivní": "prostě se to stalo",
+                "groteskní": "statistiky trávení",
+                "kulturní": "počítání jako tik",
+                "introspektivní": "nemůžu to zastavit jen sledovat",
+                "surrealistický": "čísla vycházející z tlamy",
+                "analytický": "",
+                "asociační": "",
+                "metaforický": ""
+            }
+        },
+        "zajíc": {
+            "id": "zajíc",
+            "ilustrace": "../ilustrace/zajic.jpg",
+            "uhly": {
+                "absurdní": "oheň který nefunguje",
+                "jazykový": "negace přísloví",
+                "ironický": "odolnost tam kde se čeká slabost",
+                "filozofický": "podstata nezávislá na prostředí",
+                "naivní": "oběť která nehoří",
+                "groteskní": "zajíc není palivo",
+                "kulturní": "stereotyp naruby",
+                "introspektivní": "žádný oheň nepálí stejně",
+                "surrealistický": "skok skrz nemožné",
+                "analytický": "",
+                "asociační": "",
+                "metaforický": ""
+            }
+        },
+        "ryba": {
+            "id": "ryba",
+            "ilustrace": "../ilustrace/ryba.jpg",
+            "uhly": {
+                "absurdní": "hudba bez plic",
+                "jazykový": "rytmus místo slov",
+                "ironický": "projev slyšitelný jen pod hladinou",
+                "filozofický": "komunikace která nepotřebuje porozumění",
+                "naivní": "prostě to plyne",
+                "groteskní": "flow bez vzduchu",
+                "kulturní": "underground doslova",
+                "introspektivní": "mluvím i když mě nikdo neposlouchá",
+                "surrealistický": "beat z bublin",
+                "analytický": "",
+                "asociační": "",
+                "metaforický": ""
+            }
+        },
+        "páv": {
+            "id": "páv",
+            "ilustrace": "../ilustrace/pav.jpg",
+            "uhly": {
+                "absurdní": "soutěž pohledů bez poroty",
+                "jazykový": "redundance jako ornament",
+                "ironický": "okázalost která sleduje sama sebe",
+                "filozofický": "identita vzniká z nekonečného zrcadlení",
+                "naivní": "čím víc očí tím líp",
+                "groteskní": "narcismus s peřím",
+                "kulturní": "estetika přebytku",
+                "introspektivní": "dívám se na sebe abych si byl jistý že existuji",
+                "surrealistický": "oči které se rozmnožují",
+                "analytický": "",
+                "asociační": "",
+                "metaforický": ""
+            }
+        },
+        "netopýr": {
+            "id": "netopýr",
+            "ilustrace": "../ilustrace/netopyr.jpg",
+            "uhly": {
+                "absurdní": "elegance závislá na tmě",
+                "jazykový": "přídavné jméno platné jen v noci",
+                "ironický": "to co fascinuje po tmě se za světla omlouvá",
+                "filozofický": "hodnota věcí se mění s osvětlením",
+                "naivní": "ve tmě jsem hezčí",
+                "groteskní": "glamour s blánami",
+                "kulturní": "estetika outsiderů",
+                "introspektivní": "mám verzi sebe kterou ukazuji jen nocím",
+                "surrealistický": "šperk který se rozpadne při svítání",
+                "analytický": "",
+                "asociační": "",
+                "metaforický": ""
+            }
+        },
+        "motýl": {
+            "id": "motýl",
+            "ilustrace": "../ilustrace/motyl.jpg",
+            "uhly": {
+                "absurdní": "emoce bez kalorií",
+                "jazykový": "metafora, která selhala",
+                "ironický": "romantika bez užitku",
+                "filozofický": "pocit není zdroj",
+                "naivní": "myslela jsem, že to stačí",
+                "groteskní": "dieta z emocí",
+                "kulturní": "demontáž klišé",
+                "introspektivní": "něco cítím, ale nestačí to",
+                "surrealistický": "létání v prázdném žaludku",
+                "analytický": "",
+                "asociační": "",
+                "metaforický": ""
+            }
+        },
+        "pavouk": {
+            "id": "pavouk",
+            "ilustrace": "../ilustrace/pavouk.jpg",
+            "uhly": {
+                "absurdní": "pauza která se odmítá stát pokračováním",
+                "jazykový": "věta bez slovesa",
+                "ironický": "struktura bez děje",
+                "filozofický": "stav mezi začátkem a koncem",
+                "naivní": "ono se to nějak vyřeší",
+                "groteskní": "architektura váhání",
+                "kulturní": "estetika nedokončení",
+                "introspektivní": "nechávám věci být otevřené",
+                "surrealistický": "čas zachycený ve vlákně",
+                "analytický": "",
+                "asociační": "",
+                "metaforický": ""
+            }
+        },
+        "krokodýl": {
+            "id": "krokodýl",
+            "ilustrace": "../ilustrace/krokodyl.jpg",
+            "uhly": {
+                "absurdní": "totální výprodej falešných slz",
+                "jazykový": "reklama jako vyznání",
+                "ironický": "emoce zlevněná na nulu",
+                "filozofický": "hodnota citů v tržní logice",
+                "naivní": "proč by si děti nemohly koupit balíček slz na hraní",
+                "groteskní": "marketing empatie",
+                "kulturní": "cynismus zabalený do slevy",
+                "introspektivní": "falešný pláč výhodně",
+                "surrealistický": "hypermarket predátorů",
+                "analytický": "",
+                "asociační": "",
+                "metaforický": ""
+            }
+        }
+    };
+
+    // Mapování úhlů
+    const angleMap = {
+        "analytický": { deg: 0, color: "var(--u0)", active: false },
+        "kulturní": { deg: 30, color: "var(--u30)", active: true },
+        "filozofický": { deg: 60, color: "var(--u60)", active: true },
+        "naivní": { deg: 90, color: "var(--u90)", active: true },
+        "jazykový": { deg: 120, color: "var(--u120)", active: true },
+        "metaforický": { deg: 150, color: "var(--u150)", active: false },
+        "asociační": { deg: 180, color: "var(--u180)", active: false },
+        "introspektivní": { deg: 210, color: "var(--u210)", active: true },
+        "ironický": { deg: 240, color: "var(--u240)", active: true },
+        "groteskní": { deg: 270, color: "var(--u270)", active: true },
+        "absurdní": { deg: 300, color: "var(--u300)", active: true },
+        "surrealistický": { deg: 330, color: "var(--u330)", active: true }
+    };
+
+    // Stav
+    let selectedCards = [];
+    let currentAngles = [];
+    let perspectivesVisible = false;
+    let entries = JSON.parse(localStorage.getItem('zapisnik_entries') || '[]');
+
+    // Inicializace
+    function init() {
+        drawCards();
+        loadTimeline();
+        
+        // Textarea expand
+        document.getElementById('entryText').addEventListener('focus', function() {
+            this.classList.add('expanded');
+        });
+    }
+
+    // Losování 3 náhodných karet
+    function drawCards() {
+        const keys = Object.keys(cardsData);
+        const shuffled = keys.sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, 3);
+        
+        selectedCards = selected.map(key => ({
+            key: key,
+            ...cardsData[key]
+        }));
+        
+        // Náhodné úhly (z aktivních)
+        currentAngles = selectedCards.map(() => {
+            const activeAngles = Object.entries(angleMap)
+                .filter(([_, data]) => data.active)
+                .map(([name, _]) => name);
+            return activeAngles[Math.floor(Math.random() * activeAngles.length)];
+        });
+        
+        renderCards();
+    }
+
+    // Render karet
+    function renderCards() {
+        const container = document.getElementById('cardsContainer');
+        container.innerHTML = '';
+        
+        selectedCards.forEach((card, index) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'card-wrapper';
+            
+            // Karta
+            const cardEl = document.createElement('div');
+            cardEl.className = 'card';
+            cardEl.id = `card-${index}`;
+            cardEl.onclick = () => togglePerspectives();
+            cardEl.innerHTML = `<img src="${card.ilustrace}" alt="${card.id}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 140%22><rect fill=%22%23333%22 width=%22100%22 height=%22140%22/><text fill=%22%23666%22 x=%2250%22 y=%2270%22 text-anchor=%22middle%22>${card.id}</text></svg>'">`;
+            
+            // Úhloměr
+            const procContainer = document.createElement('div');
+            procContainer.className = 'protractor-container';
+            procContainer.id = `protractor-${index}`;
+            procContainer.innerHTML = createProtractor(index, currentAngles[index]);
+            
+            // Inspirace
+            const inspiration = document.createElement('div');
+            inspiration.className = 'inspiration';
+            inspiration.id = `inspiration-${index}`;
+            updateInspiration(index, currentAngles[index]);
+            
+            wrapper.appendChild(cardEl);
+            wrapper.appendChild(procContainer);
+            wrapper.appendChild(inspiration);
+            container.appendChild(wrapper);
+        });
+    }
+
+    // Vytvoření SVG úhloměru
+    function createProtractor(index, currentAngle) {
+        const segments = Object.entries(angleMap).map(([name, data], i) => {
+            const startAngle = i * 30;
+            const endAngle = (i + 1) * 30;
+            const largeArc = 0;
+            
+            // Výpočet oblouku
+            const x1 = 50 + 40 * Math.cos((startAngle - 90) * Math.PI / 180);
+            const y1 = 50 + 40 * Math.sin((startAngle - 90) * Math.PI / 180);
+            const x2 = 50 + 40 * Math.cos((endAngle - 90) * Math.PI / 180);
+            const y2 = 50 + 40 * Math.sin((endAngle - 90) * Math.PI / 180);
+            
+            const isActive = name === currentAngle;
+            const isDisabled = !data.active;
+            
+            return `
+                <path d="M 50 50 L ${x1} ${y1} A 40 40 0 ${largeArc} 1 ${x2} ${y2} Z" 
+                      fill="${data.color.replace('var(', '').replace(')', '')}" 
+                      class="segment ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}"
+                      ${!isDisabled ? `onclick="changeAngle(${index}, '${name}')"` : ''}
+                />
+            `;
+        }).join('');
+        
+        return `
+            <div class="protractor">
+                <svg viewBox="0 0 100 100" style="transform: rotate(-90deg)">
+                    ${segments}
+                </svg>
+                <div class="center-dot"></div>
+            </div>
+        `;
+    }
+
+    // Změna úhlu
+    function changeAngle(cardIndex, angleName) {
+        currentAngles[cardIndex] = angleName;
+        
+        // Update UI
+        const procContainer = document.getElementById(`protractor-${cardIndex}`);
+        procContainer.innerHTML = createProtractor(cardIndex, angleName);
+        
+        updateInspiration(cardIndex, angleName);
+    }
+
+    // Update inspirace
+    function updateInspiration(index, angleName) {
+        const card = selectedCards[index];
+        const text = card.uhly[angleName] || '';
+        const inspirationEl = document.getElementById(`inspiration-${index}`);
+        const angleData = angleMap[angleName];
+        
+        if (text) {
+            inspirationEl.innerHTML = `[[${text}]]`;
+            inspirationEl.classList.add('has-content');
+            inspirationEl.style.borderLeftColor = angleData.color.replace('var(', '').replace(')', '');
+        } else {
+            inspirationEl.innerHTML = '';
+            inspirationEl.classList.remove('has-content');
+        }
+    }
+
+    // Toggle perspektiv
+    function togglePerspectives() {
+        perspectivesVisible = !perspectivesVisible;
+        const btn = document.getElementById('perspectiveBtn');
+        const writeSection = document.getElementById('writeSection');
+        
+        // Update tlačítka
+        btn.textContent = perspectivesVisible ? 'Schovat perspektivy' : 'Zobrazit perspektivy';
+        btn.classList.toggle('active', perspectivesVisible);
+        
+        // Update karet
+        document.querySelectorAll('.card').forEach(c => {
+            c.classList.toggle('active', perspectivesVisible);
+        });
+        
+        // Update úhloměrů
+        selectedCards.forEach((_, index) => {
+            const proc = document.getElementById(`protractor-${index}`);
+            proc.classList.toggle('visible', perspectivesVisible);
+        });
+        
+        // Show/hide psací sekce
+        if (perspectivesVisible) {
+            setTimeout(() => writeSection.classList.add('visible'), 300);
+        } else {
+            writeSection.classList.remove('visible');
+            document.getElementById('analysisSection').classList.remove('visible');
+        }
+    }
+
+    // Jednoduchá analýza textu
+    function analyzeText() {
+        const text = document.getElementById('entryText').value;
+        if (!text.trim()) {
+            alert('Nejdřív něco napiš...');
+            return;
+        }
+        
+        // Heuristiky pro detekci
+        const patterns = [
+            { name: 'kratka_veta', regex: /[^.!?]{1,20}[.!?]/g, angle: 'filozofický', color: '#ffe66d' },
+            { name: 'otazka', regex: /[^?]+\?/g, angle: 'absurdní', color: '#ffd93d' },
+            { name: 'vykricnik', regex: /[^!]+!/g, angle: 'ironický', color: '#a8e6cf' },
+            { name: 'carka', regex: /, /g, angle: 'jazykový', color: '#f38181', count: true },
+            { name: 'velka_pismena', regex: /[A-ZÁÉÍÓÚŮÝŽŠČŘĎŤŇ]{2,}/g, angle: 'groteskní', color: '#fdffb6' },
+            { name: 'tro tecky', regex: /\.{3}/g, angle: 'introspektivní', color: '#ffffd2' },
+            { name: 'zavorky', regex: /[\(\)]/g, angle: 'kulturní', color: '#4ecdc4', count: true },
+            { name: 'uvozovky', regex: /["„"]/g, angle: 'naivní', color: '#95e1d3', count: true }
+        ];
+        
+        const results = {};
+        Object.keys(angleMap).forEach(a => results[a] = 0);
+        
+        let highlightedText = text;
+        
+        patterns.forEach(p => {
+            const matches = text.match(p.regex) || [];
+            const count = p.count ? matches.length : matches.length;
+            results[p.angle] += count * 10;
+            
+            // Zvýraznění v textu
+            if (!p.count) {
+                matches.forEach((match, i) => {
+                    const id = `highlight-${p.angle}-${i}`;
+                    highlightedText = highlightedText.replace(match, `<span class="highlight" style="background: ${p.color}40; color: ${p.color}" title="${p.angle}">${match}</span>`);
+                });
+            }
+        });
+        
+        // Normalizace na 100%
+        const total = Object.values(results).reduce((a, b) => a + b, 0) || 1;
+        Object.keys(results).forEach(k => {
+            results[k] = Math.round((results[k] / total) * 100);
+        });
+        
+        // Zobrazení výsledků
+        const grid = document.getElementById('analysisGrid');
+        grid.innerHTML = '';
+        
+        Object.entries(angleMap).forEach(([name, data]) => {
+            const percent = results[name];
+            const item = document.createElement('div');
+            item.className = 'angle-item';
+            item.innerHTML = `
+                <div>
+                    <div style="color: ${data.active ? '#fff' : '#444'}">${name} ${data.deg}°</div>
+                    <div class="angle-bar">
+                        <div class="angle-fill" style="width: ${percent}%; background: ${data.color.replace('var(', '').replace(')', '')}"></div>
+                    </div>
+                </div>
+                <span style="color: ${data.active ? '#fff' : '#444'}">${percent}%</span>
+            `;
+            grid.appendChild(item);
+        });
+        
+        document.getElementById('highlightedText').innerHTML = highlightedText;
+        document.getElementById('analysisSection').classList.add('visible');
+    }
+
+    // Uložení zápisu
+    function saveEntry() {
+        const title = document.getElementById('entryTitle').value || 'Bez názvu';
+        const text = document.getElementById('entryText').value;
+        const notes = document.getElementById('entryNotes').value;
+        
+        if (!text.trim()) {
+            alert('Zápis je prázdný...');
+            return;
+        }
+        
+        // Získání 3 dominantních úhlů z analýzy
+        const anglePercentages = {};
+        Object.keys(angleMap).forEach(a => {
+            // Zjednodušeně - vezmeme aktuální úhly karet jako dominantní
+            // V reálu by se to počítalo z analýzy
+            anglePercentages[a] = currentAngles.filter(ca => ca === a).length * 33;
+        });
+        
+        const sortedAngles = Object.entries(anglePercentages)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+            .map(([name, _]) => name);
+        
+        const entry = {
+            id: Date.now(),
+            title,
+            text,
+            notes,
+            cards: selectedCards.map(c => c.id),
+            angles: currentAngles,
+            dominantAngles: sortedAngles,
+            date: new Date().toISOString()
+        };
+        
+        entries.push(entry);
+        localStorage.setItem('zapisnik_entries', JSON.stringify(entries));
+        
+        // Reset
+        document.getElementById('entryTitle').value = '';
+        document.getElementById('entryText').value = '';
+        document.getElementById('entryNotes').value = '';
+        document.getElementById('entryText').classList.remove('expanded');
+        document.getElementById('analysisSection').classList.remove('visible');
+        
+        // Nové karty
+        perspectivesVisible = false;
+        document.getElementById('perspectiveBtn').textContent = 'Zobrazit perspektivy';
+        document.getElementById('perspectiveBtn').classList.remove('active');
+        document.getElementById('writeSection').classList.remove('visible');
+        
+        drawCards();
+        loadTimeline();
+        
+        // Feedback
+        const btn = event.target;
+        const originalText = btn.textContent;
+        btn.textContent = 'Uloženo!';
+        setTimeout(() => btn.textContent = originalText, 2000);
+    }
+
+    // Načtení časové osy
+    function loadTimeline() {
+        const container = document.getElementById('timeline');
+        container.innerHTML = '';
+        
+        entries.slice(-20).reverse().forEach(entry => {
+            const item = document.createElement('div');
+            item.className = 'timeline-item';
+            item.title = `${entry.title} — ${entry.cards.join(', ')}`;
+            item.onclick = () => showEntryDetail(entry);
+            
+            const strip = document.createElement('div');
+            strip.className = 'timeline-strip';
+            
+            entry.dominantAngles.forEach(angleName => {
+                const color = angleMap[angleName]?.color.replace('var(', '').replace(')', '') || '#666';
+                const seg = document.createElement('div');
+                seg.className = 'timeline-segment';
+                seg.style.background = color;
+                strip.appendChild(seg);
+            });
+            
+            const date = document.createElement('div');
+            date.className = 'timeline-date';
+            date.textContent = new Date(entry.date).toLocaleDateString('cs', { day: 'numeric', month: 'numeric' });
+            
+            item.appendChild(strip);
+            item.appendChild(date);
+            container.appendChild(item);
+        });
+    }
+
+    // Zobrazení detailu zápisu
+    function showEntryDetail(entry) {
+        const text = `${entry.title}\n\n${entry.text}\n\nKarty: ${entry.cards.join(', ')}\nÚhly: ${entry.angles.join(', ')}\n\n${entry.notes ? 'Poznámky: ' + entry.notes : ''}`;
+        alert(text); // Prototyp - později modal
+    }
+
+    // Start
+    init();
+</script>
+</body>
+</html>
