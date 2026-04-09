@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Chceš myš? · Deník</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      background: #fbfaf6;
+      color: #1e1e1e;
+      padding: 1rem;
+      transition: background 0.2s, color 0.2s;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body.dark {
+      background: #1a1a1a;
+      color: #e0ddd5;
+    }
+
+    /* Hlavní kontejner */
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Hlavička */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid currentColor;
+      padding-bottom: 0.5rem;
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .mys-icon {
+      font-size: 2.2rem;
+      line-height: 1;
+      cursor: default;
+      animation: fallOnce 0.6s ease-in forwards;
+    }
+
+    @keyframes fallOnce {
+      0% { transform: translateY(-20px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: normal;
+      letter-spacing: 2px;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: 1px solid currentColor;
+      color: inherit;
+      font-size: 1.5rem;
+      padding: 0.2rem 0.8rem;
+      cursor: pointer;
+      border-radius: 30px;
+      transition: 0.1s;
+    }
+
+    /* Panel karet – vždy vedle sebe, proporce A7 (74:105 ≈ 1:1.42) */
+    .cards-panel {
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-wrapper {
+      flex: 1;
+      min-width: 0;  /* umožní zmenšení */
+      max-width: 280px;
+      aspect-ratio: 74 / 105;  /* A7 na výšku */
+      position: relative;
+      transition: transform 0.1s;
+    }
+
+    .card {
+      width: 100%;
+      height: 100%;
+      border: 2px solid currentColor;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #fffcf7;
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.05);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body.dark .card {
+      background: #2c2c2c;
+      border-color: #aaa;
+    }
+
+    .card-img {
+      flex: 3;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      border-bottom: 1px solid currentColor;
+    }
+
+    .card-text {
+      flex: 1;
+      padding: 0.4rem;
+      font-size: clamp(0.65rem, 2vw, 0.9rem);
+      line-height: 1.3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-weight: 500;
+      background: rgba(255,255,240,0.7);
+    }
+
+    body.dark .card-text {
+      background: #3a3a3a;
+    }
+
+    /* Úhloměr – půlkruh (vysune se pod kartu, nebo nad ni?) Dle zadání: nad kartou nebo pod? 
+       Udělám pod kartou, protože se tam vejde lépe. Po kliknutí na kartu se objeví. */
+    .uhlomer-container {
+      margin-top: 0.5rem;
+      display: none;  /* default hidden */
+      justify-content: center;
+    }
+
+    .card-wrapper.active .uhlomer-container {
+      display: flex;
+    }
+
+    .uhlomer {
+      display: flex;
+      flex-wrap: wrap;
+      width: 100%;
+      max-width: 240px;
+      margin: 0 auto;
+      border-radius: 100px 100px 0 0;
+      overflow: hidden;
+      border: 1px solid currentColor;
+      border-bottom: none;
+    }
+
+    .segment {
+      flex: 1 0 16.666%;  /* 6 segmentů na půlkruh, ale chceme 12 -> rozdělíme do dvou řad? 
+                             Lepší: jeden řádek 12 segmentů, tvar půlkruhu simulovat border-radius. */
+      height: 30px;
+      background: #ccc;
+      border-right: 1px solid #fff;
+      cursor: pointer;
+      transition: filter 0.1s;
+    }
+
+    .segment:last-child {
+      border-right: none;
+    }
+
+    .segment.active-segment {
+      filter: brightness(1.2);
+      box-shadow: inset 0 0 0 1px white;
+    }
+
+    /* Barvy úhlů – 12 barev dle tvé tabulky */
+    .seg-0 { background: #1f77b4; }  /* analytický */
+    .seg-1 { background: #ff7f0e; }  /* asociační */
+    .seg-2 { background: #2ca02c; }  /* kulturní */
+    .seg-3 { background: #d62728; }  /* introspektivní */
+    .seg-4 { background: #9467bd; }  /* filozofický */
+    .seg-5 { background: #8c564b; }  /* ironický */
+    .seg-6 { background: #e377c2; }  /* naivní */
+    .seg-7 { background: #7f7f7f; }  /* groteskní */
+    .seg-8 { background: #bcbd22; }  /* jazykový */
+    .seg-9 { background: #17becf; }  /* absurdní */
+    .seg-10 { background: #aec7e8; } /* metaforický */
+    .seg-11 { background: #ffbb78; } /* surrealistický */
+
+    .segment.inactive {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .inspire-sentence {
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      min-height: 2.5rem;
+      font-style: italic;
+      text-align: center;
+      border-top: 1px dashed currentColor;
+      padding-top: 0.3rem;
+    }
+
+    /* Ovládání karet */
+    .card-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    button {
+      background: none;
+      border: 1.5px solid currentColor;
+      padding: 0.4rem 1.2rem;
+      font-family: inherit;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 30px;
+      color: inherit;
+      transition: 0.1s;
+    }
+
+    button:hover {
+      background: rgba(0,0,0,0.05);
+    }
+
+    body.dark button:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    /* Textové pole */
+    .entry-area {
+      margin: 1.5rem 0 1rem;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 1rem;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 1rem;
+      line-height: 1.6;
+      background: #fffdf9;
+      border: 2px solid currentColor;
+      border-radius: 8px;
+      color: inherit;
+      resize: vertical;
+      min-height: 180px;
+      transition: min-height 0.2s;
+    }
+
+    body.dark textarea {
+      background: #262626;
+    }
+
+    textarea:focus {
+      min-height: 250px;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+    }
+
+    /* Výsledky analýzy */
+    .analysis-results {
+      margin: 1rem 0;
+      padding: 0.8rem;
+      border: 1px dashed currentColor;
+      border-radius: 8px;
+    }
+
+    .angle-bars {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      margin: 0.5rem 0;
+    }
+
+    .angle-item {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.8rem;
+    }
+
+    .color-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 4px;
+    }
+
+    .dominant-info {
+      margin-top: 0.5rem;
+      font-weight: bold;
+    }
+
+    .highlighted-text {
+      white-space: pre-wrap;
+      line-height: 1.8;
+    }
+
+    .highlight {
+      padding: 0 2px;
+      border-radius: 4px;
+    }
+
+    /* Časová osa */
+    .timeline {
+      margin-top: 2rem;
+      border-top: 1px solid currentColor;
+      padding-top: 1rem;
+    }
+
+    .timeline-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 0.5rem;
+    }
+
+    .timeline-entry {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid rgba(0,0,0,0.2);
+      transition: transform 0.1s;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .timeline-entry:hover {
+      transform: scale(1.1);
+      z-index: 2;
+    }
+
+    .color-stripe {
+      flex: 1;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: fixed;
+      background: #333;
+      color: #eee;
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* Sdílení */
+    .share-section {
+      margin: 0.5rem 0;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    /* Responzivní úpravy */
+    @media (max-width: 600px) {
+      .cards-panel {
+        gap: 0.3rem;
+      }
+      .card-wrapper {
+        max-width: 150px;
+      }
+      .uhlomer {
+        max-width: 180px;
+      }
+      .segment {
+        height: 22px;
+      }
+    }
+  </style>
+</head>
+<body class="light">
+<div class="app">
+  <div class="header">
+    <div class="title">
+      <span class="mys-icon">🐭</span>
+      <h1>Chceš myš? Deník</h1>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Tmavý režim">🌙</button>
+  </div>
+
+  <!-- Karty -->
+  <div class="cards-panel" id="cardsPanel"></div>
+  
+  <div class="card-actions">
+    <button id="shuffleCards">🎲 Losovat nové karty</button>
+    <button id="lockShareBtn">🔒 Zamknout a sdílet sadu</button>
+  </div>
+
+  <!-- Sdílený odkaz se zobrazí zde -->
+  <div id="shareUrlDisplay" style="font-size:0.8rem; word-break:break-all;"></div>
+
+  <!-- Editor -->
+  <div class="entry-area">
+    <textarea id="diaryEntry" placeholder="Piš svůj zápis... Myš si všimne struktury."></textarea>
+  </div>
+
+  <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+    <button id="analyzeBtn">🔍 Analyzovat</button>
+    <button id="saveBtn">💾 Uložit do deníku</button>
+  </div>
+
+  <!-- Výsledky analýzy -->
+  <div class="analysis-results" id="analysisResults" style="display: none;">
+    <div><strong>Zastoupení úhlů (0–100%):</strong></div>
+    <div class="angle-bars" id="angleBars"></div>
+    <div class="dominant-info" id="dominantInfo"></div>
+    <div><strong>Text s podbarvením:</strong></div>
+    <div id="highlightedText" class="highlighted-text"></div>
+  </div>
+
+  <!-- Časová osa -->
+  <div class="timeline">
+    <strong>📅 Časová osa</strong>
+    <div class="timeline-strip" id="timelineStrip"></div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    "use strict";
+
+    // ---------- DATA (JSON) ----------
+    const CARDS_DATA = {
+      "myš": {
+        "id": "myš",
+        "ilustrace": "doma/ilustrace/mys.jpg",
+        "text": "chceš myš ??",
+        "uhly": {
+          "absurdní": "nabídka která mate měřítka",
+          "jazykový": "zvíře i myšlenka tělo i idea",
+          "ironický": "detail který drží svět",
+          "filozofický": "čeho si nevšimne myš - nestalo se",
+          "naivní": "myslela jsem že se bude hodit",
+          "groteskní": "možná se jen houpe hlavou dolů visí za ocas a hraje si a tím mění pravidla",
+          "kulturní": "symbol ticha v nabídce",
+          "introspektivní": "navazuje kontakt",
+          "surrealistický": "otázka je dárek"
+        }
+      },
+      "kocour": {
+        "id": "kocour",
+        "ilustrace": "doma/ilustrace/kocour.jpg",
+        "text": "kocour sežral dvě berušky a půl hodiny krkal tečky",
+        "uhly": {
+          "absurdní": "trávení interpunkce",
+          "jazykový": "tečka jako vedlejší produkt věty",
+          "ironický": "přesnost tam kde na ní nezáleží",
+          "filozofický": "náhoda která se tváří jako pravidlo",
+          "naivní": "prostě se to stalo",
+          "groteskní": "statistiky trávení",
+          "kulturní": "počítání jako tik",
+          "introspektivní": "nemůžu to zastavit jen sledovat",
+          "surrealistický": "čísla vycházející z tlamy"
+        }
+      },
+      "zajíc": {
+        "id": "zajíc",
+        "ilustrace": "doma/ilustrace/zajic.jpg",
+        "text": "zajíc co prošel ohněm",
+        "uhly": {
+          "absurdní": "oheň který nefunguje",
+          "jazykový": "negace přísloví",
+          "ironický": "odolnost tam kde se čeká slabost",
+          "filozofický": "podstata nezávislá na prostředí",
+          "naivní": "oběť která nehoří",
+          "groteskní": "zajíc není palivo",
+          "kulturní": "stereotyp naruby",
+          "introspektivní": "žádný oheň nepálí stejně",
+          "surrealistický": "skok skrz nemožné"
+        }
+      },
+      "ryba": {
+        "id": "ryba",
+        "ilustrace": "doma/ilustrace/ryba.jpg",
+        "text": "rybí rap",
+        "uhly": {
+          "absurdní": "hudba bez plic",
+          "jazykový": "rytmus místo slov",
+          "ironický": "projev slyšitelný jen pod hladinou",
+          "filozofický": "komunikace která nepotřebuje porozumění",
+          "naivní": "prostě to plyne",
+          "groteskní": "flow bez vzduchu",
+          "kulturní": "underground doslova",
+          "introspektivní": "mluvím i když mě nikdo neposlouchá",
+          "surrealistický": "beat z bublin"
+        }
+      },
+      "páv": {
+        "id": "páv",
+        "ilustrace": "doma/ilustrace/pav.jpg",
+        "text": "oko za okem. páv za pávem",
+        "uhly": {
+          "absurdní": "soutěž pohledů bez poroty",
+          "jazykový": "redundance jako ornament",
+          "ironický": "okázalost která sleduje sama sebe",
+          "filozofický": "identita vzniká z nekonečného zrcadlení",
+          "naivní": "čím víc očí tím líp",
+          "groteskní": "narcismus s peřím",
+          "kulturní": "estetika přebytku",
+          "introspektivní": "dívám se na sebe abych si byl jistý že existuji",
+          "surrealistický": "oči které se rozmnožují"
+        }
+      },
+      "netopýr": {
+        "id": "netopýr",
+        "ilustrace": "doma/ilustrace/netopyr.jpg",
+        "text": "netopýří glamour",
+        "uhly": {
+          "absurdní": "elegance závislá na tmě",
+          "jazykový": "přídavné jméno platné jen v noci",
+          "ironický": "to co fascinuje po tmě se za světla omlouvá",
+          "filozofický": "hodnota věcí se mění s osvětlením",
+          "naivní": "ve tmě jsem hezčí",
+          "groteskní": "glamour s blánami",
+          "kulturní": "estetika outsiderů",
+          "introspektivní": "mám verzi sebe kterou ukazuji jen nocím",
+          "surrealistický": "šperk který se rozpadne při svítání"
+        }
+      },
+      "motýl": {
+        "id": "motýl",
+        "ilustrace": "doma/ilustrace/motyl.jpg",
+        "text": "motýl v břiše",
+        "uhly": {
+          "absurdní": "emoce bez kalorií",
+          "jazykový": "metafora, která selhala",
+          "ironický": "romantika bez užitku",
+          "filozofický": "pocit není zdroj",
+          "naivní": "myslela jsem, že to stačí",
+          "groteskní": "dieta z emocí",
+          "kulturní": "demontáž klišé",
+          "introspektivní": "něco cítím, ale nestačí to",
+          "surrealistický": "létání v prázdném žaludku"
+        }
+      },
+      "pavouk": {
+        "id": "pavouk",
+        "ilustrace": "doma/ilustrace/pavouk.jpg",
+        "text": "pavouk čeká",
+        "uhly": {
+          "absurdní": "pauza která se odmítá stát pokračováním",
+          "jazykový": "věta bez slovesa",
+          "ironický": "struktura bez děje",
+          "filozofický": "stav mezi začátkem a koncem",
+          "naivní": "ono se to nějak vyřeší",
+          "groteskní": "architektura váhání",
+          "kulturní": "estetika nedokončení",
+          "introspektivní": "nechávám věci být otevřené",
+          "surrealistický": "čas zachycený ve vlákně"
+        }
+      },
+      "krokodýl": {
+        "id": "krokodýl",
+        "ilustrace": "doma/ilustrace/krokodyl.jpg",
+        "text": "krokodýlí slzy",
+        "uhly": {
+          "absurdní": "totální výprodej falešných slz",
+          "jazykový": "reklama jako vyznání",
+          "ironický": "emoce zlevněná na nulu",
+          "filozofický": "hodnota citů v tržní logice",
+          "naivní": "proč by si děti nemohly koupit balíček slz na hraní",
+          "groteskní": "marketing empatie",
+          "kulturní": "cynismus zabalený do slevy",
+          "introspektivní": "falešný pláč výhodně",
+          "surrealistický": "hypermarket predátorů"
+        }
+      }
+    };
+
+    // Mapování názvů úhlů na indexy a barvy
+    const ANGLE_NAMES = ["analytický","asociační","kulturní","introspektivní","filozofický","ironický","naivní","groteskní","jazykový","absurdní","metaforický","surrealistický"];
+    const ANGLE_COLORS = ["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf","#aec7e8","#ffbb78"];
+
+    // Stav aplikace
+    let currentCards = ["myš", "kocour", "zajíc"]; // ID tří karet
+    let currentAnalysis = null; // { percentages: [], dominant: [] }
+    let diaryEntries = []; // pole z localStorage
+
+    // DOM prvky
+    const cardsPanel = document.getElementById('cardsPanel');
+    const shuffleBtn = document.getElementById('shuffleCards');
+    const lockShareBtn = document.getElementById('lockShareBtn');
+    const shareUrlDisplay = document.getElementById('shareUrlDisplay');
+    const diaryEntry = document.getElementById('diaryEntry');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const analysisResults = document.getElementById('analysisResults');
+    const angleBars = document.getElementById('angleBars');
+    const dominantInfo = document.getElementById('dominantInfo');
+    const highlightedTextDiv = document.getElementById('highlightedText');
+    const timelineStrip = document.getElementById('timelineStrip');
+    const themeToggle = document.getElementById('themeToggle');
+
+    // ---------- INICIALIZACE ----------
+    function init() {
+      loadTheme();
+      loadEntriesFromStorage();
+      applyUrlParams(); // pokud je ?cards=...
+      renderCards();
+      renderTimeline();
+      
+      // eventy
+      shuffleBtn.addEventListener('click', shuffleCards);
+      lockShareBtn.addEventListener('click', lockAndShare);
+      analyzeBtn.addEventListener('click', analyzeText);
+      saveBtn.addEventListener('click', saveEntry);
+      themeToggle.addEventListener('click', toggleTheme);
+    }
+
+    function loadTheme() {
+      const saved = localStorage.getItem('mys-theme');
+      if (saved === 'dark') {
+        document.body.classList.add('dark');
+        themeToggle.textContent = '☀️';
+      } else {
+        document.body.classList.remove('dark');
+        themeToggle.textContent = '🌙';
+      }
+    }
+
+    function toggleTheme() {
+      if (document.body.classList.contains('dark')) {
+        document.body.classList.remove('dark');
+        localStorage.setItem('mys-theme', 'light');
+        themeToggle.textContent = '🌙';
+      } else {
+        document.body.classList.add('dark');
+        localStorage.setItem('mys-theme', 'dark');
+        themeToggle.textContent = '☀️';
+      }
+    }
+
+    // Aplikuje parametry z URL (?cards=mys,kocour,pav)
+    function applyUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      const cardsParam = params.get('cards');
+      if (cardsParam) {
+        const ids = cardsParam.split(',').map(s => s.trim()).filter(id => CARDS_DATA[id]);
+        if (ids.length === 3) {
+          currentCards = ids;
+        } else if (ids.length > 0) {
+          // doplníme náhodně
+          while(ids.length < 3) ids.push(getRandomCardId());
+          currentCards = ids.slice(0,3);
+        }
+      }
+    }
+
+    function getRandomCardId() {
+      const ids = Object.keys(CARDS_DATA);
+      return ids[Math.floor(Math.random() * ids.length)];
+    }
+
+    function shuffleCards() {
+      const newCards = [];
+      for(let i=0; i<3; i++) newCards.push(getRandomCardId());
+      currentCards = newCards;
+      renderCards();
+      // reset analysis display
+      analysisResults.style.display = 'none';
+    }
+
+    // Vykreslí 3 karty s úhloměry
+    function renderCards() {
+      cardsPanel.innerHTML = '';
+      currentCards.forEach(cardId => {
+        const card = CARDS_DATA[cardId];
+        const wrapper = document.createElement('div');
+        wrapper.className = 'card-wrapper';
+        wrapper.dataset.cardId = cardId;
+        
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'card';
+        // Obrázek (placeholder – reálné obrázky máš ve složce, použij cestu)
+        const imgDiv = document.createElement('div');
+        imgDiv.className = 'card-img';
+        imgDiv.style.backgroundImage = `url('${card.ilustrace}')`;
+        // fallback barva
+        imgDiv.style.backgroundColor = '#ddd';
+        
+        const textDiv = document.createElement('div');
+        textDiv.className = 'card-text';
+        textDiv.textContent = card.text || card.id;
+        
+        cardDiv.appendChild(imgDiv);
+        cardDiv.appendChild(textDiv);
+        wrapper.appendChild(cardDiv);
+        
+        // Úhloměr kontejner
+        const uhlomerCont = document.createElement('div');
+        uhlomerCont.className = 'uhlomer-container';
+        uhlomerCont.innerHTML = `
+          <div style="width:100%;">
+            <div class="uhlomer" id="uhlomer-${cardId}"></div>
+            <div class="inspire-sentence" id="inspire-${cardId}"></div>
+          </div>
+        `;
+        wrapper.appendChild(uhlomerCont);
+        
+        // Kliknutí na kartu = toggle active
+        cardDiv.addEventListener('click', (e) => {
+          e.stopPropagation();
+          wrapper.classList.toggle('active');
+          if (wrapper.classList.contains('active')) {
+            buildUhlomer(cardId, wrapper);
+          }
+        });
+        
+        cardsPanel.appendChild(wrapper);
+      });
+    }
+
+    // Sestaví úhloměr pro kartu
+    function buildUhlomer(cardId, wrapper) {
+      const uhlomerDiv = wrapper.querySelector(`.uhlomer`);
+      const inspireDiv = wrapper.querySelector(`.inspire-sentence`);
+      if (uhlomerDiv.children.length > 0) return; // už postaveno
+      
+      const card = CARDS_DATA[cardId];
+      const uhly = card.uhly;
+      
+      for (let i=0; i<12; i++) {
+        const angleKey = ANGLE_NAMES[i];
+        const seg = document.createElement('div');
+        seg.className = `segment seg-${i}`;
+        seg.style.backgroundColor = ANGLE_COLORS[i];
+        seg.dataset.angleIndex = i;
+        seg.dataset.angleName = angleKey;
+        
+        const hasSentence = uhly && uhly[angleKey] && uhly[angleKey].trim() !== '';
+        if (!hasSentence) {
+          seg.classList.add('inactive');
+        } else {
+          seg.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // zobrazit větu
+            const sentence = uhly[angleKey];
+            inspireDiv.textContent = `${angleKey}: ${sentence}`;
+            // zvýraznit segment
+            uhlomerDiv.querySelectorAll('.segment').forEach(s => s.classList.remove('active-segment'));
+            seg.classList.add('active-segment');
+          });
+        }
+        uhlomerDiv.appendChild(seg);
+      }
+      
+      // výchozí: vybrat první aktivní segment a zobrazit větu
+      const firstActive = Array.from(uhlomerDiv.children).find(s => !s.classList.contains('inactive'));
+      if (firstActive) {
+        const angleKey = firstActive.dataset.angleName;
+        inspireDiv.textContent = `${angleKey}: ${card.uhly[angleKey]}`;
+        firstActive.classList.add('active-segment');
+      } else {
+        inspireDiv.textContent = '(žádná inspirační věta)';
+      }
+    }
+
+    // ---------- ANALÝZA (SIMULACE – nahraď svým kódem) ----------
+    function analyzeText() {
+      const text = diaryEntry.value;
+      if (!text.trim()) return;
+      
+      // SIMULACE: tady vložíš volání tvého analyzéru, který vrátí percentages a mapping pro podbarvení
+      const percentages = simulateAnalysis(text);
+      
+      // Ulož výsledek
+      currentAnalysis = {
+        percentages: percentages,
+        dominant: getDominantAngles(percentages)
+      };
+      
+      displayAnalysisResults(text, percentages, currentAnalysis.dominant);
+      analysisResults.style.display = 'block';
+    }
+
+    function simulateAnalysis(text) {
+      // TOTO NAHRAĎ SKUTEČNÝM ANALYZÉREM!
+      const percents = new Array(12).fill(0);
+      // Jednoduchá heuristika pro demo
+      if (text.includes('?')) { percents[0]+=20; percents[9]+=30; }
+      if (text.includes('.')) { percents[8]+=25; }
+      if (text.length < 50) { percents[1]+=40; percents[6]+=20; }
+      else { percents[4]+=30; percents[2]+=25; }
+      // náhodná složka
+      for(let i=0; i<12; i++) percents[i] = Math.min(100, percents[i] + Math.floor(Math.random()*30));
+      return percents;
+    }
+
+    function getDominantAngles(percents) {
+      const withIndex = percents.map((v,i)=> ({v,i})).sort((a,b)=> b.v - a.v);
+      const top = withIndex.slice(0,3).filter(item => item.v > 0);
+      return top.map(item => item.i);
+    }
+
+    function displayAnalysisResults(text, percents, dominant) {
+      // Tabulka procent
+      angleBars.innerHTML = '';
+      ANGLE_NAMES.forEach((name, idx) => {
+        const div = document.createElement('div');
+        div.className = 'angle-item';
+        div.innerHTML = `<span class="color-dot" style="background:${ANGLE_COLORS[idx]};"></span> ${name}: ${percents[idx]}%`;
+        angleBars.appendChild(div);
+      });
+      
+      const domNames = dominant.map(i => ANGLE_NAMES[i]).join(', ');
+      dominantInfo.textContent = `Dominantní úhly: ${domNames}`;
+      
+      // Podbarvení textu (zjednodušené, v reálu použiješ výstup analyzéru)
+      // Zde jen ukázka: obarvíme podle prvního dominantního úhlu
+      const mainAngle = dominant[0];
+      const color = ANGLE_COLORS[mainAngle] + '40'; // průhlednost
+      highlightedTextDiv.innerHTML = `<span style="background:${color}; padding:2px 0;">${escapeHtml(text)}</span>`;
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // ---------- UKLÁDÁNÍ ----------
+    function saveEntry() {
+      const text = diaryEntry.value.trim();
+      if (!text) return;
+      
+      if (!currentAnalysis) {
+        alert('Nejprve text analyzuj.');
+        return;
+      }
+      
+      const title = prompt('Název zápisu:', 'Zápis ' + new Date().toLocaleString());
+      if (title === null) return;
+      
+      const entry = {
+        id: Date.now() + '-' + Math.random().toString(36),
+        date: new Date().toISOString(),
+        title: title || 'Bez názvu',
+        text: text,
+        cards: [...currentCards],
+        dominantAngles: currentAnalysis.dominant,
+        percentages: currentAnalysis.percentages
+      };
+      
+      diaryEntries.push(entry);
+      saveEntriesToStorage();
+      renderTimeline();
+      
+      // Vyčistit?
+      diaryEntry.value = '';
+      analysisResults.style.display = 'none';
+      currentAnalysis = null;
+    }
+
+    function loadEntriesFromStorage() {
+      const stored = localStorage.getItem('mys-diary');
+      if (stored) {
+        try { diaryEntries = JSON.parse(stored); } catch(e){ diaryEntries = []; }
+      } else {
+        diaryEntries = [];
+      }
+    }
+
+    function saveEntriesToStorage() {
+      localStorage.setItem('mys-diary', JSON.stringify(diaryEntries));
+    }
+
+    function renderTimeline() {
+      timelineStrip.innerHTML = '';
+      diaryEntries.slice().reverse().forEach(entry => {
+        const el = document.createElement('div');
+        el.className = 'timeline-entry';
+        el.dataset.entryId = entry.id;
+        
+        // barevné proužky podle dominantních úhlů
+        const angles = entry.dominantAngles || [];
+        angles.forEach(idx => {
+          const stripe = document.createElement('div');
+          stripe.className = 'color-stripe';
+          stripe.style.backgroundColor = ANGLE_COLORS[idx];
+          stripe.style.height = (100 / angles.length) + '%';
+          el.appendChild(stripe);
+        });
+        if (angles.length === 0) {
+          el.style.backgroundColor = '#aaa';
+        }
+        
+        el.addEventListener('click', (e) => {
+          showEntryTooltip(e, entry);
+        });
+        el.addEventListener('dblclick', () => {
+          loadEntryToEditor(entry);
+        });
+        
+        timelineStrip.appendChild(el);
+      });
+    }
+
+    function showEntryTooltip(e, entry) {
+      const tooltip = document.createElement('div');
+      tooltip.className = 'tooltip';
+      tooltip.textContent = `${entry.title} (${new Date(entry.date).toLocaleDateString()})`;
+      document.body.appendChild(tooltip);
+      tooltip.style.left = e.clientX + 10 + 'px';
+      tooltip.style.top = e.clientY + 10 + 'px';
+      setTimeout(() => tooltip.remove(), 1500);
+    }
+
+    function loadEntryToEditor(entry) {
+      diaryEntry.value = entry.text;
+      currentCards = entry.cards;
+      renderCards();
+      // Pokud chceš i analýzu, můžeš znovu spustit
+    }
+
+    // ---------- SDÍLENÍ / ZAMČENÍ ----------
+    function lockAndShare() {
+      const url = new URL(window.location);
+      url.searchParams.set('cards', currentCards.join(','));
+      const shareUrl = url.toString();
+      shareUrlDisplay.textContent = '🔗 Sdílecí odkaz: ' + shareUrl;
+      // Zkopírovat do schránky
+      navigator.clipboard?.writeText(shareUrl).catch(()=>{});
+      alert('Odkaz zkopírován do schránky. Pošli ho dalším – uvidí stejné tři karty.');
+    }
+
+    init();
+  })();
+</script>
+</body>
+</html>
