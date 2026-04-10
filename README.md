@@ -4,6 +4,7 @@
 
 - [zapisnik](doma/nastroje/zapisnik.html)
 - [zapisnik kimi](doma/nastroje/zapisnik_kimi.html)
+- - [zapisnik claire](doma/nastroje/zapisnik_claire.html)
 - [kniha](doma/nastroje/kniha.html)
 - [knihovna kimi](doma/nastroje/knihovna_kimi.html)
 - [knihovna fenomenu](doma/nastroje/knihovna_fenomenu)
