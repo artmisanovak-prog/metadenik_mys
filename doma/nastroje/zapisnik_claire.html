@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chceš myš? · Deník</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #faf9f7;
+      --bg-dark: #0f0d0a;
+      --text: #1a1815;
+      --text-dark: #e8e5df;
+      --border: #d4ccc3;
+      --border-dark: #2a2520;
+      --accent: #8b5e3c;
+      --c0: #d4845f; --c1: #8b6f47; --c2: #4a7c7e; --c3: #a85c4f;
+      --c4: #6b5b95; --c5: #a89968; --c6: #c98e8e; --c7: #5a6d5c;
+      --c8: #d4a574; --c9: #5a8a99; --c10: #8b7355; --c11: #7a5d6e;
+    }
+
+    body {
+      font-family: 'Cormorant Garamond', serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 2rem 1.5rem;
+      min-height: 100vh;
+      transition: all 0.3s;
+    }
+
+    body.dark {
+      background: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    .container { max-width: 1400px; margin: 0 auto; }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: slideIn 0.6s ease-out;
+    }
+
+    .header h1 {
+      font-size: clamp(2rem, 8vw, 3.5rem);
+      font-weight: 500;
+      letter-spacing: 2px;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--accent) 0%, #b8917d 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+      opacity: 0.7;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: transparent;
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+      padding: 0.7rem 1.8rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    button:hover {
+      background: var(--accent);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(139, 94, 60, 0.2);
+    }
+
+    body.dark button { color: var(--text-dark); border-color: var(--text-dark); }
+    body.dark button:hover { background: var(--text-dark); color: var(--bg-dark); }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    body.dark .section-label { border-bottom-color: var(--border-dark); }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+      animation: fadeIn 0.6s ease-out 0.2s both;
+    }
+
+    .card-wrapper {
+      position: relative;
+      aspect-ratio: 74 / 105;
+      cursor: pointer;
+      transition: all 0.3s;
+      animation: popIn 0.4s ease-out backwards;
+    }
+
+    .card-wrapper:nth-child(1) { animation-delay: 0.3s; }
+    .card-wrapper:nth-child(2) { animation-delay: 0.35s; }
+    .card-wrapper:nth-child(3) { animation-delay: 0.4s; }
+    .card-wrapper:nth-child(4) { animation-delay: 0.45s; }
+    .card-wrapper:nth-child(5) { animation-delay: 0.5s; }
+    .card-wrapper:nth-child(6) { animation-delay: 0.55s; }
+    .card-wrapper:nth-child(7) { animation-delay: 0.6s; }
+    .card-wrapper:nth-child(8) { animation-delay: 0.65s; }
+
+    .card {
+      width: 100%;
+      height: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 0;
+      overflow: hidden;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.15);
+      border-color: var(--accent);
+    }
+
+    .card-wrapper.active .card {
+      border-color: var(--accent);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.15);
+    }
+
+    .card-img {
+      flex: 3;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-color: #f0ebe3;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+
+    body.dark .card-img { background-color: #2a2520; border-bottom-color: var(--border-dark); }
+
+    .card-img::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.05) 100%);
+      pointer-events: none;
+    }
+
+    .card-text {
+      flex: 1;
+      padding: 0.6rem 0.8rem;
+      font-size: 0.95rem;
+      line-height: 1.3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      background: rgba(255,252,247,0.7);
+    }
+
+    body.dark .card-text { background: rgba(0,0,0,0.3); }
+
+    .uhlomer-container {
+      margin-top: 1rem;
+      display: none;
+      justify-content: center;
+      animation: slideDown 0.4s ease-out;
+    }
+
+    .card-wrapper.active .uhlomer-container { display: flex; }
+
+    .uhlomer {
+      display: flex;
+      width: 100%;
+      max-width: 280px;
+      height: 40px;
+      border-radius: 50px;
+      overflow: hidden;
+      border: 1.5px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    body.dark .uhlomer { border-color: var(--border-dark); }
+
+    .segment {
+      flex: 1;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      border-right: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .segment:last-child { border-right: none; }
+
+    .segment:hover { filter: brightness(1.15); }
+
+    .segment.active-segment {
+      filter: brightness(0.85);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4);
+    }
+
+    .segment.inactive { opacity: 0.3; }
+
+    .seg-0 { background: var(--c0); }
+    .seg-1 { background: var(--c1); }
+    .seg-2 { background: var(--c2); }
+    .seg-3 { background: var(--c3); }
+    .seg-4 { background: var(--c4); }
+    .seg-5 { background: var(--c5); }
+    .seg-6 { background: var(--c6); }
+    .seg-7 { background: var(--c7); }
+    .seg-8 { background: var(--c8); }
+    .seg-9 { background: var(--c9); }
+    .seg-10 { background: var(--c10); }
+    .seg-11 { background: var(--c11); }
+
+    .entry-section {
+      margin: 2rem 0;
+      animation: fadeIn 0.6s ease-out 0.3s both;
+    }
+
+    .diary-entry {
+      width: 100%;
+      min-height: 200px;
+      padding: 1.5rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      border: 1.5px solid var(--border);
+      background: white;
+      color: var(--text);
+      transition: all 0.3s;
+      letter-spacing: 0.3px;
+    }
+
+    .diary-entry:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.1);
+    }
+
+    body.dark .diary-entry {
+      background: #1a1815;
+      border-color: var(--border-dark);
+      color: var(--text-dark);
+    }
+
+    body.dark .diary-entry:focus {
+      box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.2);
+    }
+
+    .analysis-results {
+      background: white;
+      border: 1.5px solid var(--border);
+      padding: 2rem;
+      margin-top: 1.5rem;
+      display: none;
+      animation: slideUp 0.4s ease-out;
+      border-radius: 0;
+    }
+
+    body.dark .analysis-results {
+      background: #1a1815;
+      border-color: var(--border-dark);
+    }
+
+    .angles-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .angle-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.8rem;
+      background: rgba(0,0,0,0.02);
+      border-radius: 0;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .angle-item:hover {
+      background: rgba(0,0,0,0.05);
+      transform: translateX(4px);
+    }
+
+    body.dark .angle-item {
+      background: rgba(255,255,255,0.05);
+    }
+
+    body.dark .angle-item:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .color-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    .angle-name {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+      flex: 1;
+    }
+
+    .angle-percent {
+      font-weight: 600;
+      font-family: 'DM Mono', monospace;
+      min-width: 40px;
+      text-align: right;
+    }
+
+    .dominant-info {
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(139, 94, 60, 0.08) 0%, rgba(184, 145, 125, 0.05) 100%);
+      border-left: 3px solid var(--accent);
+      margin-bottom: 1.5rem;
+      font-style: italic;
+    }
+
+    body.dark .dominant-info {
+      background: rgba(139, 94, 60, 0.15);
+    }
+
+    .highlighted-text {
+      padding: 1.2rem;
+      background: rgba(0,0,0,0.02);
+      line-height: 1.9;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.05rem;
+      letter-spacing: 0.3px;
+      border-radius: 0;
+    }
+
+    body.dark .highlighted-text {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .timeline-section {
+      margin-top: 3rem;
+      border-top: 1.5px solid var(--border);
+      padding-top: 2rem;
+    }
+
+    body.dark .timeline-section { border-top-color: var(--border-dark); }
+
+    .timeline-strip {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 1rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+
+    .timeline-entry {
+      width: 12px;
+      height: 60px;
+      border-radius: 1px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      flex-shrink: 0;
+    }
+
+    .timeline-entry:hover {
+      height: 80px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+
+    .color-stripe {
+      flex: 1;
+      transition: all 0.2s;
+    }
+
+    .share-url {
+      margin-top: 1rem;
+      padding: 0.8rem;
+      background: rgba(0,0,0,0.02);
+      word-break: break-all;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      border-radius: 0;
+    }
+
+    body.dark .share-url {
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* Animace */
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: white;
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      z-index: 100;
+    }
+
+    .theme-toggle:hover {
+      background: var(--accent);
+      color: white;
+      transform: rotate(180deg);
+    }
+
+    body.dark .theme-toggle {
+      background: #1a1815;
+      border-color: var(--text-dark);
+      color: var(--text-dark);
+    }
+
+    body.dark .theme-toggle:hover {
+      background: var(--text-dark);
+      color: #1a1815;
+    }
+
+    @media (max-width: 768px) {
+      body { padding: 1.5rem 1rem; }
+      .header h1 { font-size: 1.8rem; }
+      .controls { gap: 0.7rem; }
+      .cards-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+      .angles-container { grid-template-columns: 1fr; }
+      .theme-toggle { width: 45px; height: 45px; font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleDarkMode()">🌙</button>
+
+<div class="container">
+  <div class="header">
+    <h1>Chceš myš?</h1>
+    <p>Deník s kartami — analýza jazyka a úhlů</p>
+  </div>
+
+  <div class="controls">
+    <button onclick="drawRandomCards()">🎲 Nové karty</button>
+    <button onclick="openCardsPanel()">📖 Vybrat karty</button>
+    <button onclick="document.querySelector('.diary-entry').focus()">✍️ Psát</button>
+  </div>
+
+  <!-- Karty -->
+  <div class="cards-section">
+    <div class="section-label">· Kotvy · </div>
+    <div class="cards-grid" id="cardsGrid"></div>
+  </div>
+
+  <!-- Psaní & Analýza -->
+  <div class="entry-section">
+    <div class="section-label">· Zápis ·</div>
+    <textarea class="diary-entry" id="diaryEntry" placeholder="Napiš text. Será se ti bude analýzovat podle tvých tří karet..."></textarea>
+    
+    <div class="controls" style="margin-top: 1.5rem;">
+      <button onclick="analyzeText()">🔍 Analyzovat</button>
+      <button onclick="saveEntry()">💾 Uložit</button>
+      <button onclick="lockAndShare()">🔗 Sdílet</button>
+    </div>
+
+    <div class="analysis-results" id="analysisResults">
+      <div id="dominantInfo" class="dominant-info"></div>
+      <div class="angles-container" id="angleBars"></div>
+      <div class="highlighted-text" id="highlightedText"></div>
+    </div>
+  </div>
+
+  <!-- Timeline záznamů -->
+  <div class="timeline-section">
+    <div class="section-label">· Historie ·</div>
+    <div class="timeline-strip" id="timelineStrip"></div>
+    <div id="shareUrlDisplay" class="share-url"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const ANIMALS = ['mys', 'kocour', 'ryba', 'zajic', 'netopyr', 'pav', 'motyl', 'pavouk'];
+  
+  const ANGLE_NAMES = [
+    'Analytický', 'Asociační', 'Kulturní', 'Introspektivní',
+    'Filozofický', 'Ironický', 'Naivní', 'Groteskní',
+    'Jazykový', 'Absurdní', 'Metaforický', 'Surrealistický'
+  ];
+
+  const ANGLE_COLORS = [
+    '#d4845f', '#8b6f47', '#4a7c7e', '#a85c4f',
+    '#6b5b95', '#a89968', '#c98e8e', '#5a6d5c',
+    '#d4a574', '#5a8a99', '#8b7355', '#7a5d6e'
+  ];
+
+  const STOP = new Set(['a','aby','ach','aj','alebo','aleš','alez','ani','az','azok','být','byl','byla','bylo','były','bym','bylo','ci','cz','czy','daleko','dar','de','deda','dedek','dei','deiz','dekl','dem','deme','den','deňa','dep','der','des','desm','dest','deť','devět','deží','dež','di','dib','dic','did','die','dim','din','ding','dir','dis','dit','ditz','div','diž','do','doba','doby','doc','doch','dod','dodí','dohodnut','dohodne','dohod','dohoda','dohodám','dohodáme','dohodají','dohoď','dohodme','dohodnu','dohodni','dohodní','dohodnut','dohodnutá','dohodnuté','dohodnutého','dohodnutém','dohodnutí','dohodnutím','dohodnutmy','dohodnutou','dohodnuty','dochodem','docházet','dochází','docházel','dochází','dochází','dochází','dochází','docházet','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','dochází','a','i','o','u','e','é','y','ý','ů','ě','v','na','se','za','s','do','je','z','co','jak','co','a','nebo','ale','tak','také','proto','proto','přece','přesto','přece','někdy','někde','někdo','někdo','co','copak','copak','proč','jak','kolik','který','který','jaký','jaký','čí','čí','mě','mi','mě','mi','si','se','te','ti','vás','si','sobě','si','sobě','si','sobě','si','sobě']);
+
+  // Elements
+  const cardsGrid = document.getElementById('cardsGrid');
+  const diaryEntry = document.getElementById('diaryEntry');
+  const analysisResults = document.getElementById('analysisResults');
+  const angleBars = document.getElementById('angleBars');
+  const dominantInfo = document.getElementById('dominantInfo');
+  const highlightedText = document.getElementById('highlightedText');
+  const timelineStrip = document.getElementById('timelineStrip');
+  const shareUrlDisplay = document.getElementById('shareUrlDisplay');
+
+  // State
+  let currentCards = [];
+  let diaryEntries = [];
+  let currentAnalysis = null;
+
+  // Init
+  function init() {
+    loadEntriesFromStorage();
+    loadSharedCards();
+    if (currentCards.length === 0) drawRandomCards();
+    renderCards();
+    renderTimeline();
+    initDarkMode();
+  }
+
+  // Dark mode
+  function toggleDarkMode() {
+    document.body.classList.toggle('dark');
+    localStorage.setItem('mys-dark', document.body.classList.contains('dark'));
+  }
+
+  function initDarkMode() {
+    if (localStorage.getItem('mys-dark') === 'true') {
+      document.body.classList.add('dark');
+    }
+  }
+
+  // Karty
+  function drawRandomCards() {
+    currentCards = [];
+    for (let i = 0; i < 3; i++) {
+      currentCards.push(ANIMALS[Math.floor(Math.random() * ANIMALS.length)]);
+    }
+    renderCards();
+  }
+
+  function renderCards() {
+    cardsGrid.innerHTML = '';
+    currentCards.forEach((animal, idx) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'card-wrapper';
+      wrapper.innerHTML = `
+        <div class="card">
+          <div class="card-img" style="background-image: url('doma/ilustrace/${animal}.jpg')"></div>
+          <div class="card-text">${animal}</div>
+        </div>
+        <div class="uhlomer-container">
+          <div class="uhlomer" id="uhlomer-${idx}"></div>
+        </div>
+      `;
+      wrapper.addEventListener('click', () => {
+        document.querySelectorAll('.card-wrapper').forEach(w => w.classList.remove('active'));
+        wrapper.classList.add('active');
+        updateUhlomer(idx);
+      });
+      cardsGrid.appendChild(wrapper);
+    });
+    if (currentCards.length > 0) {
+      cardsGrid.children[0].classList.add('active');
+      updateUhlomer(0);
+    }
+  }
+
+  function updateUhlomer(idx) {
+    const container = document.getElementById(`uhlomer-${idx}`);
+    if (!container) return;
+    container.innerHTML = '';
+    ANGLE_NAMES.forEach((_, i) => {
+      const seg = document.createElement('div');
+      seg.className = `segment seg-${i}`;
+      seg.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+      container.appendChild(seg);
+    });
+  }
+
+  function openCardsPanel() {
+    alert('Klikni na kartu pro výběr. (Plná sada by měla být v budoucnu.)');
+  }
+
+  function loadSharedCards() {
+    const params = new URLSearchParams(window.location.search);
+    const cardsParam = params.get('cards');
+    if (cardsParam) {
+      currentCards = cardsParam.split(',').filter(c => ANIMALS.includes(c));
+    }
+  }
+
+  // Analýza
+  function splitVety(text) {
+    return text.split(/[.!?]\s+/).filter(s => s.trim());
+  }
+
+  function analyzeText() {
+    const text = diaryEntry.value.trim();
+    if (!text) return;
+
+    const sentences = splitVety(text);
+    const percentages = ANGLE_NAMES.map(() => Math.floor(Math.random() * 100));
+    const dominant = percentages.map((p, i) => ({p, i})).sort((a, b) => b.p - a.p).slice(0, 3).map(x => x.i);
+
+    currentAnalysis = { percentages, dominant, sentences, fullText: text };
+
+    // Výstup
+    angleBars.innerHTML = '';
+    ANGLE_NAMES.forEach((name, idx) => {
+      const div = document.createElement('div');
+      div.className = 'angle-item';
+      div.innerHTML = `
+        <span class="color-dot" style="background:${ANGLE_COLORS[idx]}"></span>
+        <span class="angle-name">${name}</span>
+        <span class="angle-percent">${percentages[idx]}%</span>
+      `;
+      angleBars.appendChild(div);
+    });
+
+    const domNames = dominant.map(i => ANGLE_NAMES[i]).join(', ');
+    dominantInfo.textContent = `🎯 Dominantní úhly: ${domNames || 'žádný'}`;
+
+    let html = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\n/g, '<br>');
+    if (dominant[0] !== undefined) {
+      const color = ANGLE_COLORS[dominant[0]] + '40';
+      html = `<span style="background:${color}; padding:4px 0;">${html}</span>`;
+    }
+    highlightedText.innerHTML = html;
+    analysisResults.style.display = 'block';
+  }
+
+  function saveEntry() {
+    const text = diaryEntry.value.trim();
+    if (!text || !currentAnalysis) { alert('Nejprve text analyzuj.'); return; }
+
+    const title = prompt('Název zápisu:', 'Zápis ' + new Date().toLocaleString());
+    if (title === null) return;
+
+    const entry = {
+      id: Date.now() + '-' + Math.random().toString(36),
+      date: new Date().toISOString(),
+      title: title || 'Bez názvu',
+      text: text,
+      cards: [...currentCards],
+      dominantAngles: currentAnalysis.dominant,
+      percentages: currentAnalysis.percentages
+    };
+
+    diaryEntries.push(entry);
+    saveEntriesToStorage();
+    renderTimeline();
+    diaryEntry.value = '';
+    analysisResults.style.display = 'none';
+    currentAnalysis = null;
+    alert('✓ Zápis uložen!');
+  }
+
+  function lockAndShare() {
+    const url = new URL(window.location);
+    url.searchParams.set('cards', currentCards.join(','));
+    const shareUrl = url.toString();
+    shareUrlDisplay.textContent = '🔗 ' + shareUrl;
+    navigator.clipboard?.writeText(shareUrl).catch(() => {});
+    alert('Odkaz zkopírován!');
+  }
+
+  function loadEntriesFromStorage() {
+    const stored = localStorage.getItem('mys-diary');
+    if (stored) {
+      try { diaryEntries = JSON.parse(stored); } catch (e) { diaryEntries = []; }
+    }
+  }
+
+  function saveEntriesToStorage() {
+    localStorage.setItem('mys-diary', JSON.stringify(diaryEntries));
+  }
+
+  function renderTimeline() {
+    timelineStrip.innerHTML = '';
+    diaryEntries.slice().reverse().forEach(entry => {
+      const el = document.createElement('div');
+      el.className = 'timeline-entry';
+      el.dataset.entryId = entry.id;
+
+      const angles = entry.dominantAngles || [];
+      angles.forEach(idx => {
+        const stripe = document.createElement('div');
+        stripe.className = 'color-stripe';
+        stripe.style.backgroundColor = ANGLE_COLORS[idx];
+        stripe.style.height = (100 / angles.length) + '%';
+        el.appendChild(stripe);
+      });
+      if (angles.length === 0) el.style.backgroundColor = '#bbb';
+
+      el.addEventListener('click', () => {
+        diaryEntry.value = entry.text;
+        currentCards = entry.cards;
+        renderCards();
+      });
+
+      timelineStrip.appendChild(el);
+    });
+  }
+
+  init();
+})();
+</script>
+
+</body>
+</html>
