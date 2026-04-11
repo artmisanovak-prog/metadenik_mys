@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Chceš myš? · Deník</title>
+  <style>
+    /* ---------- RESET & PROMĚNNÉ ---------- */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      background: #fbfaf6; color: #1e1e1e;
+      padding: 1rem 1rem 1rem 4.5rem;
+      transition: background 0.2s, color 0.2s;
+      min-height: 100vh; display: flex; flex-direction: column;
+      position: relative;
+    }
+    body.dark { background: #1a1a1a; color: #e0ddd5; }
+    body.modal-open { overflow: hidden; }
+
+    /* Myš */
+    .mys-container { position: fixed; left: 10px; top: 0; bottom: 0; width: 50px; pointer-events: none; z-index: 1000; }
+    .mys-icon {
+      position: absolute; top: -60px; left: 5px; font-size: 42px; line-height: 1;
+      transform: rotate(180deg); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+      animation: fallAndSlide 1.8s ease-in forwards; will-change: transform, top, left;
+    }
+    body.dark .mys-icon { filter: brightness(0) invert(1) drop-shadow(0 2px 4px rgba(255,255,255,0.1)); }
+    @keyframes fallAndSlide {
+      0% { top: -60px; left: 5px; transform: rotate(180deg); }
+      85% { top: calc(100vh - 80px); left: 5px; transform: rotate(180deg); }
+      92% { top: calc(100vh - 70px); left: 5px; transform: rotate(90deg); }
+      100% { top: calc(100vh - 70px); left: calc(100% - 70px); transform: rotate(90deg); }
+    }
+
+    .app { max-width: 1200px; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column; }
+
+    /* Hlavička */
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 1px solid currentColor; padding-bottom: 0.5rem; }
+    .title h1 { font-size: 1.8rem; font-weight: normal; letter-spacing: 2px; }
+    .theme-toggle { background: none; border: 1px solid currentColor; color: inherit; font-size: 1.5rem; padding: 0.2rem 0.8rem; cursor: pointer; border-radius: 30px; }
+
+    /* Legenda (kruh) */
+    .legend-wheel { display: flex; justify-content: center; margin-bottom: 1.5rem; }
+    .wheel-container { position: relative; width: 260px; height: 260px; }
+    canvas#angleWheel { width: 100%; height: 100%; display: block; cursor: pointer; }
+    .wheel-info { text-align: center; margin-top: 0.5rem; font-size: 0.9rem; min-height: 3rem; }
+
+    /* Karty jako blok */
+    .cards-block { display: flex; flex-wrap: nowrap; justify-content: center; gap: 0; margin-bottom: 0.5rem; border: 2px solid currentColor; border-radius: 8px; overflow: hidden; }
+    .card-wrapper { flex: 1; min-width: 0; max-width: 280px; aspect-ratio: 74 / 105; position: relative; border-right: 1px solid currentColor; }
+    .card-wrapper:last-child { border-right: none; }
+    .card { width: 100%; height: 100%; background: #fffcf7; cursor: pointer; display: flex; flex-direction: column; }
+    body.dark .card { background: #2c2c2c; }
+    .card-img { flex: 3; background-size: cover; background-position: center; background-repeat: no-repeat; border-bottom: 1px solid currentColor; }
+
+    /* Uhloměry pod kartami */
+    .uhlomers-row { display: flex; justify-content: center; gap: 0; margin-top: 0.5rem; margin-bottom: 1rem; }
+    .uhlomer-wrapper { flex: 1; max-width: 280px; display: none; flex-direction: column; align-items: center; padding: 0 0.2rem; }
+    .cards-block.active ~ .uhlomers-row .uhlomer-wrapper { display: flex; }
+    .uhlomer { display: flex; width: 100%; max-width: 240px; margin: 0 auto; border-radius: 100px 100px 0 0; overflow: hidden; border: 1px solid currentColor; border-bottom: none; }
+    .segment { flex: 1 0 16.666%; height: 30px; background: #ccc; border-right: 1px solid #fff; cursor: pointer; transition: filter 0.1s; }
+    .segment:last-child { border-right: none; }
+    .segment.active-segment { filter: brightness(1.2); box-shadow: inset 0 0 0 1px white; }
+    .segment.inactive { opacity: 0.4; cursor: not-allowed; }
+    .inspire-sentence { font-size: 0.8rem; margin-top: 0.3rem; min-height: 2.5rem; font-style: italic; text-align: center; border-top: 1px dashed currentColor; padding-top: 0.3rem; }
+
+    /* Barvy segmentů */
+    .seg-0{background:#1f77b4}.seg-1{background:#ff7f0e}.seg-2{background:#2ca02c}.seg-3{background:#d62728}.seg-4{background:#9467bd}.seg-5{background:#8c564b}.seg-6{background:#e377c2}.seg-7{background:#7f7f7f}.seg-8{background:#bcbd22}.seg-9{background:#17becf}.seg-10{background:#aec7e8}.seg-11{background:#ffbb78}
+
+    /* Ovládací prvky */
+    .card-actions { display: flex; justify-content: center; gap: 1rem; margin: 1rem 0; flex-wrap: wrap; }
+    button { background: none; border: 1.5px solid currentColor; padding: 0.4rem 1.2rem; font-family: inherit; font-size: 0.9rem; cursor: pointer; border-radius: 30px; color: inherit; transition: 0.1s; }
+    button:hover { background: rgba(0,0,0,0.05); }
+    body.dark button:hover { background: rgba(255,255,255,0.1); }
+    textarea { width: 100%; padding: 1rem; font-family: 'Courier New', Courier, monospace; font-size: 1rem; line-height: 1.6; background: #fffdf9; border: 2px solid currentColor; border-radius: 8px; color: inherit; resize: vertical; min-height: 180px; transition: min-height 0.2s; }
+    body.dark textarea { background: #262626; }
+    textarea:focus { min-height: 220px; outline: none; box-shadow: 0 0 0 2px rgba(0,0,0,0.1); }
+
+    /* Analýza */
+    .analysis-results { margin: 1rem 0; padding: 0.8rem; border: 1px dashed currentColor; border-radius: 8px; }
+    .angle-bars { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin: 0.5rem 0; }
+    .angle-item { display: flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; }
+    .color-dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 4px; }
+    .dominant-info { margin-top: 0.5rem; font-weight: bold; }
+    .highlighted-text { white-space: pre-wrap; line-height: 1.8; background: rgba(0,0,0,0.02); padding: 0.5rem; border-radius: 6px; }
+    body.dark .highlighted-text { background: rgba(255,255,255,0.03); }
+    .highlight { padding: 0 2px; border-radius: 4px; }
+
+    /* Časová osa */
+    .timeline { margin-top: 2rem; border-top: 1px solid currentColor; padding-top: 1rem; }
+    .timeline-strip { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 0.5rem; }
+    .timeline-entry { width: 24px; height: 48px; border-radius: 6px; cursor: pointer; border: 1px solid rgba(0,0,0,0.2); transition: transform 0.1s; display: flex; flex-direction: column; overflow: hidden; }
+    .timeline-entry:hover { transform: scale(1.05); z-index: 2; }
+    .color-stripe { flex: 1; }
+
+    /* Modální okno */
+    .writing-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fbfaf6; z-index: 2000; padding: 1rem; overflow-y: auto; flex-direction: column; }
+    body.dark .writing-modal { background: #1a1a1a; }
+    .writing-modal.active { display: flex; }
+    .modal-header { display: flex; justify-content: flex-end; margin-bottom: 1rem; }
+    .modal-close { font-size: 2rem; cursor: pointer; background: none; border: none; color: inherit; }
+    .modal-content { flex: 1; display: flex; flex-direction: column; max-width: 800px; margin: 0 auto; width: 100%; }
+    .modal-content textarea { flex: 1; min-height: 300px; }
+
+    @media (max-width: 600px) {
+      body { padding-left: 1rem; }
+      .mys-container { display: none; }
+      .card-wrapper { max-width: 150px; }
+      .uhlomer { max-width: 180px; }
+      .segment { height: 22px; }
+    }
+  </style>
+</head>
+<body class="light">
+<div class="mys-container"><div class="mys-icon">🐭</div></div>
+<div class="app">
+  <div class="header">
+    <div class="title"><h1>Chceš myš? Deník</h1></div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Tmavý režim">🌙</button>
+  </div>
+
+  <!-- Legenda (kruh) -->
+  <div class="legend-wheel">
+    <div class="wheel-container"><canvas id="angleWheel" width="260" height="260"></canvas></div>
+  </div>
+  <div class="wheel-info" id="wheelInfo">Klikni na segment – zobrazí se popis úhlu</div>
+
+  <!-- Blok karet -->
+  <div class="cards-block" id="cardsBlock"></div>
+  <div class="uhlomers-row" id="uhlomersRow"></div>
+
+  <div class="card-actions">
+    <button id="shuffleCards">🎲 Losovat</button>
+    <button id="lockShareBtn">🔒 Sdílet sadu</button>
+  </div>
+  <div id="shareUrlDisplay" style="font-size:0.8rem; word-break:break-all;"></div>
+
+  <!-- Editor -->
+  <div class="entry-area">
+    <textarea id="diaryEntry" placeholder="Piš svůj zápis... Myš si všimne struktury."></textarea>
+  </div>
+
+  <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+    <button id="openWritingModal">📝 Psát na celou obrazovku</button>
+    <button id="analyzeBtn">🔍 Analyzovat</button>
+    <button id="saveBtn">💾 Uložit</button>
+    <button id="newEntryBtn">🆕 Nový</button>
+  </div>
+
+  <!-- Výsledky analýzy -->
+  <div class="analysis-results" id="analysisResults" style="display: none;">
+    <div><strong>Zastoupení úhlů (0–100%):</strong></div>
+    <div class="angle-bars" id="angleBars"></div>
+    <div class="dominant-info" id="dominantInfo"></div>
+    <div><strong>Text s podbarvením:</strong></div>
+    <div id="highlightedText" class="highlighted-text"></div>
+    <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+      <button id="shareEntryBtn">🔗 Sdílet zápis</button>
+      <button id="printEntryBtn">🖨️ Tisk</button>
+    </div>
+  </div>
+
+  <!-- Časová osa -->
+  <div class="timeline">
+    <strong>📅 Historie zápisů</strong>
+    <div class="timeline-strip" id="timelineStrip"></div>
+  </div>
+  <div id="historyDetail" style="margin-top: 1rem; padding: 1rem; border: 1px dashed currentColor; display: none;"></div>
+</div>
+
+<!-- Modální okno -->
+<div class="writing-modal" id="writingModal">
+  <div class="modal-header"><button class="modal-close" id="closeModalBtn">&times;</button></div>
+  <div class="modal-content">
+    <div class="cards-block" id="modalCardsBlock"></div>
+    <textarea id="modalDiaryEntry" placeholder="Piš..."></textarea>
+    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+      <button id="modalAnalyzeBtn">🔍 Analyzovat</button>
+      <button id="modalSaveBtn">💾 Uložit</button>
+      <button id="modalCloseDone">✓ Hotovo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    "use strict";
+
+    // ---------- DATA KARET ----------
+    const CARDS_DATA = {
+      "myš": { id:"myš", ilustrace:"doma/ilustrace/mys.jpg", text:"chceš myš ??",
+        uhly:{"absurdní":"nabídka která mate měřítka","jazykový":"zvíře i myšlenka tělo i idea","ironický":"detail který drží svět","filozofický":"čeho si nevšimne myš - nestalo se","naivní":"myslela jsem že se bude hodit","groteskní":"možná se jen houpe hlavou dolů visí za ocas a hraje si a tím mění pravidla","kulturní":"symbol ticha v nabídce","introspektivní":"navazuje kontakt","surrealistický":"otázka je dárek"} },
+      "kocour": { id:"kocour", ilustrace:"doma/ilustrace/kocour.jpg", text:"kocour sežral dvě berušky a půl hodiny krkal tečky",
+        uhly:{"absurdní":"trávení interpunkce","jazykový":"tečka jako vedlejší produkt věty","ironický":"přesnost tam kde na ní nezáleží","filozofický":"náhoda která se tváří jako pravidlo","naivní":"prostě se to stalo","groteskní":"statistiky trávení","kulturní":"počítání jako tik","introspektivní":"nemůžu to zastavit jen sledovat","surrealistický":"čísla vycházející z tlamy"} },
+      "zajíc": { id:"zajíc", ilustrace:"doma/ilustrace/zajic.jpg", text:"zajíc co prošel ohněm",
+        uhly:{"absurdní":"oheň který nefunguje","jazykový":"negace přísloví","ironický":"odolnost tam kde se čeká slabost","filozofický":"podstata nezávislá na prostředí","naivní":"oběť která nehoří","groteskní":"zajíc není palivo","kulturní":"stereotyp naruby","introspektivní":"žádný oheň nepálí stejně","surrealistický":"skok skrz nemožné"} },
+      "ryba": { id:"ryba", ilustrace:"doma/ilustrace/ryba.jpg", text:"rybí rap",
+        uhly:{"absurdní":"hudba bez plic","jazykový":"rytmus místo slov","ironický":"projev slyšitelný jen pod hladinou","filozofický":"komunikace která nepotřebuje porozumění","naivní":"prostě to plyne","groteskní":"flow bez vzduchu","kulturní":"underground doslova","introspektivní":"mluvím i když mě nikdo neposlouchá","surrealistický":"beat z bublin"} },
+      "páv": { id:"páv", ilustrace:"doma/ilustrace/pav.jpg", text:"oko za okem. páv za pávem",
+        uhly:{"absurdní":"soutěž pohledů bez poroty","jazykový":"redundance jako ornament","ironický":"okázalost která sleduje sama sebe","filozofický":"identita vzniká z nekonečného zrcadlení","naivní":"čím víc očí tím líp","groteskní":"narcismus s peřím","kulturní":"estetika přebytku","introspektivní":"dívám se na sebe abych si byl jistý že existuji","surrealistický":"oči které se rozmnožují"} },
+      "netopýr": { id:"netopýr", ilustrace:"doma/ilustrace/netopyr.jpg", text:"netopýří glamour",
+        uhly:{"absurdní":"elegance závislá na tmě","jazykový":"přídavné jméno platné jen v noci","ironický":"to co fascinuje po tmě se za světla omlouvá","filozofický":"hodnota věcí se mění s osvětlením","naivní":"ve tmě jsem hezčí","groteskní":"glamour s blánami","kulturní":"estetika outsiderů","introspektivní":"mám verzi sebe kterou ukazuji jen nocím","surrealistický":"šperk který se rozpadne při svítání"} },
+      "motýl": { id:"motýl", ilustrace:"doma/ilustrace/motyl.jpg", text:"motýl v břiše",
+        uhly:{"absurdní":"emoce bez kalorií","jazykový":"metafora, která selhala","ironický":"romantika bez užitku","filozofický":"pocit není zdroj","naivní":"myslela jsem, že to stačí","groteskní":"dieta z emocí","kulturní":"demontáž klišé","introspektivní":"něco cítím, ale nestačí to","surrealistický":"létání v prázdném žaludku"} },
+      "pavouk": { id:"pavouk", ilustrace:"doma/ilustrace/pavouk.jpg", text:"pavouk čeká",
+        uhly:{"absurdní":"pauza která se odmítá stát pokračováním","jazykový":"věta bez slovesa","ironický":"struktura bez děje","filozofický":"stav mezi začátkem a koncem","naivní":"ono se to nějak vyřeší","groteskní":"architektura váhání","kulturní":"estetika nedokončení","introspektivní":"nechávám věci být otevřené","surrealistický":"čas zachycený ve vlákně"} },
+      "krokodýl": { id:"krokodýl", ilustrace:"doma/ilustrace/krokodyl.jpg", text:"krokodýlí slzy",
+        uhly:{"absurdní":"totální výprodej falešných slz","jazykový":"reklama jako vyznání","ironický":"emoce zlevněná na nulu","filozofický":"hodnota citů v tržní logice","naivní":"proč by si děti nemohly koupit balíček slz na hraní","groteskní":"marketing empatie","kulturní":"cynismus zabalený do slevy","introspektivní":"falešný pláč výhodně","surrealistický":"hypermarket predátorů"} }
+    };
+
+    // ---------- DATA ÚHLŮ (plná verze z analyzer_v7) ----------
+    const UHLY = [
+      {i:0,st:0,barva:'#1f77b4',nazev:'Analytický',popis:'Struktury, výčty, dlouhé věty.',mikro:['Dlouhá věta (20+ slov)','Polysyndeton','Apoziční definice','Parataxe'],makro:['Fixace (opakovaná slova)']},
+      {i:1,st:30,barva:'#ff7f0e',nazev:'Asociační',popis:'Fragmenty, imperativy, číslovky.',mikro:['Fragment (krátká věta)','Enumerace (čárky)','Vykřičník','Číslovka/číslice','Znaménko'],makro:[]},
+      {i:2,st:60,barva:'#2ca02c',nazev:'Kulturní',popis:'Minulý čas, tradice, role.',mikro:['Minulý čas (bez 1.os.j.č.)','Parabola','Intertextualita','Kulturní odkaz'],makro:['Změna role (zájmen)']},
+      {i:3,st:90,barva:'#d62728',nazev:'Introspektivní',popis:'1. osoba, detaily, tempo.',mikro:['1. osoba j.č.','Smyslový detail'],makro:['Změna tempa vět']},
+      {i:4,st:120,barva:'#9467bd',nazev:'Filozofický',popis:'Metatext, otázky, deklarace.',mikro:['Metatext','Deklarace','Otázka (ne v přímé řeči)','Paradox (2× být bez ale)','Filozofická kolokace'],makro:[]},
+      {i:5,st:150,barva:'#8c564b',nazev:'Ironický',popis:'Negace, kontrast, ironie.',mikro:['Negace (2+ záporů)','Parentéze','Ironie (2× být + ale)','Deformovaná frazeologie'],makro:['Kontrast (sémantický)']},
+      {i:6,st:180,barva:'#e377c2',nazev:'Naivní',popis:'Elipsa, přímá řeč, nerozhodnost.',mikro:['Elipsa (bez slovesa)','Komprese','Nerozhodnost','Přímá řeč','Performativita'],makro:[]},
+      {i:7,st:210,barva:'#7f7f7f',nazev:'Groteskní',popis:'Gradace, hyperbola, vykřičník.',mikro:['Hyperbola','Tautologie','Vykřičník','Ilokuce (řečový akt + !)'],makro:['Gradace (délka vět)','Změna času']},
+      {i:8,st:240,barva:'#bcbd22',nazev:'Jazykový',popis:'Anafora, aliterace, paralelismus.',mikro:['Onomatopoeia'],makro:['Anafora','Epifora','Aliterace','Paralelismus']},
+      {i:9,st:270,barva:'#17becf',nazev:'Absurdní',popis:'Paradox, oxymóron, personifikace.',mikro:['Aposiopeze (…)','Synestezie (2+ smysly)','Personifikace','Oxymóron','Neologismus'],makro:['Přeskok (náhlá změna)']},
+      {i:10,st:300,barva:'#aec7e8',nazev:'Metaforický',popis:'Metafora, přirovnání, apostrofa.',mikro:['Metafora','Přirovnání','Závorky','Pomlčka','Apostrofa'],makro:[]},
+      {i:11,st:330,barva:'#ffbb78',nazev:'Surrealistický',popis:'Asyndeton, sen, výplňová slova.',mikro:['Výplňová slova','Sen (klíčová slova)'],makro:['Asyndeton','Prolínání míst a časů','Hapax legomena']}
+    ];
+    const ANGLE_NAMES = UHLY.map(u=>u.nazev.toLowerCase());
+    const ANGLE_COLORS = UHLY.map(u=>u.barva);
+    const STOP = new Set(['a','ale','nebo','i','ani','ze','co','jak','kde','kdy','kdo','tam','tady','to','ten','ta','te','je','jsou','byl','byla','bylo','byt','se','si','na','v','ve','do','z','ze','o','po','pri','pro','k','ke','s','u','nad','pod','za','pred','mezi','uz','jeste','jen','take','proto','pak','tak','tedy','prece','stale','jinak']);
+
+    // ---------- Stav ----------
+    let currentCards = ["myš","kocour","zajíc"];
+    let currentAnalysis = null;
+    let diaryEntries = [];
+    let currentEntryId = null; // pro editaci
+
+    // DOM prvky
+    const cardsBlock = document.getElementById('cardsBlock');
+    const uhlomersRow = document.getElementById('uhlomersRow');
+    const diaryEntry = document.getElementById('diaryEntry');
+    const analysisResults = document.getElementById('analysisResults');
+    const angleBars = document.getElementById('angleBars');
+    const dominantInfo = document.getElementById('dominantInfo');
+    const highlightedTextDiv = document.getElementById('highlightedText');
+    const timelineStrip = document.getElementById('timelineStrip');
+    const historyDetail = document.getElementById('historyDetail');
+    const themeToggle = document.getElementById('themeToggle');
+    const shareUrlDisplay = document.getElementById('shareUrlDisplay');
+    const wheelCanvas = document.getElementById('angleWheel');
+    const wheelInfo = document.getElementById('wheelInfo');
+    const writingModal = document.getElementById('writingModal');
+    const modalCardsBlock = document.getElementById('modalCardsBlock');
+    const modalDiaryEntry = document.getElementById('modalDiaryEntry');
+
+    // ---------- KRUH LEGENDY ----------
+    function drawWheel(selectedAngleIndex = null) {
+      const ctx = wheelCanvas.getContext('2d');
+      const w = 260, h = 260, cx = 130, cy = 130, radius = 110;
+      ctx.clearRect(0,0,w,h);
+      const angleStep = (Math.PI*2)/12;
+      UHLY.forEach((u,i)=>{
+        const start = i*angleStep - Math.PI/2;
+        const end = start + angleStep;
+        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,radius,start,end); ctx.closePath();
+        ctx.fillStyle = u.barva + (selectedAngleIndex === i ? 'ff' : '40');
+        ctx.fill(); ctx.strokeStyle = '#ccc'; ctx.lineWidth = 0.5; ctx.stroke();
+        const mid = start + angleStep/2;
+        const tx = cx + Math.cos(mid)*70, ty = cy + Math.sin(mid)*70;
+        ctx.save(); ctx.translate(tx,ty); ctx.rotate(mid + Math.PI/2);
+        ctx.fillStyle = '#1e1e1e'; ctx.font = 'bold 8px "Courier New", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(u.nazev,0,0); ctx.restore();
+      });
+    }
+    drawWheel();
+    wheelCanvas.addEventListener('click', (e)=>{
+      const rect = wheelCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left - 130, y = e.clientY - rect.top - 130;
+      let angle = (Math.atan2(y,x) + Math.PI*2 + Math.PI/2) % (Math.PI*2);
+      const idx = Math.floor(angle / (Math.PI*2/12));
+      drawWheel(idx);
+      const u = UHLY[idx];
+      wheelInfo.innerHTML = `<strong>${u.nazev} (${u.st}°)</strong><br>${u.popis}`;
+    });
+
+    // ---------- VYKRESLENÍ KARET ----------
+    function renderCards() {
+      cardsBlock.innerHTML = ''; uhlomersRow.innerHTML = '';
+      currentCards.forEach(cardId => {
+        const card = CARDS_DATA[cardId];
+        const wrap = document.createElement('div'); wrap.className = 'card-wrapper';
+        const cardDiv = document.createElement('div'); cardDiv.className = 'card';
+        const img = document.createElement('div'); img.className = 'card-img';
+        img.style.backgroundImage = `url('${card.ilustrace}')`; img.style.backgroundColor = '#ddd';
+        cardDiv.appendChild(img); wrap.appendChild(cardDiv); cardsBlock.appendChild(wrap);
+
+        const uWrap = document.createElement('div'); uWrap.className = 'uhlomer-wrapper'; uWrap.dataset.cardId = cardId;
+        uWrap.innerHTML = `<div class="uhlomer" id="uhlomer-${cardId}"></div><div class="inspire-sentence" id="inspire-${cardId}"></div>`;
+        uhlomersRow.appendChild(uWrap);
+      });
+      // Kliknutí na blok karet
+      cardsBlock.addEventListener('click', (e) => {
+        if (!e.target.closest('.card')) return;
+        cardsBlock.classList.toggle('active');
+        if (cardsBlock.classList.contains('active')) {
+          currentCards.forEach(cid => buildUhlomer(cid, true));
+        }
+      });
+    }
+
+    function buildUhlomer(cardId, randomize = true) {
+      const uWrap = document.querySelector(`.uhlomer-wrapper[data-card-id="${cardId}"]`);
+      if (!uWrap) return;
+      const uhlomerDiv = uWrap.querySelector('.uhlomer');
+      const inspireDiv = uWrap.querySelector('.inspire-sentence');
+      if (uhlomerDiv.children.length > 0) {
+        if (randomize) {
+          const active = Array.from(uhlomerDiv.children).find(s=>!s.classList.contains('inactive'));
+          if(active) inspireDiv.textContent = `${active.dataset.angleName}: ${CARDS_DATA[cardId].uhly[active.dataset.angleName]}`;
+        }
+        return;
+      }
+      const card = CARDS_DATA[cardId]; const uhly = card.uhly;
+      const available = Object.keys(uhly).filter(k=>uhly[k]&&uhly[k].trim());
+      let selectedIdx = 0;
+      if (randomize && available.length) {
+        const randKey = available[Math.floor(Math.random()*available.length)];
+        selectedIdx = ANGLE_NAMES.indexOf(randKey);
+      }
+      for (let i=0; i<12; i++) {
+        const angleKey = ANGLE_NAMES[i];
+        const seg = document.createElement('div');
+        seg.className = `segment seg-${i}`; seg.style.backgroundColor = ANGLE_COLORS[i];
+        seg.dataset.angleIndex = i; seg.dataset.angleName = angleKey;
+        if (!uhly[angleKey]?.trim()) seg.classList.add('inactive');
+        else {
+          seg.addEventListener('click', (e)=>{
+            e.stopPropagation();
+            inspireDiv.textContent = `${angleKey}: ${uhly[angleKey]}`;
+            uhlomerDiv.querySelectorAll('.segment').forEach(s=>s.classList.remove('active-segment'));
+            seg.classList.add('active-segment');
+          });
+        }
+        uhlomerDiv.appendChild(seg);
+        if (i === selectedIdx && !seg.classList.contains('inactive')) {
+          inspireDiv.textContent = `${angleKey}: ${uhly[angleKey]}`; seg.classList.add('active-segment');
+        }
+      }
+    }
+
+    // ---------- KOMPLETNÍ ANALYZÉR Z analyzer_v7 ----------
+    function splitVety(t){ return t.split(/(?<=[.!?\u2026])\s+|\n(?=\S)/).map(s=>s.trim()).filter(s=>s.length>1); }
+    function detectMicro(sentence, si){
+      const s=sentence,sl=s.toLowerCase(); const words=s.split(/\s+/).filter(Boolean),wl=words.length; const R=[];
+      function hit(uhel,fig,match){ R.push({uhel,fig,match,si,type:'mikro'}); }
+      if(wl>20) hit(0,'Dlouhá věta (20+ slov)',s.slice(0,55)+'…');
+      const conj=(sl.match(/\b(a\b|ale\b|nebo\b|i\b|ani\b|avšak|jenže|přitom|protože|když|pokud|než|jestliže|ačkoli|neboť)\b/g)||[]).length;
+      if(conj>=3) hit(0,'Polysyndeton',conj+'× spojka');
+      if(/,\s*(který|která|které|jenž|jež)\b/i.test(s)) hit(0,'Apoziční definice',s.slice(0,45));
+      if(/\b(a\b|ale\b|nebo\b)\b[^,]{5,}/i.test(s)&&wl>8) hit(0,'Parataxe',s.slice(0,45));
+      const hasV=/\b(jsem|jsi|je\b|jsme|jste|jsou|byl|byla|bylo|mám|máš|má\b|jdu|jdeš|říkám|vidím|cítím|vím|chci|mohu|musím)\b/i.test(s);
+      if(hasV&&wl<=6&&wl>=2) hit(1,'Fragment (krátká věta)',s.slice(0,35));
+      const cm=(s.match(/,/g)||[]).length; if(cm>=2) hit(1,'Enumerace (čárky)',cm+'× čárka');
+      if(/[!]/.test(s)) hit(1,'Vykřičník',s.slice(0,35));
+      if(/\b\d+\b/.test(s)) hit(1,'Číslovka/číslice',s.match(/\b\d+\b/)[0]);
+      if(/[+=#&\/;]/.test(s)) hit(1,'Znaménko',s.match(/[+=#&\/;]/)[0]);
+      const pastV=s.match(/\b\w+(al|ala|alo|ali|aly|byl|byla|bylo|byli|byly)\b/gi)||[];
+      if(pastV.length>0&&!/\b(jsem|jsem\s+byl|jsem\s+byla)\b/i.test(s)) hit(2,'Minulý čas (bez 1.os.j.č.)',pastV[0]);
+      if(/jako\s+\w+\s+v\s+|podobně\s+jako|příběh\s+o|bajka|legenda|mýtus/i.test(s)) hit(2,'Parabola',s.slice(0,45));
+      if(/„[^"]+"|"[^"]+"/i.test(s)) hit(2,'Intertextualita',s.slice(0,45));
+      if(/\b(tradice|kultura|dějiny|minulost|archetyp|symbol|rituál)\b/i.test(s)) hit(2,'Kulturní odkaz',s.match(/\b(tradice|kultura|dějiny|minulost|archetyp|symbol|rituál)\b/i)[0]);
+      if(/\b(já\b|jsem\b|mě\b|mi\b|mou\b|moje\b|moji\b|mám\b|cítím\b|říkám\b|vím\b)\b/i.test(s)) hit(3,'1. osoba j.č.',s.slice(0,45));
+      const dM=s.match(/\b(\d+\s*(cm|mm|kg|°C|ml|m\b|km)|červen\w+|moder\w+|zelen\w+|žlut\w+|bíl\w+|černý|bílý|teplý|studený|hladký|hrubý|tmavý|světlý|sladký|kyselý|hořký|slaný)\b/i);
+      if(dM) hit(3,'Smyslový detail',dM[0]);
+      if(/\b(tento\s+text|tato\s+věta|píšu|říkám\s+to|mluvím\s+o|jazyk\s+sám)\b/i.test(s)) hit(4,'Metatext',s.slice(0,45));
+      if(/\b(pravda\s+je|jsem\s+přesvědčen|tvrdím|prohlašuji|je\s+zřejmé|faktem\s+je)\b/i.test(s)) hit(4,'Deklarace',s.slice(0,45));
+      if(s.trim().endsWith('?')&&!/„[^"]*\?/.test(s)&&!/"[^"]*\?/.test(s)) hit(4,'Otázka (ne v přímé řeči)',s.slice(0,55));
+      const beC=(sl.match(/\bjsem\b|\bje\b|\bjsou\b|\bbýt\b/g)||[]).length;
+      if(beC>=2&&!/\bale\b|\bpřesto\b|\bi\s+tak\b/.test(sl)) hit(4,'Paradox (2× být bez ale)',s.slice(0,45));
+      if(/\b(kolokace|fixace|dekonstrukce|epistéme|ontologie|bytí|jsoucno)\b/i.test(s)) hit(4,'Filozofická kolokace',s.slice(0,45));
+      const negs=(sl.match(/\bne\b|\bni\b|\bbez\b|\bnikdy\b|\bnikdo\b|\bnic\b|\bnení\b|\bnemá\b|\bnemám\b|\bnemohu\b|\bnemohl\b|\bnebylo?\b|\bneví\b|\bnechce\b/g)||[]).length;
+      if(negs>=2) hit(5,'Negace (2+ záporů)',negs+'× negace');
+      if(/[()]/.test(s)) hit(5,'Parentéze',s.slice(0,45));
+      const beC2=(sl.match(/\bjsem\b|\bjsi\b|\bje\b|\bjsme\b|\bjste\b|\bjsou\b|\bbyl\b|\bbyla\b/g)||[]).length;
+      const hasAle=/\bale\b|\bpřesto\b|\bi\s+tak\b|\bvšak\b|\bjenže\b/.test(sl);
+      if(beC2>=2&&hasAle) hit(5,'Ironie (2× být + ale)',s.slice(0,45));
+      if(/\b(samozřejmě|pochopitelně|jasně|no\s+jo|jak\s+jinak)\b/i.test(s)) hit(5,'Deformovaná frazeologie',s.match(/\b(samozřejmě|pochopitelně|jasně|no\s+jo|jak\s+jinak)\b/i)[0]);
+      const hasV2=/\b(jsem|jsi|je\b|jsme|jste|jsou|byl|byla|bylo|být|mám|máš|má\b|jdu|šel|šla|říká|vidí|cítí|vím|mohu|musím|chci|dal|vzal|přišel)\b/i.test(s);
+      if(!hasV2&&wl>1) hit(6,'Elipsa (bez slovesa)',s.slice(0,45));
+      if(wl<=5&&wl>=2&&/\b(jsem|jsi|je\b|jsme|jste|jsou|byl|byla|mám|máš|jdu|stojí)\b/i.test(s)) hit(6,'Komprese',s.slice(0,35));
+      if(/\b(možná|snad|nevím|doufám|pravděpodobně|myslím\s+si|asi|zdá\s+se|zřejmě|skoro|jaksi)\b/i.test(s)) hit(6,'Nerozhodnost',s.match(/\b(možná|snad|nevím|doufám|pravděpodobně|myslím\s+si|asi|zdá\s+se|zřejmě|skoro|jaksi)\b/i)[0]);
+      if(/„[^"]+"|"[^"]+"/i.test(s)) hit(6,'Přímá řeč',s.slice(0,45));
+      if(/\b(kdybych|kdybychom|přál\s+bych\s+si|nechť|kéž|ať\b)\b/i.test(s)) hit(6,'Performativita',s.slice(0,35));
+      if(/\b(naprosto|absolutně|zcela|totálně|nejvíc|nejhůř|nejlépe|nikdy\s+v\s+životě|stoprocentně)\b/i.test(s)) hit(7,'Hyperbola',s.match(/\b(naprosto|absolutně|zcela|totálně|nejvíc|nejhůř|nejlépe|stoprocentně)\b/i)[0]);
+      const wA=words.map(w=>w.toLowerCase().replace(/[.,!?;:]/g,'')); const seen={}; let tau=false;
+      wA.forEach(w=>{ if(w.length>3&&!STOP.has(w)){ if(seen[w]) tau=true; seen[w]=true; } });
+      if(tau) hit(7,'Tautologie',s.slice(0,45));
+      if(/[!]/.test(s)) hit(7,'Vykřičník',s.slice(0,35));
+      const reci=/\b(říká|říkal|řekl|řekla|křičí|křičel|šeptal|volá|volal|prohlašuje|tvrdí)\b/i.test(s);
+      if(reci&&/[!]/.test(s)) hit(7,'Ilokuce',s.slice(0,35));
+      if(/\b(bum|prásk|žbluňk|šum|hukot|šelest|šustí|sykot|hřmot|dunění|vrčí|klepot|vrzá|cinká|zvoní|hučí|šepotá|kvičí|prská)\b/i.test(s)) hit(8,'Onomatopoeia',s.match(/\b(bum|prásk|žbluňk|šum|hukot|šelest|šustí|sykot|hřmot|dunění|vrčí|klepot|vrzá|cinká|zvoní|hučí|šepotá|kvičí|prská)\b/i)[0]);
+      if(/\.\.\.|…/.test(s)) hit(9,'Aposiopeze (…)',s.slice(0,45));
+      const zr=/\b(barva|červen\w+|moder\w+|světl\w+|tmav\w+|vidět)\b/i.test(s), sl2=/\b(zvuk|tón|melodie|hluk|tich\w+|slyšet)\b/i.test(s);
+      const chu=/\b(chuť|sladký|kyselý|hořký|slaný|ochutnat)\b/i.test(s), hm=/\b(dotyk|hladký|hrubý|teplý|studený|hebký|tvrdý|měkký)\b/i.test(s);
+      const vu=/\b(vůně|zápach|vonět|páchnout|parfém)\b/i.test(s);
+      if([zr,sl2,chu,hm,vu].filter(Boolean).length>=2) hit(9,'Synestezie (2+ smysly)',s.slice(0,45));
+      const ina=/\b(ticho|čas|světlo|tma|slova?|myšlenky?|vzduch|vítr|voda|kameny?|strom\w+|krajina|mlha|sen\w+)\b/i.test(s);
+      const hv=/\b(řekl|říká|myslí|cítí|ví|chce|vzpomíná|snívá|smál|plakal|volal)\b/i.test(s);
+      if(ina&&hv) hit(9,'Personifikace',s.slice(0,45));
+      if(/\b(živá\s+smrt|sladká\s+bolest|veselý\s+smutek|hlučné\s+ticho|světlá\s+tma|radostný\s+pláč)\b/i.test(s)) hit(9,'Oxymóron',s.slice(0,35));
+      const neo=s.match(/\b\w+-\w+\b/g)||[]; if(neo.length>0) hit(9,'Neologismus',neo[0]);
+      const mM=s.match(/(\b\w{3,}\b)\s+(je|jsou|byl|byla|bylo)\s+(\b\w{3,}\b)/gi)||[];
+      mM.forEach(m=>{ const idx=s.indexOf(m); const before=s.slice(Math.max(0,idx-12),idx).toLowerCase();
+        if(!/\b(já|ty|on|ona|ono|my|vy|oni|ony|se|si)\b/.test(before)) hit(10,'Metafora',m.slice(0,45)); });
+      if(/\b(jako\b|jako\s+by|podobně\s+jako|připomíná|jako\s+kdyby)\b/i.test(s)) hit(10,'Přirovnání',s.slice(0,45));
+      if(/[()]/.test(s)) hit(10,'Závorky',s.slice(0,45));
+      if(/[—–]/.test(s)) hit(10,'Pomlčka',s.slice(0,45));
+      if(/\b(ó|ach|hej|poslyš|pohleď)\b/i.test(s)) hit(10,'Apostrofa',s.slice(0,35));
+      const vy=(s.match(/\b(vlastně|jaksi|prostě|no\b|tedy|tak\b|víte|víš|ehm|hm\b|teda|takže\b)\b/gi)||[]);
+      if(vy.length>0) hit(11,'Výplňová slova',vy.slice(0,3).join(', '));
+      if(/\b(sen\b|snový|zdálo\s+se|snil\b|sny\b|noční\b|spánek|přisnil|snít)\b/i.test(s)) hit(11,'Sen (klíčová slova)',s.slice(0,35));
+      return R;
+    }
+    function detectMakro(sentences, fullText){
+      const R=[], fl=fullText.toLowerCase();
+      const words=fullText.split(/\s+/).filter(Boolean).map(w=>w.toLowerCase().replace(/[.,!?;:„""\-—–()]/g,''));
+      function hit(uhel,fig,match){ R.push({uhel,fig,match,si:-1,type:'makro'}); }
+      const wfreq={}; words.forEach(w=>{ if(w.length>3&&!STOP.has(w)) wfreq[w]=(wfreq[w]||0)+1; });
+      const fixW=Object.entries(wfreq).filter(([w,c])=>c>=3).sort((a,b)=>b[1]-a[1]);
+      if(fixW.length>0) hit(0,'Fixace (opakovaná slova)',fixW.slice(0,3).map(([w,c])=>`"${w}" ${c}×`).join(', '));
+      const psets=sentences.map(s=>{ const p=new Set();
+        if(/\bjá\b|\bjsem\b/i.test(s)) p.add('já'); if(/\bty\b|\btě\b/i.test(s)) p.add('ty');
+        if(/\bmy\b|\bnám\b/i.test(s)) p.add('my'); if(/\bvy\b|\bvám\b/i.test(s)) p.add('vy'); return p; });
+      const allP=new Set(psets.flatMap(s=>[...s])); if(allP.size>=2) hit(2,'Změna role (zájmen)','přechod: '+[...allP].join(' → '));
+      let an=0; for(let i=1;i<sentences.length;i++){ const w1=(sentences[i-1].trim().split(/\s+/)[0]||'').toLowerCase(), w2=(sentences[i].trim().split(/\s+/)[0]||'').toLowerCase(); if(w1.length>1&&w1===w2) an++; } if(an>=2) hit(8,'Anafora',an+'× stejné začátky vět');
+      let ep=0; for(let i=1;i<sentences.length;i++){ const a=sentences[i-1].trim().split(/\s+/), b=sentences[i].trim().split(/\s+/); const wa=(a[a.length-1]||'').toLowerCase().replace(/[.!?,;]/g,''), wb=(b[b.length-1]||'').toLowerCase().replace(/[.!?,;]/g,''); if(wa.length>1&&wa===wb) ep++; } if(ep>=2) hit(8,'Epifora',ep+'× stejné konce vět');
+      let al=false; sentences.forEach(s=>{ const ws=s.split(/\s+/).map(w=>w.toLowerCase().replace(/[^a-záčďéěíňóřšťůúýž]/g,'')); const ic={}; ws.forEach(w=>{ if(w.length>1) ic[w[0]]=(ic[w[0]]||0)+1; }); if(Object.values(ic).some(c=>c>=3)) al=true; }); if(al) hit(8,'Aliterace','3+ slov se stejným písmenem v větě');
+      let par=0; for(let i=1;i<sentences.length;i++){ const la=sentences[i-1].split(/\s+/).length, lb=sentences[i].split(/\s+/).length; if(Math.abs(la-lb)<=2&&la>=3&&lb>=3) par++; } if(par>=3) hit(8,'Paralelismus',par+' větné páry podobné délky');
+      const lens=sentences.map(s=>s.split(/\s+/).length); if(lens.length>=3){ const mx=Math.max(...lens), mn=Math.min(...lens); if(mx/Math.max(mn,1)>=4) hit(3,'Změna tempa vět',`délky: ${mn}–${mx} slov`); }
+      const pos=/\b(krásný|dobrý|šťastný|radost|úspěch|láska|naděje|světlo|skvělý|milý)\b/i, neg=/\b(ošklivý|špatný|smutný|smutek|neúspěch|nenávist|beznaděj|tma|strašný|hrozný)\b/i; let ct=0;
+      for(let i=1;i<sentences.length;i++){ if((pos.test(sentences[i-1])&&neg.test(sentences[i]))||(neg.test(sentences[i-1])&&pos.test(sentences[i]))) ct++; } if(ct>=1) hit(5,'Kontrast (sémantický)',ct+'× protikladné věty');
+      let gu=0,gd=0; for(let i=2;i<lens.length;i++){ if(lens[i]>lens[i-1]&&lens[i-1]>lens[i-2]) gu++; if(lens[i]<lens[i-1]&&lens[i-1]<lens[i-2]) gd++; } if(gu>=2||gd>=2) hit(7,'Gradace (délka vět)',gu>=2?`narůstající ${gu}×`:`klesající ${gd}×`);
+      const hp=/\b\w+(al|ala|alo|ali|aly|byl|byla|bylo)\b/i.test(fullText), hpr=/\b(je\b|jsou\b|má\b|mám\b|jde\b|říká)\b/i.test(fullText), hf=/\b(bude\b|budu\b|budeme\b|budou\b)\b/i.test(fullText);
+      if([hp,hpr,hf].filter(Boolean).length>=2) hit(7,'Změna času','přechod časů v textu');
+      for(let i=1;i<sentences.length;i++){ const la=sentences[i-1].split(/\s+/).length, lb=sentences[i].split(/\s+/).length; if(Math.abs(la-lb)>15&&lb<4) hit(9,'Přeskok (náhlá změna)',sentences[i].slice(0,35)); }
+      let as=0; for(let i=1;i<sentences.length;i++){ if(sentences[i-1].split(/\s+/).length<=5&&sentences[i].split(/\s+/).length<=5&&!/^(a\b|nebo\b|ale\b)/i.test(sentences[i].trim())) as++; } if(as>=3) hit(11,'Asyndeton',as+'× krátké věty bez spojky');
+      const mi=(fl.match(/\b(tady|tam|zde|venku|uvnitř|nahoru|dolů|nahoře|dole|daleko|blízko)\b/g)||[]), ca=(fl.match(/\b(dnes|včera|zítra|teď|nyní|tehdy|dávno|brzy|najednou|jednou)\b/g)||[]);
+      if(mi.length>=2&&ca.length>=2) hit(11,'Prolínání míst a časů',mi.length+'× místo, '+ca.length+'× čas');
+      if(words.length>50){ const hapax=Object.entries(wfreq).filter(([w,c])=>c===1&&w.length>5&&!STOP.has(w)); const ratio=hapax.length/words.length; if(ratio>0.7) hit(11,'Hapax legomena',hapax.length+' unikátních slov ('+Math.round(ratio*100)+'%)'); }
+      return R;
+    }
+
+    function analyzeText() {
+      const text = diaryEntry.value.trim(); if (!text) return;
+      const sentences = splitVety(text); const allWords = text.split(/\s+/).filter(Boolean);
+      const micro = []; sentences.forEach((s,si)=>detectMicro(s,si).forEach(h=>micro.push(h)));
+      const macro = detectMakro(sentences, text); const allHits = [...micro, ...macro];
+      const scores = UHLY.map(u=>{
+        const hits = allHits.filter(h=>h.uhel===u.i);
+        const mc = hits.filter(h=>h.type==='mikro').length;
+        const xc = hits.filter(h=>h.type==='makro').length;
+        const maxM = u.mikro.length * sentences.length;
+        const maxX = u.makro.length;
+        const total = maxM + maxX;
+        const pct = total>0 ? Math.min(100, Math.round((mc+xc)/total*100)) : 0;
+        return {uhel:u.i, hits, pct, mc, xc};
+      });
+      const percentages = scores.map(s=>s.pct);
+      const dominant = scores.map((s,i)=>({pct:s.pct,i})).sort((a,b)=>b.pct-a.pct).filter(item=>item.pct>0).slice(0,3).map(item=>item.i);
+      currentAnalysis = { percentages, dominant, hits: allHits, sentences, fullText: text };
+      // Zobrazení
+      angleBars.innerHTML = ''; ANGLE_NAMES.forEach((name,idx)=>{
+        const div = document.createElement('div'); div.className = 'angle-item';
+        div.innerHTML = `<span class="color-dot" style="background:${ANGLE_COLORS[idx]};"></span> ${name}: ${percentages[idx]}%`;
+        angleBars.appendChild(div);
+      });
+      dominantInfo.textContent = `Dominantní úhly: ${dominant.map(i=>ANGLE_NAMES[i]).join(', ') || 'žádný'}`;
+      // Podbarvení textu podle vět (jako v analyzer_v7)
+      let html = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+      const sentHits = {}; allHits.filter(h=>h.si>=0).forEach(h=>{ if(!sentHits[h.si]) sentHits[h.si]=[]; sentHits[h.si].push(h); });
+      sentences.forEach((s,si)=>{
+        if(!sentHits[si]) return;
+        const counts = {}; sentHits[si].forEach(h=>counts[h.uhel]=(counts[h.uhel]||0)+1);
+        const topUhel = parseInt(Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0]);
+        const u = UHLY[topUhel]; const color = u.barva+'40';
+        const esc = s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+        const figList = [...new Set(sentHits[si].map(h=>h.fig))].join(', ');
+        html = html.replace(esc, `<span style="background:${color}; padding:2px 0;" title="${u.nazev}: ${figList}">${esc}</span>`);
+      });
+      highlightedTextDiv.innerHTML = html;
+      analysisResults.style.display = 'block';
+    }
+
+    // ---------- UKLÁDÁNÍ A HISTORIE ----------
+    function saveEntry() {
+      const text = diaryEntry.value.trim(); if (!text) return;
+      if (!currentAnalysis) { alert('Nejprve text analyzuj.'); return; }
+      const title = prompt('Název zápisu:', currentEntryId ? 'Upravený zápis' : 'Zápis ' + new Date().toLocaleString());
+      if (title === null) return;
+      const entry = {
+        id: currentEntryId || Date.now() + '-' + Math.random().toString(36),
+        date: new Date().toISOString(), title: title || 'Bez názvu', text, cards: [...currentCards],
+        dominantAngles: currentAnalysis.dominant, percentages: currentAnalysis.percentages
+      };
+      const existingIdx = diaryEntries.findIndex(e=>e.id === entry.id);
+      if (existingIdx >= 0) diaryEntries[existingIdx] = entry; else diaryEntries.push(entry);
+      saveEntriesToStorage(); renderTimeline();
+      currentEntryId = null;
+    }
+    function loadEntriesFromStorage() {
+      const stored = localStorage.getItem('mys-diary');
+      if (stored) { try { diaryEntries = JSON.parse(stored); } catch(e){ diaryEntries = []; } }
+      else diaryEntries = [];
+    }
+    function saveEntriesToStorage() { localStorage.setItem('mys-diary', JSON.stringify(diaryEntries)); }
+    function renderTimeline() {
+      timelineStrip.innerHTML = '';
+      diaryEntries.slice().reverse().forEach(entry => {
+        const el = document.createElement('div'); el.className = 'timeline-entry';
+        const angles = entry.dominantAngles || [];
+        angles.forEach(idx => { const stripe = document.createElement('div'); stripe.className = 'color-stripe'; stripe.style.backgroundColor = ANGLE_COLORS[idx]; stripe.style.height = (100/angles.length)+'%'; el.appendChild(stripe); });
+        if (angles.length === 0) el.style.backgroundColor = '#aaa';
+        el.addEventListener('click', ()=>{
+          historyDetail.style.display = 'block';
+          historyDetail.innerHTML = `<strong>${entry.title}</strong> (${new Date(entry.date).toLocaleString()})<br>`;
+          const short = entry.text.length>200? entry.text.slice(0,200)+'…' : entry.text;
+          historyDetail.innerHTML += `<p>${short}</p><button data-id="${entry.id}" class="loadEntryBtn">📂 Načíst</button> `;
+          historyDetail.innerHTML += `<button data-id="${entry.id}" class="deleteEntryBtn">🗑 Smazat</button>`;
+        });
+        timelineStrip.appendChild(el);
+      });
+    }
+    document.addEventListener('click', (e)=>{
+      if (e.target.classList.contains('loadEntryBtn')) {
+        const id = e.target.dataset.id; const entry = diaryEntries.find(e=>e.id===id);
+        if (entry) { diaryEntry.value = entry.text; currentCards = entry.cards; renderCards(); currentEntryId = entry.id; historyDetail.style.display = 'none'; }
+      }
+      if (e.target.classList.contains('deleteEntryBtn')) {
+        const id = e.target.dataset.id; diaryEntries = diaryEntries.filter(e=>e.id!==id);
+        saveEntriesToStorage(); renderTimeline(); historyDetail.style.display = 'none';
+      }
+    });
+
+    // ---------- SDÍLENÍ, TISK, NOVÝ ----------
+    function lockAndShare() {
+      const url = new URL(window.location); url.searchParams.set('cards', currentCards.join(','));
+      shareUrlDisplay.textContent = '🔗 Sdílecí odkaz: ' + url.toString();
+      navigator.clipboard?.writeText(url.toString()).catch(()=>{});
+      alert('Odkaz na sadu karet zkopírován.');
+    }
+    function shareEntry() {
+      if (!currentAnalysis) return;
+      const data = { text: diaryEntry.value, cards: currentCards, analysis: currentAnalysis };
+      const url = new URL(window.location); url.searchParams.set('shared', encodeURIComponent(JSON.stringify(data)));
+      navigator.clipboard?.writeText(url.toString()).catch(()=>{});
+      alert('Odkaz na zápis zkopírován.');
+    }
+    function printEntry() {
+      if (!currentAnalysis) return;
+      const printWin = window.open('','','width=800,height=600');
+      printWin.document.write(`<pre>${diaryEntry.value}</pre><hr><pre>${JSON.stringify(currentAnalysis.percentages,null,2)}</pre>`);
+      printWin.document.close(); printWin.print();
+    }
+    function newEntry() {
+      if (diaryEntry.value && !confirm('Opravdu smazat aktuální text?')) return;
+      diaryEntry.value = ''; analysisResults.style.display = 'none'; currentAnalysis = null; currentEntryId = null;
+    }
+
+    // ---------- MODÁLNÍ OKNO ----------
+    function openModal() { modalDiaryEntry.value = diaryEntry.value; renderModalCards(); writingModal.classList.add('active'); document.body.classList.add('modal-open'); }
+    function closeModal() { diaryEntry.value = modalDiaryEntry.value; writingModal.classList.remove('active'); document.body.classList.remove('modal-open'); }
+    function renderModalCards() {
+      modalCardsBlock.innerHTML = ''; currentCards.forEach(cardId=>{
+        const card = CARDS_DATA[cardId]; const wrap = document.createElement('div'); wrap.className = 'card-wrapper';
+        const cardDiv = document.createElement('div'); cardDiv.className = 'card';
+        const img = document.createElement('div'); img.className = 'card-img';
+        img.style.backgroundImage = `url('${card.ilustrace}')`; img.style.backgroundColor = '#ddd';
+        cardDiv.appendChild(img); wrap.appendChild(cardDiv); modalCardsBlock.appendChild(wrap);
+      });
+    }
+
+    // ---------- INICIALIZACE ----------
+    function init() {
+      const savedTheme = localStorage.getItem('mys-theme');
+      if (savedTheme === 'dark') { document.body.classList.add('dark'); themeToggle.textContent = '☀️'; }
+      else themeToggle.textContent = '🌙';
+      themeToggle.addEventListener('click', ()=>{
+        document.body.classList.toggle('dark'); const isDark = document.body.classList.contains('dark');
+        localStorage.setItem('mys-theme', isDark ? 'dark' : 'light');
+        themeToggle.textContent = isDark ? '☀️' : '🌙';
+      });
+      loadEntriesFromStorage(); renderTimeline();
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('cards')) {
+        const ids = params.get('cards').split(',').map(s=>s.trim()).filter(id=>CARDS_DATA[id]);
+        if (ids.length===3) currentCards = ids; else if (ids.length>0) { while(ids.length<3) ids.push(Object.keys(CARDS_DATA)[Math.floor(Math.random()*Object.keys(CARDS_DATA).length)]); currentCards = ids.slice(0,3); }
+      }
+      if (params.has('shared')) {
+        try { const data = JSON.parse(decodeURIComponent(params.get('shared'))); diaryEntry.value = data.text; currentCards = data.cards; currentAnalysis = data.analysis; } catch(e){}
+      }
+      renderCards();
+      document.getElementById('shuffleCards').addEventListener('click', ()=>{ currentCards = [getRandomCardId(),getRandomCardId(),getRandomCardId()]; renderCards(); });
+      document.getElementById('lockShareBtn').addEventListener('click', lockAndShare);
+      document.getElementById('analyzeBtn').addEventListener('click', analyzeText);
+      document.getElementById('saveBtn').addEventListener('click', saveEntry);
+      document.getElementById('newEntryBtn').addEventListener('click', newEntry);
+      document.getElementById('shareEntryBtn').addEventListener('click', shareEntry);
+      document.getElementById('printEntryBtn').addEventListener('click', printEntry);
+      document.getElementById('openWritingModal').addEventListener('click', openModal);
+      document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+      document.getElementById('modalCloseDone').addEventListener('click', closeModal);
+      document.getElementById('modalAnalyzeBtn').addEventListener('click', ()=>{ diaryEntry.value = modalDiaryEntry.value; analyzeText(); closeModal(); });
+      document.getElementById('modalSaveBtn').addEventListener('click', ()=>{ diaryEntry.value = modalDiaryEntry.value; saveEntry(); closeModal(); });
+    }
+    function getRandomCardId() { const ids = Object.keys(CARDS_DATA); return ids[Math.floor(Math.random()*ids.length)]; }
+    init();
+  })();
+</script>
+</body>
+</html>
