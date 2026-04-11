@@ -21,5 +21,5 @@
 - [zapisnik 01](doma/nastroje/zapisnik_01.html)
 - [zapisnik 02](doma/nastroje/zapisnik_02)
 - [motiv zapisnik](doma/nastroje/motiv_zapisnik.html)
-- [galerie fenomenu](doma/nastroje/galerie_fenomenu.html)
+- [zapisnik 03](doma/nastroje/zapisnik_03.html)
 
