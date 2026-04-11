@@ -20,6 +20,6 @@
 - [styl u krbu](doma/nastroje/styl_u_krbu.html)
 - [zapisnik 01](doma/nastroje/zapisnik_01.html)
 - [zapisnik 02](doma/nastroje/zapisnik_02)
-- [galerie jevů](doma/nastroje/galerie_jevu.html)
+- [motiv zapisnik](doma/nastroje/motiv_zapisnik.html)
 - [galerie fenomenu](doma/nastroje/galerie_fenomenu.html)
 
