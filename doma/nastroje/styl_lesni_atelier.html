@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chceš myš? · Deník (Les)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Mono&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #e2f0d9; color: #2d3e2c; font-family: 'DM Mono', monospace;
+      padding: 2rem 1rem; line-height: 1.7;
+    }
+    .app { max-width: 900px; margin: 0 auto; }
+    h1 { font-family: 'Cormorant Garamond', serif; font-size: 3.2rem; font-weight: 400; color: #3a5a35; margin-bottom: 2rem; text-shadow: 2px 2px 0 #c0d6b3; }
+    .cards-row { display: flex; gap: 1.2rem; margin: 2.5rem 0; }
+    .card {
+      flex: 1; aspect-ratio: 74/105; background: #f4faf0; border: 1px solid #8aa67d;
+      border-radius: 12px; padding: 0.8rem; box-shadow: 0 8px 0 #6b8c5c; font-family: 'Cormorant Garamond', serif;
+    }
+    .card-img { height: 70%; background: #bdd6b0; border-radius: 8px; margin-bottom: 0.5rem; background-size: cover; }
+    .card-text { font-size: 0.9rem; text-align: center; color: #2d4a26; }
+    button {
+      background: #f4faf0; border: 1px solid #6b8c5c; padding: 0.6rem 1.8rem;
+      font-family: 'DM Mono', monospace; color: #3a5a35; border-radius: 30px;
+      cursor: pointer; margin-right: 0.8rem; transition: 0.2s; box-shadow: 0 3px 0 #8aa67d;
+    }
+    button:hover { transform: translateY(-2px); box-shadow: 0 5px 0 #6b8c5c; }
+    textarea {
+      width: 100%; padding: 1.5rem; background: #f4faf0; border: 1px solid #8aa67d;
+      border-radius: 16px; font-family: 'DM Mono', monospace; font-size: 0.9rem; margin: 2rem 0;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.03);
+    }
+    .timeline { margin-top: 3rem; }
+    .timeline-strip { display: flex; gap: 8px; }
+    .timeline-entry { width: 18px; height: 36px; background: #bdd6b0; border-radius: 20px; border: 1px solid #6b8c5c; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <h1>Chceš myš? Deník</h1>
+  <div class="cards-row">
+    <div class="card"><div class="card-img" style="background-image:url('doma/ilustrace/ryba.jpg')"></div><div class="card-text">rybí rap</div></div>
+    <div class="card"><div class="card-img" style="background-image:url('doma/ilustrace/pav.jpg')"></div><div class="card-text">oko za okem</div></div>
+    <div class="card"><div class="card-img" style="background-image:url('doma/ilustrace/krokodyl.jpg')"></div><div class="card-text">krokodýlí slzy</div></div>
+  </div>
+  <div>
+    <button>🎲 Losovat</button>
+    <button>🔒 Sdílet</button>
+  </div>
+  <textarea placeholder="Piš...">V mechu se skrývají slova, která ještě nikdo nevyslovil. Ryba pod hladinou rytmicky opakuje: „Flow teče, i když stojíš.“ Páv roztahuje ocas a ptá se: „Kolik očí potřebuješ, abys uviděl jedno?“</textarea>
+  <div>
+    <button>📝 Celá obrazovka</button>
+    <button>🔍 Analyzovat</button>
+    <button>💾 Uložit</button>
+  </div>
+  <div class="timeline">
+    <strong>📅 Historie</strong>
+    <div class="timeline-strip">
+      <div class="timeline-entry"></div><div class="timeline-entry"></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
