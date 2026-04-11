@@ -11,3 +11,15 @@
 - [galerie jevů](doma/nastroje/galerie_jevu.html)
 - [galerie fenomenu](doma/nastroje/galerie_fenomenu.html)
 
+---
+
+
+- [zapisnik_estetika](doma/nastroje/zapisnik_estetika.html)
+- [styl nocni_pisar](doma/nastroje/styl_nocni_pisar.html)
+- [styl_lesni_atelier](doma/nastroje/styl_lesni_atelier.html)
+- [styl u krbu](doma/nastroje/styl_u_krbu.html)
+- [zapisnik 01](doma/nastroje/zapisnik_01.html)
+- [zapisnik 02](doma/nastroje/zapisnik_02)
+- [galerie jevů](doma/nastroje/galerie_jevu.html)
+- [galerie fenomenu](doma/nastroje/galerie_fenomenu.html)
+
