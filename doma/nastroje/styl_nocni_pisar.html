@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chceš myš? · Deník (Noc)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Mono&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #11100e; color: #d4cdbc; font-family: 'DM Mono', monospace;
+      padding: 2rem 1rem; line-height: 1.8;
+    }
+    .app { max-width: 900px; margin: 0 auto; }
+    h1 { font-family: 'Cormorant Garamond', serif; font-size: 3rem; font-weight: 400; color: #c9ae74; letter-spacing: 6px; text-transform: uppercase; margin-bottom: 2rem; text-shadow: 0 0 8px rgba(201,174,116,0.3); }
+    .cards-row { display: flex; gap: 1rem; margin: 2rem 0; }
+    .card {
+      flex: 1; aspect-ratio: 74/105; background: #1e1b16; border: 2px solid #5a4a32;
+      box-shadow: 0 0 15px rgba(0,0,0,0.7); padding: 0.5rem; font-family: 'Cormorant Garamond', serif;
+    }
+    .card-img { height: 75%; background: #2a241c; border-bottom: 1px solid #7a6548; background-size: cover; }
+    .card-text { font-size: 0.9rem; text-align: center; color: #b8a78d; padding-top: 0.3rem; }
+    button {
+      background: transparent; border: 1px solid #5a4a32; padding: 0.5rem 1.5rem;
+      font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 2px;
+      color: #a89880; cursor: pointer; margin-right: 0.5rem; transition: 0.2s;
+    }
+    button:hover { border-color: #c9ae74; color: #e0d5c0; background: rgba(201,174,116,0.05); }
+    textarea {
+      width: 100%; padding: 1.5rem; background: #1a1712; border: 1px solid #5a4a32;
+      font-family: 'DM Mono', monospace; font-size: 0.9rem; color: #d4cdbc; margin: 2rem 0;
+    }
+    .timeline { margin-top: 3rem; border-top: 1px solid #5a4a32; padding-top: 1.5rem; }
+    .timeline-strip { display: flex; gap: 10px; }
+    .timeline-entry { width: 24px; height: 24px; background: #2a241c; border: 1px solid #7a6548; border-radius: 50%; box-shadow: inset 0 0 5px #000; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <h1>Chceš myš? Deník</h1>
+  <div class="cards-row">
+    <div class="card"><div class="card-img" style="background-image:url('doma/ilustrace/netopyr.jpg')"></div><div class="card-text">netopýří glamour</div></div>
+    <div class="card"><div class="card-img" style="background-image:url('doma/ilustrace/motyl.jpg')"></div><div class="card-text">motýl v břiše</div></div>
+    <div class="card"><div class="card-img" style="background-image:url('doma/ilustrace/pavouk.jpg')"></div><div class="card-text">pavouk čeká</div></div>
+  </div>
+  <div>
+    <button>🎲 Losovat</button>
+    <button>🔒 Sdílet sadu</button>
+  </div>
+  <textarea placeholder="Piš...">Netopýr visí hlavou dolů a šeptá: „Glamour je jen jiný druh tmy.“ Motýl v břiše se proměnil v můru. Pavouk spřádá síť z nedokončených otázek. Kdo se do ní chytí?</textarea>
+  <div>
+    <button>📝 Celá obrazovka</button>
+    <button>🔍 Analyzovat</button>
+    <button>💾 Uložit</button>
+  </div>
+  <div class="timeline">
+    <strong>📅 Historie</strong>
+    <div class="timeline-strip">
+      <div class="timeline-entry"></div><div class="timeline-entry"></div><div class="timeline-entry"></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
