@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chceš myš? · Galerie motivů</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Mono&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Mono', monospace; padding: 1.5rem 1rem; line-height: 1.7; transition: background 0.3s, color 0.3s; min-height: 100vh; }
+    .app { max-width: 900px; margin: 0 auto; }
+
+    /* Hlavička s přepínačem motivů */
+    .theme-bar { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .theme-option { font-size: 1.6rem; cursor: pointer; padding: 0.2rem 0.4rem; border-radius: 12px; transition: 0.2s; opacity: 0.6; background: transparent; border: none; line-height: 1; }
+    .theme-option:hover { opacity: 1; transform: scale(1.1); }
+    .theme-option.active { opacity: 1; box-shadow: 0 0 0 2px currentColor; }
+
+    h1 { font-family: 'Cormorant Garamond', serif; font-size: 2.8rem; font-weight: 400; margin-bottom: 0.5rem; }
+
+    .cards-row { display: flex; gap: 1rem; margin: 2rem 0; }
+    .card { flex: 1; aspect-ratio: 74/105; padding: 0.5rem; display: flex; flex-direction: column; transition: all 0.2s; }
+    .card-img { flex: 3; background-size: cover; background-position: center; margin-bottom: 0.5rem; }
+    .card-text { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; text-align: center; font-style: italic; }
+
+    button { background: transparent; padding: 0.5rem 1.2rem; font-family: 'DM Mono', monospace; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; margin-right: 0.5rem; margin-bottom: 0.5rem; transition: 0.2s; }
+
+    textarea { width: 100%; padding: 1.5rem; font-family: 'DM Mono', monospace; font-size: 0.9rem; line-height: 1.8; margin: 1.5rem 0; resize: vertical; }
+
+    .timeline { margin-top: 2.5rem; border-top-width: 1px; border-top-style: solid; padding-top: 1rem; }
+    .timeline-strip { display: flex; gap: 8px; margin-top: 0.5rem; }
+    .timeline-entry { width: 20px; height: 20px; border-radius: 50%; }
+
+    /* ─── MOTIVY ───────────────────────────────────── */
+    /* 1. Krb (výchozí) */
+    body.theme-krb { background: #f3ecd8; color: #2c2416; }
+    .theme-krb h1 { color: #5c4a32; border-bottom: 2px solid #b8a78d; }
+    .theme-krb .card { background: #e8ddcc; border: 1px solid #a89880; box-shadow: 6px 6px 0 rgba(0,0,0,0.05); }
+    .theme-krb .card-img { background-color: #d4c5a0; }
+    .theme-krb button { border: 1.5px solid #7a6548; color: #5c4a32; }
+    .theme-krb button:hover { background: #7a6548; color: #f3ecd8; }
+    .theme-krb textarea { background: rgba(255,255,240,0.6); border: 1px solid #a89880; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.03); }
+    .theme-krb .timeline { border-top-color: #a89880; }
+    .theme-krb .timeline-entry { background: #d4c5a0; border: 1px solid #7a6548; }
+
+    /* 2. Les */
+    body.theme-les { background: #e2f0d9; color: #2d3e2c; }
+    .theme-les h1 { color: #3a5a35; text-shadow: 2px 2px 0 #c0d6b3; }
+    .theme-les .card { background: #f4faf0; border: 1px solid #8aa67d; border-radius: 12px; box-shadow: 0 8px 0 #6b8c5c; }
+    .theme-les .card-img { background-color: #bdd6b0; border-radius: 8px; }
+    .theme-les button { background: #f4faf0; border: 1px solid #6b8c5c; color: #3a5a35; border-radius: 30px; box-shadow: 0 3px 0 #8aa67d; }
+    .theme-les button:hover { transform: translateY(-2px); box-shadow: 0 5px 0 #6b8c5c; }
+    .theme-les textarea { background: #f4faf0; border: 1px solid #8aa67d; border-radius: 16px; }
+    .theme-les .timeline { border-top-color: #8aa67d; }
+    .theme-les .timeline-entry { background: #bdd6b0; border: 1px solid #6b8c5c; border-radius: 20px; }
+
+    /* 3. Noc */
+    body.theme-noc { background: #11100e; color: #d4cdbc; }
+    .theme-noc h1 { color: #c9ae74; letter-spacing: 6px; text-transform: uppercase; text-shadow: 0 0 8px rgba(201,174,116,0.3); }
+    .theme-noc .card { background: #1e1b16; border: 2px solid #5a4a32; box-shadow: 0 0 15px rgba(0,0,0,0.7); }
+    .theme-noc .card-img { background-color: #2a241c; }
+    .theme-noc button { border: 1px solid #5a4a32; color: #a89880; }
+    .theme-noc button:hover { border-color: #c9ae74; color: #e0d5c0; background: rgba(201,174,116,0.05); }
+    .theme-noc textarea { background: #1a1712; border: 1px solid #5a4a32; color: #d4cdbc; }
+    .theme-noc .timeline { border-top-color: #5a4a32; }
+    .theme-noc .timeline-entry { background: #2a241c; border: 1px solid #7a6548; box-shadow: inset 0 0 5px #000; }
+
+    /* 4. Mlha */
+    body.theme-mlha { background: #f0edf2; color: #3a3340; }
+    .theme-mlha h1 { color: #8b7d9e; font-weight: 300; text-shadow: 2px 2px 4px rgba(255,255,255,0.8); }
+    .theme-mlha .card { background: rgba(255,255,255,0.5); backdrop-filter: blur(4px); border: 1px solid #d6cee0; box-shadow: 0 8px 20px rgba(140,120,160,0.1); }
+    .theme-mlha button { background: rgba(255,255,255,0.3); border: 1px solid #b8a6c9; color: #5c4e6b; }
+    .theme-mlha textarea { background: rgba(255,255,245,0.6); border: 1px solid #d6cee0; }
+    .theme-mlha .timeline { border-top-color: #d6cee0; }
+    .theme-mlha .timeline-entry { background: #d6cee0; border: 1px solid #b8a6c9; }
+
+    /* 5. Měď */
+    body.theme-med { background: #2a241e; color: #e2d3c0; }
+    .theme-med h1 { color: #c97e5a; letter-spacing: 8px; border-bottom: 2px solid #a85e3a; }
+    .theme-med .card { background: #3c322a; border: 1px solid #b86b4a; box-shadow: 4px 4px 0 #5a3e2e; }
+    .theme-med button { border: 1px solid #a85e3a; color: #d49c7c; text-transform: none; font-weight: 300; }
+    .theme-med button:hover { background: #a85e3a; color: #1f1a16; }
+    .theme-med textarea { background: #1f1a16; border: 1px solid #b86b4a; }
+    .theme-med .timeline { border-top-color: #b86b4a; }
+    .theme-med .timeline-entry { background: #b86b4a; border: 1px solid #a85e3a; }
+
+    /* 6. Zima */
+    body.theme-zima { background: #f5fafd; color: #1e3a4d; }
+    .theme-zima h1 { color: #4a7c8e; font-weight: 300; }
+    .theme-zima .card { background: #ffffff; border: 1px solid #c0dce8; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+    .theme-zima button { border: 1px solid #9bc0d4; color: #3a6a80; border-radius: 2px; }
+    .theme-zima textarea { background: #ffffff; border: 1px solid #c0dce8; }
+    .theme-zima .timeline { border-top-color: #c0dce8; }
+    .theme-zima .timeline-entry { background: #c0dce8; border: 1px solid #9bc0d4; }
+
+    /* 7. Oheň */
+    body.theme-ohen { background: #140c08; color: #f5d6b3; }
+    .theme-ohen h1 { color: #e85d26; text-shadow: 0 0 10px #ff6b35; }
+    .theme-ohen .card { background: #1f110a; border: 1px solid #b34e1a; box-shadow: 0 0 15px rgba(230,80,30,0.2); }
+    .theme-ohen button { border-color: #c25a28; color: #f0906a; }
+    .theme-ohen button:hover { background: #a03e0f; color: #ffdcc0; box-shadow: 0 0 8px #ff6b35; }
+    .theme-ohen textarea { background: #0f0804; border: 1px solid #b34e1a; color: #ffd0a8; }
+    .theme-ohen .timeline { border-top-color: #b34e1a; }
+    .theme-ohen .timeline-entry { background: #e85d26; border: 1px solid #ffaa33; box-shadow: 0 0 6px #ff6b35; }
+
+    /* 8. Dílna */
+    body.theme-dilna { background: #e8dccc; color: #2e241a; background-image: radial-gradient(circle at 20% 30%, #f3e9d2 0%, #dac8ae 100%); }
+    .theme-dilna h1 { color: #1e3a5f; font-family: 'Cormorant Garamond', serif; font-size: 3.2rem; border-bottom: 3px double #b89b6e; }
+    .theme-dilna .card { background: #fdf3e0; border: 2px solid #b89b6e; border-radius: 0; box-shadow: 8px 8px 0 #8f7a5c; }
+    .theme-dilna button { border: 2px solid #5c4a32; color: #3d2e1c; background: #efe2cf; }
+    .theme-dilna textarea { background: #fcf6ea; border: 2px solid #b89b6e; font-style: italic; }
+    .theme-dilna .timeline { border-top-color: #b89b6e; }
+    .theme-dilna .timeline-entry { background: #b89b6e; border: 2px solid #5c4a32; border-radius: 0; }
+  </style>
+</head>
+<body class="theme-krb">
+<div class="app">
+  <div class="theme-bar">
+    <button class="theme-option" data-theme="krb" title="Krb">🪵</button>
+    <button class="theme-option" data-theme="les" title="Les">🌳</button>
+    <button class="theme-option" data-theme="noc" title="Noc">🦇</button>
+    <button class="theme-option" data-theme="mlha" title="Mlha">🌫️</button>
+    <button class="theme-option" data-theme="med" title="Měď">🪙</button>
+    <button class="theme-option" data-theme="zima" title="Zima">❄️</button>
+    <button class="theme-option" data-theme="ohen" title="Oheň">🔥</button>
+    <button class="theme-option" data-theme="dilna" title="Dílna">📜</button>
+  </div>
+
+  <h1>Chceš myš? Deník</h1>
+
+  <div class="cards-row">
+    <div class="card"><div class="card-img" style="background-image:url('doma/ilustrace/mys.jpg')"></div><div class="card-text">chceš myš ??</div></div>
+    <div class="card"><div class="card-img" style="background-image:url('doma/ilustrace/kocour.jpg')"></div><div class="card-text">kocour sežral…</div></div>
+    <div class="card"><div class="card-img" style="background-image:url('doma/ilustrace/zajic.jpg')"></div><div class="card-text">zajíc co prošel ohněm</div></div>
+  </div>
+
+  <div>
+    <button>🎲 Losovat</button>
+    <button>🔒 Sdílet sadu</button>
+  </div>
+
+  <textarea placeholder="Piš svůj zápis... Myš si všimne struktury.">Dnes bylo zvláštní světlo. Jako by někdo zapomněl zavřít dveře do jiného času. Kocour spolkl tečku a věta zůstala viset ve vzduchu. Nedokončená. Čekající.</textarea>
+
+  <div>
+    <button>📝 Celá obrazovka</button>
+    <button>🔍 Analyzovat</button>
+    <button>💾 Uložit</button>
+  </div>
+
+  <div class="timeline">
+    <strong>📅 Historie</strong>
+    <div class="timeline-strip">
+      <div class="timeline-entry"></div><div class="timeline-entry"></div><div class="timeline-entry"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const body = document.body;
+    const buttons = document.querySelectorAll('.theme-option');
+    const storageKey = 'mys-diary-theme';
+
+    function setTheme(themeName) {
+      body.className = ''; // odstraní všechny třídy
+      body.classList.add(`theme-${themeName}`);
+      buttons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.theme === themeName) btn.classList.add('active');
+      });
+      localStorage.setItem(storageKey, themeName);
+    }
+
+    // Načtení uloženého motivu
+    const saved = localStorage.getItem(storageKey);
+    if (saved) setTheme(saved);
+    else {
+      // výchozí aktivní ikonka
+      document.querySelector('[data-theme="krb"]').classList.add('active');
+    }
+
+    // Event listenery
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => setTheme(btn.dataset.theme));
+    });
+  })();
+</script>
+</body>
+</html>
