@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chceš myš? · Deník (Krb)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Mono&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #f3ecd8; color: #2c2416; font-family: 'DM Mono', monospace;
+      padding: 2rem 1rem; line-height: 1.7;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M10 10 L 90 10 L 90 90 L 10 90 Z" fill="none" stroke="%23d4c5a0" stroke-width="0.3"/></svg>');
+    }
+    .app { max-width: 900px; margin: 0 auto; }
+    h1 { font-family: 'Cormorant Garamond', serif; font-size: 3rem; font-weight: 400; letter-spacing: 4px; margin-bottom: 1rem; border-bottom: 2px solid #b8a78d; padding-bottom: 0.5rem; }
+    .cards-row { display: flex; gap: 1rem; margin: 2rem 0; }
+    .card {
+      flex: 1; aspect-ratio: 74/105; background: #e8ddcc; border: 1px solid #a89880;
+      box-shadow: 6px 6px 0 rgba(0,0,0,0.05); padding: 0.5rem; font-family: 'Cormorant Garamond', serif;
+      display: flex; flex-direction: column;
+    }
+    .card-img { flex: 3; background: #d4c5a0; margin-bottom: 0.5rem; background-size: cover; }
+    .card-text { font-size: 0.9rem; text-align: center; font-style: italic; }
+    button {
+      background: transparent; border: 1.5px solid #7a6548; padding: 0.5rem 1.5rem;
+      font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 2px;
+      color: #5c4a32; cursor: pointer; margin-right: 0.5rem; transition: 0.2s;
+    }
+    button:hover { background: #7a6548; color: #f3ecd8; }
+    textarea {
+      width: 100%; padding: 1.5rem; background: rgba(255,255,240,0.6); border: 1px solid #a89880;
+      font-family: 'DM Mono', monospace; font-size: 0.9rem; line-height: 1.8; margin: 1rem 0;
+      box-shadow: inset 2px 2px 5px rgba(0,0,0,0.03);
+    }
+    .timeline { margin-top: 3rem; border-top: 1px dashed #a89880; padding-top: 1rem; }
+    .timeline-strip { display: flex; gap: 6px; }
+    .timeline-entry { width: 20px; height: 40px; background: #d4c5a0; border: 1px solid #7a6548; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <h1>Chceš myš? Deník</h1>
+  <div class="cards-row">
+    <div class="card"><div class="card-img" style="background-image:url('doma/ilustrace/mys.jpg')"></div><div class="card-text">chceš myš ??</div></div>
+    <div class="card"><div class="card-img" style="background-image:url('doma/ilustrace/kocour.jpg')"></div><div class="card-text">kocour sežral…</div></div>
+    <div class="card"><div class="card-img" style="background-image:url('doma/ilustrace/zajic.jpg')"></div><div class="card-text">zajíc co prošel ohněm</div></div>
+  </div>
+  <div>
+    <button>🎲 Losovat</button>
+    <button>🔒 Sdílet sadu</button>
+  </div>
+  <textarea placeholder="Piš svůj zápis... Myš si všimne struktury.">Dnes bylo zvláštní světlo. Jako by někdo zapomněl zavřít dveře do jiného času. Kocour spolkl tečku a věta zůstala viset ve vzduchu. Nedokončená. Čekající.</textarea>
+  <div>
+    <button>📝 Celá obrazovka</button>
+    <button>🔍 Analyzovat</button>
+    <button>💾 Uložit</button>
+  </div>
+  <div class="timeline">
+    <strong>📅 Historie</strong>
+    <div class="timeline-strip">
+      <div class="timeline-entry"></div><div class="timeline-entry"></div><div class="timeline-entry"></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
