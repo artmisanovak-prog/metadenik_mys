@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Chceš myš? · Deník</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-krb">
+  <div class="mys-container"><div class="mys-icon">🐭</div></div>
+
+  <div class="app">
+    <!-- Přepínač témat (8 ikonek) -->
+    <div class="theme-bar">
+      <button class="theme-option" data-theme="krb" title="Krb">🪵</button>
+      <button class="theme-option" data-theme="les" title="Les">🌳</button>
+      <button class="theme-option" data-theme="noc" title="Noc">🦇</button>
+      <button class="theme-option" data-theme="mlha" title="Mlha">🌫️</button>
+      <button class="theme-option" data-theme="med" title="Měď">🪙</button>
+      <button class="theme-option" data-theme="zima" title="Zima">❄️</button>
+      <button class="theme-option" data-theme="ohen" title="Oheň">🔥</button>
+      <button class="theme-option" data-theme="dilna" title="Dílna">📜</button>
+    </div>
+
+    <h1>Chceš myš? Deník</h1>
+
+    <!-- Horní úhloměr -->
+    <div class="legend-wheel">
+      <canvas id="angleWheel" width="260" height="260"></canvas>
+    </div>
+    <div class="wheel-info" id="wheelInfo">Klikni na segment – popis úhlu</div>
+
+    <!-- Karty (zde se budou zvětšovat) -->
+    <div class="cards-wrapper" id="cardsWrapper">
+      <div class="cards-block" id="cardsBlock"></div>
+      <!-- Úhloměry NAD kartami -->
+      <div class="uhlomers-row" id="uhlomersRow"></div>
+    </div>
+
+    <div class="card-actions">
+      <button class="btn btn-g" id="toggleUhlomersBtn">🔮 Zobrazit úhloměry</button>
+      <button class="btn btn-g" id="shuffleCards">🎲 Losovat</button>
+      <button class="btn btn-g" id="lockShareBtn">🔒 Sdílet sadu</button>
+    </div>
+    <div id="shareUrlDisplay" class="share-url"></div>
+
+    <textarea id="diaryEntry" placeholder="Piš svůj zápis... Myš si všimne struktury."></textarea>
+
+    <div class="action-buttons">
+      <button class="btn btn-p" id="analyzeBtn">🔍 Analyzovat</button>
+      <button class="btn btn-g" id="saveBtn">💾 Uložit</button>
+      <button class="btn btn-g" id="newEntryBtn">🆕 Nový</button>
+    </div>
+
+    <!-- Výsledky analýzy -->
+    <div class="analysis-results" id="analysisResults" style="display: none;">
+      <div class="az-header" style="margin-bottom:1px">
+        <span>Výsledky analýzy</span>
+        <span id="analysisStats"></span>
+      </div>
+      <div class="angle-bars" id="angleBars"></div>
+      <div class="dominant-info" id="dominantInfo"></div>
+      <div class="az-header" style="margin-top:1rem">Text s podbarvením</div>
+      <div id="highlightedText" class="highlighted-text"></div>
+      <div class="result-actions">
+        <button class="btn btn-g" id="shareEntryBtn">🔗 Sdílet zápis</button>
+        <button class="btn btn-g" id="printEntryBtn">🖨️ Tisk</button>
+      </div>
+    </div>
+
+    <!-- Historie -->
+    <div class="timeline">
+      <div class="az-header">📅 Historie zápisů</div>
+      <div class="timeline-strip" id="timelineStrip"></div>
+    </div>
+    <div id="historyDetail" class="history-detail"></div>
+  </div>
+
+  <script src="analyzer.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
