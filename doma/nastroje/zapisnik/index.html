@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Chceš myš? · Deník</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-krb">
+  <div class="mys-container"><div class="mys-icon">🐭</div></div>
+
+  <div class="app">
+    <!-- Přepínač témat (ikonky v pásku bez mezer) -->
+    <div class="theme-bar">
+      <button class="theme-option" data-theme="krb" title="Krb">🪵</button>
+      <button class="theme-option" data-theme="les" title="Les">🌳</button>
+      <button class="theme-option" data-theme="noc" title="Noc">🦇</button>
+      <button class="theme-option" data-theme="mlha" title="Mlha">🌫️</button>
+      <button class="theme-option" data-theme="med" title="Měď">🪙</button>
+      <button class="theme-option" data-theme="zima" title="Zima">❄️</button>
+      <button class="theme-option" data-theme="ohen" title="Oheň">🔥</button>
+      <button class="theme-option" data-theme="dilna" title="Dílna">📜</button>
+    </div>
+
+    <h1>Chceš myš? Deník</h1>
+
+    <!-- Horní úhloměr -->
+    <div class="legend-wheel">
+      <canvas id="angleWheel" width="220" height="220"></canvas>
+    </div>
+    <div class="wheel-info" id="wheelInfo">Klikni na segment – popis úhlu</div>
+
+    <!-- Karty – 3 vedle sebe bez mezer -->
+    <div class="cards-block" id="cardsBlock"></div>
+    <!-- Uhloměry pod kartami -->
+    <div class="uhlomers-row" id="uhlomersRow"></div>
+
+    <div class="card-actions">
+      <button id="shuffleCards">🎲 Losovat</button>
+      <button id="lockShareBtn">🔒 Sdílet sadu</button>
+    </div>
+    <div id="shareUrlDisplay"></div>
+
+    <textarea id="diaryEntry" placeholder="Piš svůj zápis... Myš si všimne struktury."></textarea>
+
+    <div class="action-buttons">
+      <button id="openWritingModal">📝 Celá obrazovka</button>
+      <button id="analyzeBtn">🔍 Analyzovat</button>
+      <button id="saveBtn">💾 Uložit</button>
+      <button id="newEntryBtn">🆕 Nový</button>
+    </div>
+
+    <!-- Výsledky analýzy -->
+    <div class="analysis-results" id="analysisResults" style="display: none;">
+      <div class="results-title">Zastoupení úhlů (0–100%)</div>
+      <div class="angle-bars" id="angleBars"></div>
+      <div class="dominant-info" id="dominantInfo"></div>
+      <div class="results-title">Text s podbarvením</div>
+      <div id="highlightedText" class="highlighted-text"></div>
+      <div class="result-actions">
+        <button id="shareEntryBtn">🔗 Sdílet zápis</button>
+        <button id="printEntryBtn">🖨️ Tisk</button>
+      </div>
+    </div>
+
+    <!-- Historie (časová osa) -->
+    <div class="timeline">
+      <div class="timeline-title">📅 Historie</div>
+      <div class="timeline-strip" id="timelineStrip"></div>
+    </div>
+    <div id="historyDetail" class="history-detail"></div>
+  </div>
+
+  <!-- Modální okno pro psaní -->
+  <div class="writing-modal" id="writingModal">
+    <div class="modal-header"><button class="modal-close" id="closeModalBtn">&times;</button></div>
+    <div class="modal-content">
+      <div class="cards-block" id="modalCardsBlock"></div>
+      <textarea id="modalDiaryEntry" placeholder="Piš..."></textarea>
+      <div class="modal-actions">
+        <button id="modalAnalyzeBtn">🔍 Analyzovat</button>
+        <button id="modalSaveBtn">💾 Uložit</button>
+        <button id="modalCloseDone">✓ Hotovo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skripty -->
+  <script src="analyzer.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
