@@ -1,0 +1,112 @@
+/* ---------- SPOLEČNÉ STYLY ---------- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Mono', monospace;
+  padding: 1rem 1rem 1rem 4.5rem;
+  line-height: 1.7;
+  transition: background 0.3s, color 0.3s;
+  min-height: 100vh;
+}
+.mys-container { position: fixed; left: 10px; top: 0; bottom: 0; width: 50px; pointer-events: none; z-index: 1000; display: flex; align-items: flex-end; }
+.mys-icon { font-size: 42px; line-height: 1; transform: rotate(180deg); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+.app { max-width: 1100px; margin: 0 auto; }
+.theme-bar { display: flex; align-items: center; border-bottom: 1px solid; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+.theme-option { font-size: 1.6rem; cursor: pointer; padding: 0.2rem 0.4rem; background: transparent; border: none; opacity: 0.6; transition: 0.2s; border-radius: 12px; }
+.theme-option:hover { opacity: 1; transform: scale(1.1); }
+.theme-option.active { opacity: 1; box-shadow: 0 0 0 2px currentColor; }
+h1 { font-family: 'Cormorant Garamond', serif; font-size: 2.8rem; font-weight: 400; margin-bottom: 0.5rem; }
+/* Karty */
+.cards-block { display: flex; border: 1px solid; margin-bottom: 0.5rem; }
+.card-wrapper { flex: 1; aspect-ratio: 74 / 105; cursor: pointer; }
+.card { width: 100%; height: 100%; display: flex; flex-direction: column; }
+.card-img { flex: 1; background-size: cover; background-position: center; }
+/* Uhloměry pod kartami */
+.uhlomers-row { display: flex; margin: 0.5rem 0 1.5rem; }
+.uhlomer-wrapper { flex: 1; display: none; flex-direction: column; align-items: center; padding: 0.5rem; border: 1px solid; }
+.cards-block.active ~ .uhlomers-row .uhlomer-wrapper { display: flex; }
+.uhlomer { display: flex; width: 100%; max-width: 200px; margin: 0 auto; border-radius: 40px 40px 0 0; overflow: hidden; border: 1px solid; }
+.segment { flex: 1 0 16.666%; height: 24px; cursor: pointer; transition: 0.2s; border-right: 1px solid; }
+.segment:last-child { border-right: none; }
+.segment.inactive { opacity: 0.25; cursor: not-allowed; }
+.inspire-sentence { font-size: 0.75rem; margin-top: 0.6rem; font-style: italic; text-align: center; min-height: 2.5rem; }
+/* Horní úhloměr */
+.legend-wheel { display: flex; justify-content: center; margin: 1.5rem 0; }
+.wheel-info { text-align: center; font-size: 0.85rem; min-height: 3rem; }
+/* Tlačítka */
+button { background: transparent; padding: 0.5rem 1.2rem; font-family: inherit; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.2s; margin: 0; }
+.action-buttons { display: flex; gap: 0.8rem; flex-wrap: wrap; margin: 1.2rem 0; }
+/* Analýza */
+.analysis-results { margin-top: 2rem; padding: 1.2rem; border: 1px solid; }
+.angle-bars { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.5rem 1rem; margin: 1rem 0; }
+.angle-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; }
+.color-dot { width: 10px; height: 10px; border-radius: 50%; }
+.highlighted-text { padding: 1rem; line-height: 1.9; white-space: pre-wrap; }
+/* Historie */
+.timeline { margin-top: 2.5rem; border-top: 1px solid; padding-top: 1rem; }
+.timeline-strip { display: flex; margin: 1rem 0; }
+.timeline-entry { width: 22px; height: 44px; cursor: pointer; transition: transform 0.15s; display: flex; flex-direction: column; }
+.timeline-entry:hover { transform: scale(1.08); }
+.color-stripe { flex: 1; }
+.history-detail { padding: 1rem; border: 1px solid; margin-top: 1rem; display: none; }
+
+/* ---------- MOTIVY (8) ---------- */
+body.theme-krb { background: #f3ecd8; color: #2c2416; }
+.theme-krb .cards-block, .theme-krb .uhlomer-wrapper, .theme-krb .analysis-results, .theme-krb .history-detail { border-color: #a89880; background: #fdf3e0; }
+.theme-krb .card { background: #e8ddcc; }
+.theme-krb button { border: 1.5px solid #7a6548; color: #5c4a32; border-radius: 8px; }
+.theme-krb button:hover { background: #7a6548; color: #f3ecd8; }
+.theme-krb textarea { background: rgba(255,255,240,0.6); border: 1px solid #a89880; border-radius: 8px; }
+.theme-krb .timeline-entry { border: 1px solid #7a6548; }
+
+body.theme-les { background: #e2f0d9; color: #2d3e2c; }
+.theme-les .cards-block, .theme-les .uhlomer-wrapper, .theme-les .analysis-results, .theme-les .history-detail { border-color: #8aa67d; background: #f4faf0; }
+.theme-les .card { background: #f4faf0; border-radius: 12px; }
+.theme-les button { border: 1px solid #6b8c5c; color: #3a5a35; border-radius: 30px; box-shadow: 0 3px 0 #8aa67d; }
+.theme-les button:hover { transform: translateY(-2px); box-shadow: 0 5px 0 #6b8c5c; }
+.theme-les textarea { background: #f4faf0; border: 1px solid #8aa67d; border-radius: 16px; }
+.theme-les .timeline-entry { border: 1px solid #6b8c5c; border-radius: 20px; }
+
+body.theme-noc { background: #11100e; color: #d4cdbc; }
+.theme-noc .cards-block, .theme-noc .uhlomer-wrapper, .theme-noc .analysis-results, .theme-noc .history-detail { border-color: #5a4a32; background: #1e1b16; }
+.theme-noc .card { background: #1e1b16; border: 2px solid #5a4a32; }
+.theme-noc button { border: 1px solid #5a4a32; color: #a89880; border-radius: 2px; }
+.theme-noc button:hover { border-color: #c9ae74; color: #e0d5c0; }
+.theme-noc textarea { background: #1a1712; border: 1px solid #5a4a32; border-radius: 2px; }
+.theme-noc .timeline-entry { border: 1px solid #7a6548; border-radius: 2px; }
+
+body.theme-mlha { background: #f0edf2; color: #3a3340; }
+.theme-mlha .cards-block, .theme-mlha .uhlomer-wrapper, .theme-mlha .analysis-results, .theme-mlha .history-detail { border-color: #d6cee0; background: rgba(255,255,255,0.5); backdrop-filter: blur(4px); }
+.theme-mlha .card { background: transparent; }
+.theme-mlha button { border: 1px solid #b8a6c9; color: #5c4e6b; border-radius: 20px; }
+.theme-mlha textarea { background: rgba(255,255,245,0.6); border: 1px solid #d6cee0; border-radius: 20px; }
+.theme-mlha .timeline-entry { border: 1px solid #b8a6c9; border-radius: 20px; }
+
+body.theme-med { background: #2a241e; color: #e2d3c0; }
+.theme-med .cards-block, .theme-med .uhlomer-wrapper, .theme-med .analysis-results, .theme-med .history-detail { border-color: #b86b4a; background: #3c322a; }
+.theme-med .card { background: #3c322a; border: 1px solid #b86b4a; }
+.theme-med button { border: 1px solid #a85e3a; color: #d49c7c; text-transform: none; border-radius: 0; }
+.theme-med button:hover { background: #a85e3a; color: #1f1a16; }
+.theme-med textarea { background: #1f1a16; border: 1px solid #b86b4a; border-radius: 0; }
+.theme-med .timeline-entry { border: 1px solid #a85e3a; }
+
+body.theme-zima { background: #f5fafd; color: #1e3a4d; }
+.theme-zima .cards-block, .theme-zima .uhlomer-wrapper, .theme-zima .analysis-results, .theme-zima .history-detail { border-color: #c0dce8; background: #ffffff; }
+.theme-zima .card { background: #fff; border-radius: 4px; }
+.theme-zima button { border: 1px solid #9bc0d4; color: #3a6a80; border-radius: 2px; }
+.theme-zima textarea { background: #fff; border: 1px solid #c0dce8; border-radius: 4px; }
+.theme-zima .timeline-entry { border: 1px solid #9bc0d4; border-radius: 2px; }
+
+body.theme-ohen { background: #140c08; color: #f5d6b3; }
+.theme-ohen .cards-block, .theme-ohen .uhlomer-wrapper, .theme-ohen .analysis-results, .theme-ohen .history-detail { border-color: #b34e1a; background: #1f110a; }
+.theme-ohen .card { background: #1f110a; border: 1px solid #b34e1a; }
+.theme-ohen button { border: 1px solid #c25a28; color: #f0906a; border-radius: 0; }
+.theme-ohen button:hover { background: #a03e0f; color: #ffdcc0; box-shadow: 0 0 8px #ff6b35; }
+.theme-ohen textarea { background: #0f0804; border: 1px solid #b34e1a; }
+.theme-ohen .timeline-entry { border: 1px solid #e85d26; }
+
+body.theme-dilna { background: #e8dccc; color: #2e241a; background-image: radial-gradient(circle at 20% 30%, #f3e9d2 0%, #dac8ae 100%); }
+.theme-dilna .cards-block, .theme-dilna .uhlomer-wrapper, .theme-dilna .analysis-results, .theme-dilna .history-detail { border-color: #b89b6e; background: #fdf3e0; }
+.theme-dilna .card { background: #fdf3e0; border: 2px solid #b89b6e; border-radius: 0; }
+.theme-dilna button { border: 2px solid #5c4a32; color: #3d2e1c; background: #efe2cf; border-radius: 0; }
+.theme-dilna textarea { background: #fcf6ea; border: 2px solid #b89b6e; font-style: italic; border-radius: 0; }
+.theme-dilna .timeline-entry { border: 2px solid #5c4a32; }
