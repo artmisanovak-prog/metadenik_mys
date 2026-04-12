@@ -21,5 +21,5 @@
 - [zapisnik01](doma/nastroje/zapisnik01.html)
 - [zapisnik02](doma/nastroje/zapisnik02.html)
 - [motiv zapisnik](doma/nastroje/motiv_zapisnik.html)
-- [zapisnik03](doma/nastroje/zapisnik03.html)
+- [zapisnik](doma/nastroje/zapisnik/index.html)
 
