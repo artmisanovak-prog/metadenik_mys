@@ -1,0 +1,110 @@
+/* ---------- ZÁKLADNÍ PROMĚNNÉ (STEJNÉ JAKO SLON) ---------- */
+:root{
+  --bg:#0f0d0a;--s:#171410;--s2:#1e1a14;
+  --cream:#e8e0d0;--dim:rgba(232,224,208,.42);--dim2:rgba(232,224,208,.2);
+  --a:#c8903a;--a2:#8a6020;--ab:rgba(200,144,58,.1);--ab2:rgba(200,144,58,.22);
+  --border:rgba(200,144,58,.15);--border-hi:rgba(200,144,58,.32);
+  --serif:'Cormorant Garamond',Georgia,serif;--mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--cream);font-family:var(--mono);font-size:13px;
+  line-height:1.8;-webkit-font-smoothing:antialiased;padding:1rem 1rem 1rem 4.5rem;
+  min-height:100vh;display:flex;flex-direction:column;
+}
+.mys-container{position:fixed;left:10px;top:0;bottom:0;width:50px;pointer-events:none;z-index:1000;display:flex;align-items:flex-end}
+.mys-icon{font-size:42px;line-height:1;transform:rotate(180deg);filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2))}
+.app{max-width:1100px;margin:0 auto;width:100%}
+h1{font-family:var(--serif);font-size:clamp(2.2rem,6vw,3.5rem);font-weight:300;line-height:1.1;margin-bottom:1.5rem}
+h1 em{font-style:italic;color:var(--a)}
+
+/* ---------- HORNÍ ÚHLOMĚR ---------- */
+.legend-wheel{display:flex;justify-content:center;margin:2rem 0}
+.wheel-info{text-align:center;font-size:.85rem;color:var(--dim);min-height:2.5rem;margin-top:.5rem}
+
+/* ---------- KARTY ---------- */
+.cards-block{display:flex;gap:2px;background:var(--border);border:1px solid var(--border);margin-bottom:.5rem}
+.card-wrapper{flex:1;aspect-ratio:74/105;background:var(--s);cursor:pointer}
+.card{width:100%;height:100%;display:flex;flex-direction:column}
+.card-img{flex:1;background-size:cover;background-position:center;border-bottom:1px solid var(--border)}
+.uhlomers-row{display:flex;gap:2px;margin:.5rem 0 1.5rem}
+.uhlomer-wrapper{flex:1;background:var(--s);border:1px solid var(--border);padding:.8rem .5rem;display:none;flex-direction:column;align-items:center}
+.cards-block.active ~ .uhlomers-row .uhlomer-wrapper{display:flex}
+.uhlomer{display:flex;width:100%;max-width:200px;margin:0 auto;border-radius:40px 40px 0 0;overflow:hidden;border:1px solid var(--border-hi)}
+.segment{flex:1 0 16.666%;height:24px;cursor:pointer;transition:filter .2s,opacity .2s;border-right:1px solid var(--bg)}
+.segment:last-child{border-right:none}
+.segment.inactive{opacity:.25;cursor:not-allowed}
+.inspire-sentence{font-size:.75rem;margin-top:.6rem;font-style:italic;text-align:center;color:var(--dim);min-height:2.5rem}
+
+/* Barvy segmentů (ztlumené, jako u Slona) */
+.seg-0{background:#6a8fa8}.seg-1{background:#b58a5a}.seg-2{background:#6a9e6a}.seg-3{background:#b56a6a}
+.seg-4{background:#8a6aa8}.seg-5{background:#a86a5a}.seg-6{background:#b57a9a}.seg-7{background:#8a8a8a}
+.seg-8{background:#9a9a4a}.seg-9{background:#5a9a9a}.seg-10{background:#7a9ab5}.seg-11{background:#c9a05a}
+
+/* ---------- TLAČÍTKA ---------- */
+.card-actions{display:flex;justify-content:center;gap:1rem;margin:1.2rem 0;flex-wrap:wrap}
+.btn{
+  padding:.5rem 1.4rem;font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;
+  text-transform:uppercase;border:none;cursor:pointer;transition:all .12s;display:inline-block;
+}
+.btn-p{background:var(--a);color:var(--bg)}
+.btn-p:hover{background:#daa050}
+.btn-g{background:transparent;color:var(--dim);border:1px solid var(--border)}
+.btn-g:hover{color:var(--cream);border-color:var(--border-hi)}
+.action-buttons{display:flex;gap:.8rem;flex-wrap:wrap;margin:1.2rem 0}
+.share-url{font-size:.7rem;color:var(--dim);margin-top:.5rem;word-break:break-all}
+
+/* ---------- TEXTAREA ---------- */
+textarea{
+  width:100%;padding:1.2rem;background:var(--s);border:1px solid var(--border);
+  color:var(--cream);font-family:var(--mono);font-size:.85rem;line-height:1.7;
+  resize:vertical;min-height:180px;margin:1rem 0;
+}
+textarea:focus{outline:none;border-color:var(--a);box-shadow:0 0 0 2px var(--ab)}
+
+/* ---------- VÝSLEDKY ANALÝZY (DLAŽDICE) ---------- */
+.analysis-results{margin:2rem 0}
+.az-header{
+  background:var(--ab);border:1px solid var(--border-hi);padding:.6rem 1rem;
+  font-size:.7rem;display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap;
+}
+.angle-bars{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.5rem;margin:.8rem 0}
+.angle-item{display:flex;align-items:center;gap:.4rem;font-size:.7rem}
+.color-dot{width:10px;height:10px;border-radius:50%}
+.dominant-info{font-size:.75rem;color:var(--a);margin:.8rem 0}
+.highlighted-text{
+  background:var(--s);border:1px solid var(--border);padding:1.2rem;
+  font-family:var(--serif);font-size:.85rem;line-height:2;white-space:pre-wrap;
+}
+.result-actions{display:flex;gap:1rem;margin-top:1.5rem}
+
+/* ---------- HISTORIE ---------- */
+.timeline{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border)}
+.timeline-strip{display:flex;gap:6px;margin:1rem 0;flex-wrap:wrap}
+.timeline-entry{
+  width:24px;height:48px;border:1px solid var(--border);cursor:pointer;
+  transition:transform .15s;display:flex;flex-direction:column;background:var(--s);
+}
+.timeline-entry:hover{transform:scale(1.08);border-color:var(--a)}
+.color-stripe{flex:1}
+.history-detail{
+  background:var(--s);border:1px solid var(--border-hi);padding:1.2rem;
+  margin-top:1rem;display:none;
+}
+
+/* ---------- MODÁLNÍ OKNO ---------- */
+.diag-modal{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);
+  z-index:200;align-items:center;justify-content:center;padding:20px;
+}
+.diag-modal.active{display:flex}
+.diag-box{
+  background:var(--s);border:1px solid var(--border-hi);max-width:700px;width:100%;
+  padding:22px;max-height:90vh;overflow-y:auto;
+}
+.diag-close{
+  float:right;background:none;border:1px solid var(--border);color:var(--dim);
+  font-family:var(--mono);font-size:.6rem;padding:3px 8px;cursor:pointer;transition:all .12s;
+}
+.diag-close:hover{color:var(--cream);border-color:var(--border-hi)}
