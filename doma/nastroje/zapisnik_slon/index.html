@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Chceš myš? · Deník</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="mys-container"><div class="mys-icon">🐭</div></div>
+
+  <div class="app">
+    <h1>Chceš myš? Deník</h1>
+
+    <!-- Horní úhloměr -->
+    <div class="legend-wheel">
+      <canvas id="angleWheel" width="260" height="260"></canvas>
+    </div>
+    <div class="wheel-info" id="wheelInfo">Klikni na segment – popis úhlu</div>
+
+    <!-- Karty -->
+    <div class="cards-block" id="cardsBlock"></div>
+    <div class="uhlomers-row" id="uhlomersRow"></div>
+
+    <div class="card-actions">
+      <button class="btn btn-g" id="shuffleCards">🎲 Losovat</button>
+      <button class="btn btn-g" id="lockShareBtn">🔒 Sdílet sadu</button>
+    </div>
+    <div id="shareUrlDisplay" class="share-url"></div>
+
+    <textarea id="diaryEntry" placeholder="Piš svůj zápis... Myš si všimne struktury."></textarea>
+
+    <div class="action-buttons">
+      <button class="btn btn-g" id="openWritingModal">📝 Celá obrazovka</button>
+      <button class="btn btn-p" id="analyzeBtn">🔍 Analyzovat</button>
+      <button class="btn btn-g" id="saveBtn">💾 Uložit</button>
+      <button class="btn btn-g" id="newEntryBtn">🆕 Nový</button>
+    </div>
+
+    <!-- Výsledky analýzy (dlaždice) -->
+    <div class="analysis-results" id="analysisResults" style="display: none;">
+      <div class="az-header" style="margin-bottom:1px">
+        <span>Výsledky analýzy</span>
+        <span id="analysisStats"></span>
+      </div>
+      <div class="angle-bars" id="angleBars"></div>
+      <div class="dominant-info" id="dominantInfo"></div>
+      <div class="az-header" style="margin-top:1rem">Text s podbarvením</div>
+      <div id="highlightedText" class="highlighted-text"></div>
+      <div class="result-actions">
+        <button class="btn btn-g" id="shareEntryBtn">🔗 Sdílet zápis</button>
+        <button class="btn btn-g" id="printEntryBtn">🖨️ Tisk</button>
+      </div>
+    </div>
+
+    <!-- Historie -->
+    <div class="timeline">
+      <div class="az-header">📅 Historie zápisů</div>
+      <div class="timeline-strip" id="timelineStrip"></div>
+    </div>
+    <div id="historyDetail" class="history-detail"></div>
+  </div>
+
+  <!-- Modální okno -->
+  <div class="diag-modal" id="writingModal">
+    <div class="diag-box">
+      <button class="diag-close" id="closeModalBtn">✕ zavřít</button>
+      <div style="font-family:var(--serif);font-size:1.1rem;font-weight:300;margin-bottom:14px;padding-right:60px">Pište na celou obrazovku</div>
+      <div class="cards-block" id="modalCardsBlock" style="margin-bottom:1rem"></div>
+      <textarea id="modalDiaryEntry" placeholder="Pište..." style="min-height:250px"></textarea>
+      <div style="display:flex;gap:6px;margin-top:12px">
+        <button class="btn btn-p" id="modalAnalyzeBtn">🔍 Analyzovat</button>
+        <button class="btn btn-g" id="modalSaveBtn">💾 Uložit</button>
+        <button class="btn btn-g" id="modalCloseDone">✓ Hotovo</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="analyzer.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
