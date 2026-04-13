@@ -2,6 +2,7 @@
 
 ---
 
+- [zapisnik slon styl](doma/nastroje/zapisnik_slon/index.html)
 - [zapisnik](doma/nastroje/zapisnik.html)
 - [zapisnik kimi](doma/nastroje/zapisnik_kimi.html)
 - [zapisnik claire](doma/nastroje/zapisnik_claire.html)
