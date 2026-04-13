@@ -22,6 +22,8 @@
 - [zapisnik01](doma/nastroje/zapisnik01.html)
 - [zapisnik02](doma/nastroje/zapisnik02.html)
 - [motiv zapisnik](doma/nastroje/motiv_zapisnik.html)
-- [zapisnik](doma/nastroje/zapisnik_inspi/index.html)
+- [zapisnik inspi](doma/nastroje/zapisnik_inspi/index.html)
+- [zapisnik slon](doma/nastroje/zapisnik_slon/index.html)
+- [zapisnik index](doma/nastroje/zapisnik/index.html)
 - [denik](doma/nastroje/denik/index.html)
 
