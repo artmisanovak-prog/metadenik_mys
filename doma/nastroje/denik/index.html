@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Chceš myš? · Deník</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-krb">
+  <div class="mys-container"><div class="mys-icon">🐭</div></div>
+
+  <div class="app">
+    <!-- Hlavička + témata -->
+    <div class="theme-bar">
+      <button class="theme-option" data-theme="krb" title="Krb">🪵</button>
+      <button class="theme-option" data-theme="les" title="Les">🌳</button>
+      <button class="theme-option" data-theme="noc" title="Noc">🦇</button>
+      <button class="theme-option" data-theme="mlha" title="Mlha">🌫️</button>
+    </div>
+
+    <h1>Chceš myš? Deník</h1>
+    <p class="intro-text">Vylosuj tři karty. Napiš zápis. Myš ti ukáže, z jakých úhlů píšeš.</p>
+
+    <!-- Horní úhloměr -->
+    <section class="section">
+      <h2 class="section-title">12 úhlů pohledu</h2>
+      <div class="legend-wheel">
+        <canvas id="angleWheel" width="280" height="280"></canvas>
+      </div>
+      <div class="wheel-info" id="wheelInfo">Klikni na segment – popis úhlu a figury</div>
+    </section>
+
+    <!-- Karty -->
+    <section class="section">
+      <h2 class="section-title">Tři fenomény</h2>
+      <p class="section-desc">Kliknutím na kartu otevřeš její úhly.</p>
+      <div class="cards-block" id="cardsBlock"></div>
+      <div class="card-actions">
+        <button class="btn btn-g" id="shuffleCards">🎲 Losovat nové karty</button>
+        <button class="btn btn-g" id="lockShareBtn">🔒 Sdílet sadu</button>
+      </div>
+      <div id="shareUrlDisplay" class="share-url"></div>
+    </section>
+
+    <!-- Zápis -->
+    <section class="section">
+      <h2 class="section-title">Tvůj zápis</h2>
+      <textarea id="diaryEntry" placeholder="Piš svůj zápis... Myš si všimne struktury."></textarea>
+    </section>
+
+    <!-- Akce -->
+    <div class="action-buttons">
+      <button class="btn btn-p" id="analyzeBtn">🔍 Analyzovat</button>
+      <button class="btn btn-g" id="saveBtn">💾 Uložit</button>
+      <button class="btn btn-g" id="newEntryBtn">🆕 Nový zápis</button>
+      <button class="btn btn-g" id="openMapBtn">📊 Kognitivní mapa</button>
+    </div>
+
+    <!-- Výsledky analýzy -->
+    <section class="section" id="analysisSection" style="display:none;">
+      <h2 class="section-title">Výsledky analýzy</h2>
+      <div class="analysis-results">
+        <div class="az-header">
+          <span>Zastoupení úhlů (0–100%)</span>
+          <span id="analysisStats"></span>
+        </div>
+        <div class="angle-bars" id="angleBars"></div>
+        <div class="dominant-info" id="dominantInfo"></div>
+        <div class="az-header">Text s podbarvením</div>
+        <div id="highlightedText" class="highlighted-text"></div>
+        <div class="result-actions">
+          <button class="btn btn-g" id="shareEntryBtn">🔗 Sdílet zápis</button>
+          <button class="btn btn-g" id="printEntryBtn">🖨️ Tisk</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Historie: graf, statistiky, seznam -->
+    <section class="section">
+      <h2 class="section-title">📅 Tvoje kognitivní mapa</h2>
+      <p class="section-desc">Každý sloupec = jeden zápis. Tři čáry = tři karty. Barva = dominantní úhel. Vzor = karta. Výška = počet slov.</p>
+
+      <!-- Filtrování -->
+      <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all">Vše</button>
+        <select id="filterCard" class="filter-select">
+          <option value="">Filtrovat podle karty...</option>
+        </select>
+        <select id="filterAngle" class="filter-select">
+          <option value="">Filtrovat podle úhlu...</option>
+        </select>
+        <button class="btn btn-g" id="animateBtn">▶ Animovat vývoj</button>
+      </div>
+
+      <!-- Graf -->
+      <div class="chart-container">
+        <canvas id="historyChart" width="800" height="200"></canvas>
+      </div>
+
+      <!-- Statistiky -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card"><span class="stat-label">Nejčastější úhel</span><span class="stat-value" id="topAngle">—</span></div>
+        <div class="stat-card"><span class="stat-label">Nejpoužívanější karta</span><span class="stat-value" id="topCard">—</span></div>
+        <div class="stat-card"><span class="stat-label">Průměrně slov</span><span class="stat-value" id="avgWords">—</span></div>
+      </div>
+
+      <!-- Seznam zápisů -->
+      <div class="entries-list" id="entriesList"></div>
+      <div id="historyDetail" class="history-detail"></div>
+    </section>
+  </div>
+
+  <script src="analyzer.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
