@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chceš myš? · Deník</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-krb">
+  <div class="mys-container"><div class="mys-icon">🐭</div></div>
+
+  <div class="app">
+    <!-- Přepínač témat -->
+    <div class="theme-bar">
+      <button class="theme-option" data-theme="krb" title="Krb">🪵</button>
+      <button class="theme-option" data-theme="les" title="Les">🌳</button>
+      <button class="theme-option" data-theme="noc" title="Noc">🦇</button>
+      <button class="theme-option" data-theme="mlha" title="Mlha">🌫️</button>
+      <button class="theme-option" data-theme="med" title="Měď">🪙</button>
+      <button class="theme-option" data-theme="zima" title="Zima">❄️</button>
+      <button class="theme-option" data-theme="ohen" title="Oheň">🔥</button>
+      <button class="theme-option" data-theme="dilna" title="Dílna">📜</button>
+    </div>
+
+    <h1>Chceš myš? Deník</h1>
+    <p class="intro-text">Vylosuj tři karty. Napiš zápis. Myš ti ukáže, z jakých úhlů píšeš.</p>
+
+    <!-- Horní úhloměr (legenda) -->
+    <section class="section">
+      <h2 class="section-title">12 úhlů pohledu</h2>
+      <div class="legend-wheel">
+        <canvas id="angleWheel" width="280" height="280"></canvas>
+      </div>
+      <div class="wheel-info" id="wheelInfo">Klikni na segment – zobrazí se popis úhlu a použité figury.</div>
+    </section>
+
+    <!-- Karty a úhloměry -->
+    <section class="section">
+      <h2 class="section-title">Tři fenomény</h2>
+      <p class="section-desc">Každá karta nese jiný příběh. Kliknutím na kartu otevřeš její úhly. Tlačítkem pod kartami zobrazíš úhloměry – vyber perspektivu a věta se ukáže pod kartou.</p>
+
+      <div class="cards-wrapper" id="cardsWrapper">
+        <div class="cards-block" id="cardsBlock"></div>
+        <div class="uhlomers-row" id="uhlomersRow"></div>
+        <div class="inspire-row" id="inspireRow"></div>
+      </div>
+
+      <div class="card-actions">
+        <button class="btn btn-g" id="toggleUhlomersBtn">🔮 Zobrazit úhloměry</button>
+        <button class="btn btn-g" id="shuffleCards">🎲 Losovat nové karty</button>
+        <button class="btn btn-g" id="lockShareBtn">🔒 Sdílet sadu</button>
+      </div>
+      <div id="shareUrlDisplay" class="share-url"></div>
+    </section>
+
+    <!-- Zápis -->
+    <section class="section">
+      <h2 class="section-title">Tvůj zápis</h2>
+      <textarea id="diaryEntry" placeholder="Piš svůj zápis... Myš si všimne struktury."></textarea>
+    </section>
+
+    <!-- Akce -->
+    <div class="action-buttons">
+      <button class="btn btn-p" id="analyzeBtn">🔍 Analyzovat</button>
+      <button class="btn btn-g" id="saveBtn">💾 Uložit</button>
+      <button class="btn btn-g" id="newEntryBtn">🆕 Nový zápis</button>
+    </div>
+
+    <!-- Výsledky analýzy -->
+    <section class="section" id="analysisSection" style="display:none;">
+      <h2 class="section-title">Výsledky analýzy</h2>
+      <div class="analysis-results">
+        <div class="az-header">
+          <span>Zastoupení úhlů (0–100%)</span>
+          <span id="analysisStats"></span>
+        </div>
+        <div class="angle-bars" id="angleBars"></div>
+        <div class="dominant-info" id="dominantInfo"></div>
+        <div class="az-header">Text s podbarvením</div>
+        <div id="highlightedText" class="highlighted-text"></div>
+        <div class="result-actions">
+          <button class="btn btn-g" id="shareEntryBtn">🔗 Sdílet zápis</button>
+          <button class="btn btn-g" id="printEntryBtn">🖨️ Tisk</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Časová osa -->
+    <section class="section">
+      <h2 class="section-title">📅 Historie</h2>
+      <p class="section-desc">Každý proužek je jeden zápis. Barvy ukazují dominantní úhly. Kliknutím na proužek zobrazíš detail.</p>
+      <div class="timeline-map" id="timelineMap"></div>
+      <div class="entries-list" id="entriesList"></div>
+      <div id="historyDetail" class="history-detail"></div>
+    </section>
+  </div>
+
+  <script src="analyzer.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
