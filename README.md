@@ -11,6 +11,7 @@
 - [knihovna fenomenu](doma/nastroje/knihovna_fenomenu)
 - [galerie jevů](doma/nastroje/galerie_jevu.html)
 - [galerie fenomenu](doma/nastroje/galerie_fenomenu.html)
+- [tlupa1ku1.jpg](doma/ilustrace/tlupa1ku1.jpg)
 
 ---
 
