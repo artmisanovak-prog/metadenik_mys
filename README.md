@@ -26,4 +26,5 @@
 - [zapisnik slon](doma/nastroje/zapisnik_slon/index.html)
 - [zapisnik index](doma/nastroje/zapisnik/index.html)
 - [denik](doma/nastroje/denik/index.html)
+- [uhlomer papir img](doma/ilustrace/uhlomer_papir.jpg)
 
