@@ -2,6 +2,7 @@
 
 ---
 
+- [deník minimalismus](doma/nastroje/denik_minimal.html)
 - [zapisnik slon styl](doma/nastroje/zapisnik_slon/index.html)
 - [zapisnik](doma/nastroje/zapisnik.html)
 - [zapisnik kimi](doma/nastroje/zapisnik_kimi.html)
