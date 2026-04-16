@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Chceš myš? · Deník</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    /* ---------- GLOBÁLNÍ ---------- */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f0d0a; color: #e8e0d0; font-family: 'DM Mono', monospace;
+      font-size: 14px; line-height: 1.7; -webkit-font-smoothing: antialiased;
+      padding: 2rem 1.5rem; min-height: 100vh; display: flex; flex-direction: column;
+    }
+    .app { max-width: 900px; margin: 0 auto; width: 100%; }
+    h1 { font-family: 'Cormorant Garamond', serif; font-size: 3.2rem; font-weight: 300; letter-spacing: -0.01em; margin-bottom: 1.8rem; color: #e8e0d0; }
+    h1 em { font-style: italic; color: #a89880; }
+
+    /* ---------- KARTY ---------- */
+    .cards-row { display: flex; gap: 2px; background: rgba(168,152,128,.15); border: 1px solid rgba(168,152,128,.25); margin-bottom: 1.2rem; }
+    .card-wrapper { flex: 1; aspect-ratio: 74/105; background: #171410; cursor: pointer; overflow: hidden; }
+    .card-img { width: 100%; height: 100%; background-size: cover; background-position: center; filter: grayscale(0.3); transition: filter 0.2s; }
+    .card-wrapper:hover .card-img { filter: grayscale(0); }
+    .card-actions { display: flex; gap: 1rem; margin: 0.8rem 0 1.8rem; }
+    .btn { padding: 0.5rem 1.5rem; font-family: 'DM Mono', monospace; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; background: transparent; border: 1px solid rgba(168,152,128,.35); color: #a89880; cursor: pointer; transition: all 0.15s; border-radius: 2px; }
+    .btn:hover { background: rgba(168,152,128,.08); border-color: #a89880; color: #e8e0d0; }
+    .btn-primary { background: #a89880; border-color: #a89880; color: #0f0d0a; font-weight: 400; }
+    .btn-primary:hover { background: #c0aa90; }
+
+    /* ---------- EDITOR ---------- */
+    .editor-toolbar { display: flex; gap: 0.5rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
+    .tool-btn { background: transparent; border: 1px solid rgba(168,152,128,.2); color: #a89880; padding: 0.2rem 0.7rem; font-family: inherit; font-size: 0.8rem; cursor: pointer; border-radius: 2px; }
+    .tool-btn:hover { background: rgba(168,152,128,.1); border-color: #a89880; }
+    .editor { width: 100%; min-height: 120px; padding: 1rem 0; font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; line-height: 1.6; background: transparent; border: none; border-bottom: 2px solid rgba(168,152,128,.2); color: #e8e0d0; resize: none; overflow: hidden; transition: border-color 0.2s; }
+    .editor:focus { outline: none; border-bottom-color: #a89880; }
+    .editor[contenteditable="true"]:empty:before { content: attr(placeholder); color: rgba(232,224,208,.25); font-style: italic; }
+    .editor blockquote { border-left: 3px solid #a89880; padding-left: 1rem; margin: 0.5rem 0; color: rgba(232,224,208,.7); }
+    .editor h2, .editor h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; margin: 0.5rem 0; }
+    .editor ul, .editor ol { padding-left: 1.8rem; }
+
+    /* ---------- AKČNÍ TLAČÍTKA ---------- */
+    .action-bar { display: flex; gap: 1rem; margin: 1.5rem 0 2rem; flex-wrap: wrap; }
+
+    /* ---------- ČASOVÁ OSA ---------- */
+    .timeline-title { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; }
+    .timeline-strip { display: flex; gap: 0; margin: 0.8rem 0; background: rgba(0,0,0,.2); padding: 0.2rem 0; }
+    .tl-entry { height: 36px; display: flex; cursor: pointer; transition: opacity 0.15s; margin-right: 1px; }
+    .tl-entry:hover { opacity: 0.85; }
+    .tl-segment { height: 100%; width: 100%; }
+
+    /* ---------- MODÁLNÍ OKNO ---------- */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(8,6,4,.85); backdrop-filter: blur(6px); z-index: 1000; align-items: center; justify-content: center; padding: 1rem; }
+    .modal.active { display: flex; }
+    .modal-content { background: #171410; border: 1px solid rgba(168,152,128,.4); padding: 2rem; max-width: 650px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,.5); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; }
+    .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; color: #e8e0d0; }
+    .modal-close { cursor: pointer; font-size: 1.8rem; background: none; border: none; color: #a89880; }
+    .detail-meta { font-size: 0.8rem; color: #a89880; margin-bottom: 0.5rem; }
+    .detail-text { background: #0f0d0a; padding: 1.2rem; margin: 1rem 0; white-space: pre-wrap; font-family: 'Cormorant Garamond', serif; border-left: 3px solid #a89880; }
+    .user-angle-row { margin: 1rem 0; }
+    .user-angle-select { background: #0f0d0a; border: 1px solid rgba(168,152,128,.3); color: #e8e0d0; padding: 0.3rem; font-family: inherit; margin-left: 0.5rem; }
+
+    /* ---------- DROBNOSTI ---------- */
+    .share-url { font-size: 0.7rem; color: #a89880; margin-top: 0.3rem; word-break: break-all; }
+    .note { color: rgba(232,224,208,.4); font-size: 0.75rem; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <h1>Chceš myš? <em>Deník</em></h1>
+
+  <!-- Karty -->
+  <div class="cards-row" id="cardsRow"></div>
+  <div class="card-actions">
+    <button class="btn" id="shuffleBtn">🎲 Losovat</button>
+    <button class="btn" id="lockShareBtn">🔒 Zamknout a sdílet</button>
+  </div>
+  <div id="shareUrlDisplay" class="share-url"></div>
+
+  <!-- Editor -->
+  <div class="editor-toolbar">
+    <button class="tool-btn" data-command="bold"><b>B</b></button>
+    <button class="tool-btn" data-command="italic"><i>I</i></button>
+    <button class="tool-btn" data-command="formatBlock" data-value="h2">H2</button>
+    <button class="tool-btn" data-command="formatBlock" data-value="h3">H3</button>
+    <button class="tool-btn" data-command="insertUnorderedList">•</button>
+    <button class="tool-btn" data-command="insertOrderedList">1.</button>
+    <button class="tool-btn" data-command="blockquote">“</button>
+    <button class="tool-btn" data-command="fontSize" data-value="1">A-</button>
+    <button class="tool-btn" data-command="fontSize" data-value="7">A+</button>
+  </div>
+  <div id="editor" class="editor" contenteditable="true" placeholder="Piš svůj zápis..."></div>
+
+  <!-- Akce -->
+  <div class="action-bar">
+    <button class="btn btn-primary" id="analyzeBtn">🔍 Otevřít v analyzéru</button>
+    <button class="btn" id="saveLocalBtn">💾 Uložit lokálně</button>
+    <button class="btn" id="shareToGalleryBtn">📊 Sdílet do přehlídky jevů</button>
+    <button class="btn" id="editBtn">✏️ Upravit</button>
+  </div>
+
+  <!-- Časová osa -->
+  <div class="timeline-title">
+    <span>📅 Časová osa</span>
+    <span class="note">klikni na proužek</span>
+  </div>
+  <div class="timeline-strip" id="timelineStrip"></div>
+
+  <!-- Modální okno detailu -->
+  <div class="modal" id="detailModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-title" id="modalTitle">Detail zápisu</span>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    "use strict";
+
+    // ---------- KONFIGURACE ----------
+    const ANALYZER_URL = 'https://artmisanovak-prog.github.io/chces-mys/doma/nastroje/analyzer.html';
+    const GALLERY_URL = 'https://artmisanovak-prog.github.io/chces-mys/doma/nastroje/prehlidka_jevu.html';
+    const BASE_ASSETS = (window.location.hostname.includes('github') || window.location.hostname.includes('artmisanovak'))
+      ? 'https://artmisanovak-prog.github.io/chces-mys/'
+      : '';
+
+    // Data karet (9 ks)
+    const CARDS = {
+      "myš": { file: "mys.jpg", odkaz: "https://artmisanovak-prog.github.io/chces-mys/doma/data/uhly/mys_uhly.html" },
+      "kocour": { file: "kocour.jpg", odkaz: "https://artmisanovak-prog.github.io/chces-mys/doma/data/uhly/kocour_uhly.html" },
+      "zajíc": { file: "zajic.jpg", odkaz: "" },
+      "ryba": { file: "ryba.jpg", odkaz: "https://artmisanovak-prog.github.io/chces-mys/doma/data/uhly/ryba_uhly.html" },
+      "páv": { file: "pav.jpg", odkaz: "" },
+      "netopýr": { file: "netopyr.jpg", odkaz: "" },
+      "motýl": { file: "motyl.jpg", odkaz: "" },
+      "pavouk": { file: "pavouk.jpg", odkaz: "" },
+      "krokodýl": { file: "krokodyl.jpg", odkaz: "" }
+    };
+
+    // Úhly – paleta (upravená)
+    const ANGLES = [
+      { st:0, name:'Analytický', color:'#4a6075' },        // tmavě šedomodrá
+      { st:30, name:'Kulturní', color:'#6a9e72' },
+      { st:60, name:'Filozofický', color:'#d4a0b0' },      // světle růžová
+      { st:90, name:'Naivní', color:'#5fa8a0' },
+      { st:120, name:'Jazykový', color:'#8e7248' },
+      { st:150, name:'Metaforický', color:'#5a8a5a' },
+      { st:180, name:'Asociační', color:'#a85a5a' },
+      { st:210, name:'Introspektivní', color:'#c8a832' },
+      { st:240, name:'Ironický', color:'#c8722a' },
+      { st:270, name:'Groteskní', color:'#a83060' },
+      { st:300, name:'Absurdní', color:'#6080a0' },
+      { st:330, name:'Surrealistický', color:'#8060b0' }  // fialová
+    ];
+    const ANGLE_MAP = Object.fromEntries(ANGLES.map(a => [a.st, a]));
+
+    // Stav
+    let currentCards = ["myš","kocour","zajíc"];
+    let diaryEntries = [];
+    let currentEntryId = null;
+    let pendingAnalysis = null; // dočasné úložiště při návratu z analyzéru
+
+    // DOM
+    const cardsRow = document.getElementById('cardsRow');
+    const editor = document.getElementById('editor');
+    const timelineStrip = document.getElementById('timelineStrip');
+    const modal = document.getElementById('detailModal');
+    const detailContent = document.getElementById('detailContent');
+    const modalTitle = document.getElementById('modalTitle');
+
+    // ---------- KARTY ----------
+    function renderCards() {
+      cardsRow.innerHTML = '';
+      currentCards.forEach(id => {
+        const c = CARDS[id];
+        const url = BASE_ASSETS + 'doma/ilustrace/' + c.file;
+        const wrap = document.createElement('div'); wrap.className = 'card-wrapper';
+        wrap.innerHTML = `<div class="card-img" style="background-image:url('${url}')"></div>`;
+        wrap.addEventListener('click', () => { if (c.odkaz) window.open(c.odkaz, '_blank'); });
+        cardsRow.appendChild(wrap);
+      });
+    }
+
+    // ---------- EDITOR ----------
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.preventDefault();
+        const cmd = btn.dataset.command;
+        const val = btn.dataset.value || null;
+        if (cmd === 'fontSize') {
+          document.execCommand('fontSize', false, val);
+        } else if (cmd === 'formatBlock') {
+          document.execCommand('formatBlock', false, `<${val}>`);
+        } else {
+          document.execCommand(cmd, false, null);
+        }
+        editor.focus();
+      });
+    });
+
+    // ---------- ANALÝZA (otevře externí analyzér) ----------
+    function openAnalyzer() {
+      const text = editor.innerText.trim(); // nebo innerHTML? pošleme plain text
+      if (!text) { alert('Napiš text.'); return; }
+      const url = new URL(ANALYZER_URL);
+      url.searchParams.set('text', text);
+      url.searchParams.set('returnTo', window.location.href); // volitelné
+      window.open(url.toString(), '_blank');
+    }
+
+    // ---------- PŘÍJEM VÝSLEDKŮ Z ANALYZÉRU (voláno přes URL param) ----------
+    function processUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('angles')) {
+        const anglesStr = params.get('angles'); // formát: "0:78,60:45,90:12"
+        const percentages = {};
+        anglesStr.split(',').forEach(p => {
+          const [st, val] = p.split(':').map(Number);
+          if (!isNaN(st) && !isNaN(val)) percentages[st] = val;
+        });
+        const cardsParam = params.get('cards') || currentCards.join(',');
+        const analysis = { percentages, cards: cardsParam.split(','), timestamp: Date.now() };
+        pendingAnalysis = analysis;
+        // vyčistit URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        // nabídnout uložení
+        if (confirm('Analýza dokončena. Uložit zápis s výsledky?')) {
+          saveEntryWithAnalysis(analysis);
+        }
+      }
+    }
+
+    function saveEntryWithAnalysis(analysis) {
+      const text = editor.innerText;
+      const title = prompt('Název zápisu:', 'Zápis ' + new Date().toLocaleString());
+      if (title === null) return;
+      
+      // výběr vlastního úhlu (nepovinné)
+      let userAngle = null;
+      if (confirm('Chcete přidat vlastní úhel (jak jste to mysleli)?')) {
+        const angleSt = prompt('Zadejte stupně úhlu (0,30,60,90,120,150,180,210,240,270,300,330):');
+        if (angleSt && ANGLE_MAP[angleSt]) userAngle = parseInt(angleSt);
+      }
+
+      const entry = {
+        id: currentEntryId || Date.now() + '-' + Math.random().toString(36),
+        date: new Date().toISOString(),
+        title,
+        text,
+        cards: analysis.cards,
+        percentages: analysis.percentages,
+        userAngle: userAngle,
+      };
+      
+      const idx = diaryEntries.findIndex(e => e.id === entry.id);
+      if (idx >= 0) diaryEntries[idx] = entry;
+      else diaryEntries.push(entry);
+      
+      localStorage.setItem('mys-diary', JSON.stringify(diaryEntries));
+      renderTimeline();
+      currentEntryId = null;
+      pendingAnalysis = null;
+      editor.innerHTML = '';
+      alert('Zápis uložen.');
+    }
+
+    // ---------- LOKÁLNÍ ULOŽENÍ (bez analýzy) ----------
+    function saveLocal() {
+      const text = editor.innerText;
+      if (!text) return;
+      const title = prompt('Název zápisu:', 'Zápis ' + new Date().toLocaleString());
+      if (title === null) return;
+      
+      const entry = {
+        id: currentEntryId || Date.now() + '-' + Math.random().toString(36),
+        date: new Date().toISOString(),
+        title,
+        text,
+        cards: [...currentCards],
+        percentages: {},
+        userAngle: null,
+      };
+      
+      const idx = diaryEntries.findIndex(e => e.id === entry.id);
+      if (idx >= 0) diaryEntries[idx] = entry;
+      else diaryEntries.push(entry);
+      
+      localStorage.setItem('mys-diary', JSON.stringify(diaryEntries));
+      renderTimeline();
+      currentEntryId = null;
+      editor.innerHTML = '';
+      alert('Zápis uložen lokálně.');
+    }
+
+    // ---------- PRAVIDLO PRO VÝBĚR ÚHLŮ DO OSY ----------
+    function selectDominantAngles(percentages) {
+      const entries = Object.entries(percentages).map(([st, val]) => ({ st: parseInt(st), val }));
+      entries.sort((a,b) => b.val - a.val);
+      if (entries.length === 0) return [];
+      
+      const first = entries[0];
+      const second = entries[1];
+      
+      if (first.val >= 80) {
+        return entries.slice(0, 3).map(e => e.st);
+      } else if (first.val >= 50) {
+        return entries.slice(0, 2).map(e => e.st);
+      } else {
+        if (second && (first.val - second.val) <= 10) {
+          return [first.st, second.st];
+        }
+        return [first.st];
+      }
+    }
+
+    // ---------- ČASOVÁ OSA ----------
+    function loadEntries() {
+      const stored = localStorage.getItem('mys-diary');
+      if (stored) diaryEntries = JSON.parse(stored);
+    }
+    function saveEntries() { localStorage.setItem('mys-diary', JSON.stringify(diaryEntries)); }
+
+    function renderTimeline() {
+      timelineStrip.innerHTML = '';
+      diaryEntries.slice().reverse().forEach(entry => {
+        const percs = entry.percentages || {};
+        const doms = selectDominantAngles(percs);
+        if (doms.length === 0) return;
+        
+        const total = doms.reduce((sum, st) => sum + (percs[st] || 0), 0);
+        const wrapper = document.createElement('div'); wrapper.className = 'tl-entry';
+        wrapper.style.width = (20 + doms.length * 6) + 'px';
+        
+        doms.forEach(st => {
+          const seg = document.createElement('div'); seg.className = 'tl-segment';
+          const ang = ANGLE_MAP[st];
+          seg.style.backgroundColor = ang ? ang.color : '#888';
+          const width = total > 0 ? (percs[st] / total) * 100 : 100 / doms.length;
+          seg.style.width = width + '%';
+          wrapper.appendChild(seg);
+        });
+        
+        wrapper.addEventListener('click', () => showDetail(entry));
+        timelineStrip.appendChild(wrapper);
+      });
+    }
+
+    function showDetail(entry) {
+      modalTitle.textContent = entry.title;
+      const cardsStr = entry.cards.join(' + ');
+      const percs = entry.percentages || {};
+      const anglesStr = Object.entries(percs).map(([st,val]) => `${ANGLE_MAP[st]?.name || st} ${val}%`).join(', ');
+      const userAngleStr = entry.userAngle ? `${ANGLE_MAP[entry.userAngle]?.name || entry.userAngle}°` : '—';
+      
+      detailContent.innerHTML = `
+        <div class="detail-meta">Datum: ${new Date(entry.date).toLocaleString()}</div>
+        <div class="detail-meta">Karty: ${cardsStr}</div>
+        <div class="detail-meta">Strukturální úhly: ${anglesStr || '—'}</div>
+        <div class="detail-meta">Vlastní úhel: ${userAngleStr}</div>
+        <div class="detail-text">${entry.text}</div>
+        <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
+          <button class="btn" onclick="openAnalyzerForEntry('${entry.id}')">🔍 Otevřít v analyzéru</button>
+          <button class="btn" onclick="shareToGallery('${entry.id}')">📊 Sdílet do přehlídky</button>
+          <button class="btn" onclick="loadEntry('${entry.id}')">📂 Načíst</button>
+          <button class="btn" onclick="deleteEntry('${entry.id}')">🗑 Smazat</button>
+        </div>
+      `;
+      modal.classList.add('active');
+    }
+
+    window.closeModal = () => modal.classList.remove('active');
+    window.openAnalyzerForEntry = (id) => {
+      const entry = diaryEntries.find(e => e.id === id);
+      if (entry) {
+        const url = new URL(ANALYZER_URL);
+        url.searchParams.set('text', entry.text);
+        window.open(url.toString(), '_blank');
+      }
+    };
+    window.shareToGallery = (id) => {
+      const entry = diaryEntries.find(e => e.id === id);
+      if (!entry) return;
+      const nick = prompt('Nepovinná přezdívka:') || '';
+      const params = new URLSearchParams();
+      params.set('cards', entry.cards.join(','));
+      params.set('angles', Object.entries(entry.percentages).map(([st,val])=>`${st}:${val}`).join(','));
+      if (entry.userAngle) params.set('userAngle', entry.userAngle);
+      if (nick) params.set('nick', nick);
+      window.open(`${GALLERY_URL}?${params.toString()}`, '_blank');
+    };
+    window.loadEntry = (id) => {
+      const entry = diaryEntries.find(e => e.id === id);
+      if (entry) {
+        editor.innerHTML = entry.text;
+        currentCards = entry.cards;
+        renderCards();
+        currentEntryId = entry.id;
+        closeModal();
+      }
+    };
+    window.deleteEntry = (id) => {
+      diaryEntries = diaryEntries.filter(e => e.id !== id);
+      saveEntries();
+      renderTimeline();
+      closeModal();
+    };
+
+    // ---------- SDÍLENÍ ZAMČENÝCH KARET ----------
+    function lockAndShare() {
+      const url = new URL(window.location);
+      url.searchParams.set('cards', currentCards.join(','));
+      navigator.clipboard?.writeText(url.toString());
+      document.getElementById('shareUrlDisplay').textContent = '🔗 Odkaz zkopírován: ' + url.toString();
+    }
+
+    // ---------- INICIALIZACE ----------
+    function init() {
+      loadEntries();
+      renderCards();
+      renderTimeline();
+      processUrlParams(); // zpracování návratu z analyzéru
+      
+      document.getElementById('shuffleBtn').addEventListener('click', () => {
+        const ids = Object.keys(CARDS);
+        currentCards = [ids[Math.floor(Math.random()*ids.length)], ids[Math.floor(Math.random()*ids.length)], ids[Math.floor(Math.random()*ids.length)]];
+        renderCards();
+      });
+      document.getElementById('lockShareBtn').addEventListener('click', lockAndShare);
+      document.getElementById('analyzeBtn').addEventListener('click', openAnalyzer);
+      document.getElementById('saveLocalBtn').addEventListener('click', saveLocal);
+      document.getElementById('shareToGalleryBtn').addEventListener('click', () => {
+        if (!pendingAnalysis && !currentEntryId) { alert('Nejprve analyzujte nebo uložte zápis.'); return; }
+        const entry = currentEntryId ? diaryEntries.find(e => e.id === currentEntryId) : null;
+        if (entry) shareToGallery(entry.id);
+        else alert('Uložte zápis před sdílením.');
+      });
+      document.getElementById('editBtn').addEventListener('click', () => editor.focus());
+      
+      // Načtení parametrů z URL (sdílené karty)
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('cards')) {
+        const ids = params.get('cards').split(',').map(s => s.trim()).filter(id => CARDS[id]);
+        if (ids.length === 3) currentCards = ids;
+        renderCards();
+      }
+    }
+    init();
+  })();
+</script>
+</body>
+</html>
