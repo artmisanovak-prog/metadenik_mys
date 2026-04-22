@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Chceš myš? · Deník</title>
+  <!-- Fonty: elegantní serif pro nadpisy, mono pro popisky -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    /* ---------- PROMĚNNÉ ---------- */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0b0a08; color: #e0dcd3; font-family: 'DM Mono', monospace;
+      font-size: 14px; line-height: 1.6; padding: 2rem 1.5rem; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .app { max-width: 1000px; width: 100%; }
+    h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; letter-spacing: -0.01em; }
+    h1 { font-size: 3.5rem; margin-bottom: 0.5rem; color: #e8e0d0; }
+    .subhead { font-size: 1rem; color: #a89880; margin-bottom: 2rem; border-left: 2px solid #a89880; padding-left: 1rem; }
+
+    /* ---------- KARTY ---------- */
+    .cards-section { margin-bottom: 2rem; }
+    .cards-row { display: flex; gap: 4px; }
+    .card-wrapper {
+      flex: 1; aspect-ratio: 74/105; background: #1e1a15; cursor: pointer;
+      border: 1px solid #3a3228; transition: border-color 0.2s;
+    }
+    .card-wrapper:hover { border-color: #a89880; }
+    .card-img { width: 100%; height: 100%; background-size: cover; background-position: center; }
+    .card-actions { display: flex; gap: 1rem; margin: 1rem 0; }
+
+    /* ---------- TLAČÍTKA ---------- */
+    .btn {
+      background: transparent; border: 1px solid #3a3228; color: #a89880;
+      padding: 0.4rem 1rem; font-family: inherit; font-size: 0.75rem;
+      text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer;
+      transition: all 0.2s; border-radius: 2px;
+    }
+    .btn:hover { background: #1e1a15; border-color: #a89880; color: #e8e0d0; }
+    .btn-primary { background: #a89880; border-color: #a89880; color: #0b0a08; font-weight: 500; }
+    .btn-primary:hover { background: #c0aa90; }
+
+    .icon-toolbar { display: flex; gap: 1.5rem; margin: 1.5rem 0; flex-wrap: wrap; }
+    .icon-item {
+      display: flex; flex-direction: column; align-items: center; cursor: pointer;
+      opacity: 0.8; transition: opacity 0.2s;
+    }
+    .icon-item:hover { opacity: 1; }
+    .icon-item .icon { font-size: 1.8rem; margin-bottom: 0.2rem; }
+    .icon-item .label { font-size: 0.65rem; text-transform: uppercase; color: #a89880; }
+
+    /* ---------- EDITOR ---------- */
+    .editor-toolbar { display: flex; gap: 0.8rem; margin: 1rem 0; }
+    .tool-btn {
+      background: none; border: 1px solid #3a3228; color: #a89880;
+      padding: 0.2rem 0.6rem; font-family: inherit; cursor: pointer;
+    }
+    .editor {
+      width: 100%; min-height: 150px; padding: 1rem;
+      font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; line-height: 1.6;
+      background: #0f0d0a; border: 1px solid #3a3228; color: #e8e0d0;
+      resize: vertical; outline: none;
+    }
+    .editor:focus { border-color: #a89880; }
+    .editor[contenteditable="true"]:empty:before {
+      content: attr(placeholder); color: #5a5248; font-style: italic;
+    }
+
+    /* ---------- ČASOVÁ OSA ---------- */
+    .timeline-wrap { margin: 2.5rem 0; }
+    .timeline-title { display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: #a89880; }
+    .timeline-strip {
+      display: flex; flex-wrap: wrap; gap: 6px; padding: 0.5rem 0;
+    }
+    .tl-entry {
+      display: flex; flex-direction: column; align-items: center; cursor: pointer;
+      min-width: 70px; transition: transform 0.1s;
+    }
+    .tl-entry:hover { transform: translateY(-2px); }
+    .tl-bars {
+      display: flex; width: 100%; height: 28px; border: 1px solid #2a241e;
+    }
+    .tl-segment { height: 100%; }
+    .tl-date { font-size: 0.6rem; margin-top: 0.2rem; color: #8a7e6e; }
+
+    /* ---------- MODÁL ---------- */
+    .modal {
+      display: none; position: fixed; inset: 0; background: rgba(8,6,4,0.9);
+      backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: #171410; border: 1px solid #a89880; padding: 2rem;
+      max-width: 700px; width: 100%; max-height: 85vh; overflow-y: auto;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .modal-title { font-size: 2rem; font-family: 'Cormorant Garamond', serif; }
+    .modal-close { font-size: 2rem; cursor: pointer; background: none; border: none; color: #a89880; }
+    .detail-meta { color: #a89880; font-size: 0.8rem; margin-bottom: 0.3rem; }
+    .detail-text { background: #0f0d0a; padding: 1.2rem; margin: 1.2rem 0; white-space: pre-wrap; border-left: 3px solid #a89880; }
+    .angles-bar { display: flex; height: 24px; margin: 1rem 0; border: 1px solid #3a3228; }
+
+    /* ---------- IMPORT KARET ---------- */
+    .import-area { margin-top: 2rem; padding-top: 1rem; border-top: 1px dashed #3a3228; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <h1>Chceš myš? <em>Deník</em></h1>
+  <div class="subhead">
+    Piš, losuj karty, nech text analyzovat. Zápisy se ukládají lokálně, otisky můžeš sdílet do Přehlídky fenoménů.
+  </div>
+
+  <!-- KARTY -->
+  <section class="cards-section">
+    <div class="cards-row" id="cardsRow"></div>
+    <div class="card-actions">
+      <button class="btn" id="shuffleBtn">🎲 Losovat karty</button>
+      <button class="btn" id="lockShareBtn">🔗 Sdílet odkaz na karty</button>
+    </div>
+    <div id="shareUrlDisplay" style="font-size:0.7rem; color:#a89880;"></div>
+  </section>
+
+  <!-- EDITOR + NÁSTROJE -->
+  <div class="editor-toolbar">
+    <button class="tool-btn" data-command="bold"><b>B</b></button>
+    <button class="tool-btn" data-command="italic"><i>I</i></button>
+    <button class="tool-btn" data-command="formatBlock" data-value="h2">H2</button>
+    <button class="tool-btn" data-command="formatBlock" data-value="h3">H3</button>
+    <button class="tool-btn" data-command="insertUnorderedList">•</button>
+    <button class="tool-btn" data-command="blockquote">“</button>
+  </div>
+  <div id="editor" class="editor" contenteditable="true" placeholder="Piš svůj zápis..."></div>
+
+  <!-- IKONOVÝ PANEL AKCÍ -->
+  <div class="icon-toolbar">
+    <div class="icon-item" id="analyzeBtn">
+      <span class="icon">🔍</span>
+      <span class="label">Analyzovat</span>
+    </div>
+    <div class="icon-item" id="saveLocalBtn">
+      <span class="icon">💾</span>
+      <span class="label">Uložit</span>
+    </div>
+    <div class="icon-item" id="shareToGalleryBtn">
+      <span class="icon">📊</span>
+      <span class="label">Sdílet do přehlídky</span>
+    </div>
+    <div class="icon-item" id="editBtn">
+      <span class="icon">✏️</span>
+      <span class="label">Upravit</span>
+    </div>
+    <div class="icon-item" id="importCardsBtn">
+      <span class="icon">📦</span>
+      <span class="label">Přidat karty</span>
+    </div>
+  </div>
+
+  <!-- ČASOVÁ OSA -->
+  <div class="timeline-wrap">
+    <div class="timeline-title">
+      <span>📅 Časová osa (otisky)</span>
+      <span class="note" style="font-size:0.7rem;">klikni pro detail</span>
+    </div>
+    <div class="timeline-strip" id="timelineStrip"></div>
+  </div>
+
+  <!-- IMPORT KARET (schované v rozbalovacím bloku) -->
+  <details class="import-area">
+    <summary style="cursor:pointer; color:#a89880;">➕ Přidat další balíček karet</summary>
+    <div style="margin-top:1rem;">
+      <label style="display:block; margin-bottom:0.3rem;">URL JSON souboru s kartami:</label>
+      <input type="url" id="importUrl" placeholder="https://.../karty.json" style="width:100%; padding:0.5rem; background:#0f0d0a; border:1px solid #3a3228; color:#e8e0d0;">
+      <button class="btn" id="importBtn" style="margin-top:0.8rem;">Načíst karty</button>
+      <p style="font-size:0.7rem; margin-top:0.5rem;">Struktura: {"id": {"file":"obrazek.jpg","odkaz":"...","name":"Název"}}</p>
+    </div>
+  </details>
+</div>
+
+<!-- MODÁLNÍ OKNO -->
+<div class="modal" id="detailModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle"></span>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    "use strict";
+
+    // ---------- KONFIGURACE ----------
+    const ANALYZER_URL = 'https://artmisanovak-prog.github.io/chces-mys/doma/nastroje/analyzer.html';
+    const GALLERY_URL = 'https://artmisanovak-prog.github.io/chces-mys/doma/nastroje/prehlidka_jevu.html';
+    const BASE_ASSETS = (window.location.hostname.includes('github') || window.location.hostname.includes('artmisanovak'))
+      ? 'https://artmisanovak-prog.github.io/chces-mys/'
+      : '';
+
+    // Výchozí sada karet (9 ks) – lze rozšířit importem
+    let CARDS = {
+      "myš": { file: "mys.jpg", odkaz: "https://artmisanovak-prog.github.io/chces-mys/doma/data/uhly/mys_uhly.html", name: "Myš" },
+      "kocour": { file: "kocour.jpg", odkaz: "https://artmisanovak-prog.github.io/chces-mys/doma/data/uhly/kocour_uhly.html", name: "Kocour" },
+      "zajíc": { file: "zajic.jpg", odkaz: "", name: "Zajíc" },
+      "ryba": { file: "ryba.jpg", odkaz: "https://artmisanovak-prog.github.io/chces-mys/doma/data/uhly/ryba_uhly.html", name: "Ryba" },
+      "páv": { file: "pav.jpg", odkaz: "", name: "Páv" },
+      "netopýr": { file: "netopyr.jpg", odkaz: "", name: "Netopýr" },
+      "motýl": { file: "motyl.jpg", odkaz: "", name: "Motýl" },
+      "pavouk": { file: "pavouk.jpg", odkaz: "", name: "Pavouk" },
+      "krokodýl": { file: "krokodyl.jpg", odkaz: "", name: "Krokodýl" }
+    };
+
+    // Úhly – barvy převzaty z původního kódu
+    const ANGLES = [
+      { st:0, name:'Analytický', color:'#4a6075' }, { st:30, name:'Kulturní', color:'#6a9e72' },
+      { st:60, name:'Filozofický', color:'#d4a0b0' }, { st:90, name:'Naivní', color:'#5fa8a0' },
+      { st:120, name:'Jazykový', color:'#8e7248' }, { st:150, name:'Metaforický', color:'#5a8a5a' },
+      { st:180, name:'Asociační', color:'#a85a5a' }, { st:210, name:'Introspektivní', color:'#c8a832' },
+      { st:240, name:'Ironický', color:'#c8722a' }, { st:270, name:'Groteskní', color:'#a83060' },
+      { st:300, name:'Absurdní', color:'#6080a0' }, { st:330, name:'Surrealistický', color:'#8060b0' }
+    ];
+    const ANGLE_MAP = Object.fromEntries(ANGLES.map(a => [a.st, a]));
+
+    // Stav aplikace
+    let currentCards = ["myš","kocour","zajíc"];
+    let diaryEntries = [];
+    let currentEntryId = null;
+    let pendingAnalysis = null;
+
+    // DOM prvky
+    const cardsRow = document.getElementById('cardsRow');
+    const editor = document.getElementById('editor');
+    const timelineStrip = document.getElementById('timelineStrip');
+    const modal = document.getElementById('detailModal');
+    const detailContent = document.getElementById('detailContent');
+    const modalTitle = document.getElementById('modalTitle');
+
+    // ---------- RENDER KARET ----------
+    function renderCards() {
+      cardsRow.innerHTML = '';
+      currentCards.forEach(id => {
+        const card = CARDS[id];
+        if (!card) return;
+        const url = (card.file.startsWith('http') ? '' : BASE_ASSETS + 'doma/ilustrace/') + card.file;
+        const wrap = document.createElement('div'); wrap.className = 'card-wrapper';
+        wrap.innerHTML = `<div class="card-img" style="background-image:url('${url}')"></div>`;
+        wrap.addEventListener('click', () => {
+          if (card.odkaz) window.open(card.odkaz, '_blank');
+        });
+        cardsRow.appendChild(wrap);
+      });
+    }
+
+    // ---------- EDITOR ----------
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.preventDefault();
+        const cmd = btn.dataset.command;
+        const val = btn.dataset.value || null;
+        if (cmd === 'formatBlock') document.execCommand('formatBlock', false, `<${val}>`);
+        else document.execCommand(cmd, false, val);
+        editor.focus();
+      });
+    });
+
+    // ---------- ANALÝZA ----------
+    function openAnalyzer() {
+      const text = editor.innerText.trim();
+      if (!text) { alert('Napiš text.'); return; }
+      const url = new URL(ANALYZER_URL);
+      url.searchParams.set('text', text);
+      url.searchParams.set('returnTo', window.location.href);
+      window.open(url.toString(), '_blank');
+    }
+
+    // Zpracování návratu z analyzéru
+    function processUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('angles')) {
+        const anglesStr = params.get('angles');
+        const percentages = {};
+        anglesStr.split(',').forEach(p => {
+          const [st, val] = p.split(':').map(Number);
+          if (!isNaN(st) && !isNaN(val)) percentages[st] = val;
+        });
+        const cardsParam = params.get('cards') || currentCards.join(',');
+        const analysis = { percentages, cards: cardsParam.split(','), timestamp: Date.now() };
+        pendingAnalysis = analysis;
+        window.history.replaceState({}, document.title, window.location.pathname);
+        if (confirm('Analýza dokončena. Uložit zápis s výsledky?')) saveEntryWithAnalysis(analysis);
+      }
+    }
+
+    function saveEntryWithAnalysis(analysis) {
+      const text = editor.innerText;
+      const title = prompt('Název zápisu:', 'Zápis ' + new Date().toLocaleString());
+      if (title === null) return;
+      let userAngle = null;
+      if (confirm('Přidat vlastní úhel (jak jste to mysleli)?')) {
+        const angleSt = prompt('Zadejte stupně (0,30,60,90,120,150,180,210,240,270,300,330):');
+        if (angleSt && ANGLE_MAP[angleSt]) userAngle = parseInt(angleSt);
+      }
+      const entry = {
+        id: currentEntryId || Date.now() + '-' + Math.random().toString(36),
+        date: new Date().toISOString(),
+        title,
+        text,
+        cards: analysis.cards,
+        percentages: analysis.percentages,
+        userAngle: userAngle,
+      };
+      const idx = diaryEntries.findIndex(e => e.id === entry.id);
+      if (idx >= 0) diaryEntries[idx] = entry; else diaryEntries.push(entry);
+      localStorage.setItem('mys-diary', JSON.stringify(diaryEntries));
+      renderTimeline();
+      currentEntryId = null;
+      pendingAnalysis = null;
+      editor.innerHTML = '';
+      alert('Zápis uložen.');
+    }
+
+    // ---------- LOKÁLNÍ ULOŽENÍ ----------
+    function saveLocal() {
+      const text = editor.innerText;
+      if (!text) return;
+      const title = prompt('Název zápisu:', 'Zápis ' + new Date().toLocaleString());
+      if (title === null) return;
+      const entry = {
+        id: currentEntryId || Date.now() + '-' + Math.random().toString(36),
+        date: new Date().toISOString(),
+        title,
+        text,
+        cards: [...currentCards],
+        percentages: {},
+        userAngle: null,
+      };
+      const idx = diaryEntries.findIndex(e => e.id === entry.id);
+      if (idx >= 0) diaryEntries[idx] = entry; else diaryEntries.push(entry);
+      localStorage.setItem('mys-diary', JSON.stringify(diaryEntries));
+      renderTimeline();
+      currentEntryId = null;
+      editor.innerHTML = '';
+      alert('Zápis uložen lokálně.');
+    }
+
+    // ---------- ČASOVÁ OSA (VYLEPŠENÁ) ----------
+    function selectDominantAngles(percentages) {
+      const entries = Object.entries(percentages).map(([st, val]) => ({ st: parseInt(st), val }));
+      entries.sort((a,b) => b.val - a.val);
+      if (entries.length === 0) return [];
+      const first = entries[0], second = entries[1];
+      if (first.val >= 80) return entries.slice(0, 3).map(e => e.st);
+      else if (first.val >= 50) return entries.slice(0, 2).map(e => e.st);
+      else {
+        if (second && (first.val - second.val) <= 10) return [first.st, second.st];
+        return [first.st];
+      }
+    }
+
+    function renderTimeline() {
+      timelineStrip.innerHTML = '';
+      const entries = diaryEntries.slice().reverse();
+      entries.forEach(entry => {
+        const percs = entry.percentages || {};
+        const doms = selectDominantAngles(percs);
+        if (doms.length === 0) return;
+        const wrapper = document.createElement('div'); wrapper.className = 'tl-entry';
+        const barsDiv = document.createElement('div'); barsDiv.className = 'tl-bars';
+        doms.forEach(st => {
+          const seg = document.createElement('div'); seg.className = 'tl-segment';
+          const ang = ANGLE_MAP[st];
+          seg.style.backgroundColor = ang ? ang.color : '#888';
+          seg.style.flex = percs[st] || 1;
+          barsDiv.appendChild(seg);
+        });
+        wrapper.appendChild(barsDiv);
+        const dateDiv = document.createElement('div'); dateDiv.className = 'tl-date';
+        dateDiv.textContent = new Date(entry.date).toLocaleDateString('cs-CZ', {day:'2-digit', month:'2-digit'});
+        wrapper.appendChild(dateDiv);
+        wrapper.addEventListener('click', () => showDetail(entry));
+        timelineStrip.appendChild(wrapper);
+      });
+    }
+
+    // ---------- DETAIL ZÁPISU ----------
+    function showDetail(entry) {
+      modalTitle.textContent = entry.title;
+      const cardsStr = entry.cards.map(id => CARDS[id]?.name || id).join(' + ');
+      const percs = entry.percentages || {};
+      const anglesStr = Object.entries(percs).map(([st,val]) => `${ANGLE_MAP[st]?.name || st} ${val}%`).join(', ');
+      const userAngleStr = entry.userAngle ? `${ANGLE_MAP[entry.userAngle]?.name || entry.userAngle}°` : '—';
+      let anglesBarHtml = '';
+      if (Object.keys(percs).length > 0) {
+        anglesBarHtml = `<div class="angles-bar">`;
+        ANGLES.forEach(ang => {
+          const val = percs[ang.st] || 0;
+          anglesBarHtml += `<div style="background:${ang.color}; width:${val}%; height:100%;" title="${ang.name} ${val}%"></div>`;
+        });
+        anglesBarHtml += `</div>`;
+      }
+      detailContent.innerHTML = `
+        <div class="detail-meta">Datum: ${new Date(entry.date).toLocaleString()}</div>
+        <div class="detail-meta">Karty: ${cardsStr}</div>
+        <div class="detail-meta">Strukturální úhly: ${anglesStr || '—'}</div>
+        <div class="detail-meta">Vlastní úhel: ${userAngleStr}</div>
+        ${anglesBarHtml}
+        <div class="detail-text">${entry.text}</div>
+        <div style="display:flex; gap:0.8rem; flex-wrap:wrap; margin-top:1rem;">
+          <button class="btn" onclick="openAnalyzerForEntry('${entry.id}')">🔍 Analyzovat znovu</button>
+          <button class="btn" onclick="shareToGallery('${entry.id}')">📊 Sdílet do přehlídky</button>
+          <button class="btn" onclick="loadEntry('${entry.id}')">📂 Načíst</button>
+          <button class="btn" onclick="deleteEntry('${entry.id}')">🗑 Smazat</button>
+        </div>
+      `;
+      modal.classList.add('active');
+    }
+
+    window.closeModal = () => modal.classList.remove('active');
+    window.openAnalyzerForEntry = (id) => {
+      const entry = diaryEntries.find(e => e.id === id);
+      if (entry) { const url = new URL(ANALYZER_URL); url.searchParams.set('text', entry.text); window.open(url.toString(), '_blank'); }
+    };
+    window.shareToGallery = (id) => {
+      const entry = diaryEntries.find(e => e.id === id);
+      if (!entry) return;
+      const nick = prompt('Nepovinná přezdívka:') || '';
+      const params = new URLSearchParams();
+      params.set('cards', entry.cards.join(','));
+      params.set('angles', Object.entries(entry.percentages).map(([st,val])=>`${st}:${val}`).join(','));
+      if (entry.userAngle) params.set('userAngle', entry.userAngle);
+      if (nick) params.set('nick', nick);
+      window.open(`${GALLERY_URL}?${params.toString()}`, '_blank');
+    };
+    window.loadEntry = (id) => {
+      const entry = diaryEntries.find(e => e.id === id);
+      if (entry) { editor.innerHTML = entry.text; currentCards = entry.cards; renderCards(); currentEntryId = entry.id; closeModal(); }
+    };
+    window.deleteEntry = (id) => {
+      diaryEntries = diaryEntries.filter(e => e.id !== id);
+      localStorage.setItem('mys-diary', JSON.stringify(diaryEntries));
+      renderTimeline();
+      closeModal();
+    };
+
+    // ---------- SDÍLENÍ KARET ----------
+    function lockAndShare() {
+      const url = new URL(window.location);
+      url.searchParams.set('cards', currentCards.join(','));
+      navigator.clipboard?.writeText(url.toString());
+      document.getElementById('shareUrlDisplay').textContent = '🔗 Odkaz zkopírován: ' + url.toString();
+    }
+
+    // ---------- IMPORT KARET Z JSON ----------
+    async function importCards(url) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Síťová chyba');
+        const newCards = await res.json();
+        CARDS = { ...CARDS, ...newCards };
+        localStorage.setItem('mys-cards', JSON.stringify(CARDS));
+        renderCards();
+        alert('Karty načteny. Nyní je můžeš použít.');
+      } catch (e) {
+        alert('Nepodařilo se načíst karty: ' + e.message);
+      }
+    }
+
+    // ---------- INICIALIZACE ----------
+    function loadCardsFromStorage() {
+      const stored = localStorage.getItem('mys-cards');
+      if (stored) CARDS = JSON.parse(stored);
+    }
+    function loadEntries() {
+      const stored = localStorage.getItem('mys-diary');
+      if (stored) diaryEntries = JSON.parse(stored);
+    }
+
+    function init() {
+      loadCardsFromStorage();
+      loadEntries();
+      renderCards();
+      renderTimeline();
+      processUrlParams();
+
+      document.getElementById('shuffleBtn').addEventListener('click', () => {
+        const ids = Object.keys(CARDS);
+        if (ids.length < 3) { alert('Je potřeba alespoň 3 karty.'); return; }
+        currentCards = [ids[Math.floor(Math.random()*ids.length)], ids[Math.floor(Math.random()*ids.length)], ids[Math.floor(Math.random()*ids.length)]];
+        renderCards();
+      });
+      document.getElementById('lockShareBtn').addEventListener('click', lockAndShare);
+      document.getElementById('analyzeBtn').addEventListener('click', openAnalyzer);
+      document.getElementById('saveLocalBtn').addEventListener('click', saveLocal);
+      document.getElementById('shareToGalleryBtn').addEventListener('click', () => {
+        if (!pendingAnalysis && !currentEntryId) { alert('Nejprve analyzuj nebo ulož zápis.'); return; }
+        const entry = currentEntryId ? diaryEntries.find(e => e.id === currentEntryId) : null;
+        if (entry) shareToGallery(entry.id);
+        else alert('Ulož zápis před sdílením.');
+      });
+      document.getElementById('editBtn').addEventListener('click', () => editor.focus());
+      document.getElementById('importCardsBtn').addEventListener('click', () => {
+        document.querySelector('details').open = true;
+      });
+      document.getElementById('importBtn').addEventListener('click', () => {
+        const url = document.getElementById('importUrl').value.trim();
+        if (url) importCards(url);
+      });
+
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('cards')) {
+        const ids = params.get('cards').split(',').map(s => s.trim()).filter(id => CARDS[id]);
+        if (ids.length === 3) currentCards = ids;
+        renderCards();
+      }
+    }
+    init();
+  })();
+</script>
+</body>
+</html>
