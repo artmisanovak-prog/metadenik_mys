@@ -3,7 +3,7 @@
 ---
 
 - [denik](doma/nastroje/denik.html)
-- [denik](doma/nastroje/denik1.html)
+- [denik 1](doma/nastroje/denik1.html)
 - [analyzer](doma/nastroje/analyzer.html)
 - [prehlidka_jevu](doma/nastroje/prehlidka_jevu.html)
 - [deník minimalismus](doma/nastroje/denik_minimal.html)
